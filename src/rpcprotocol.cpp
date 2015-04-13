@@ -40,12 +40,12 @@ const size_t POST_READ_SIZE = 256 * 1024;
  * and to be compatible with other JSON-RPC implementations.
  */
 
-string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeaders)
+string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeaders, const std::string &host, const std::string &url)
 {
     ostringstream s;
-    s << "POST / HTTP/1.1\r\n"
+    s << "POST " << url << " HTTP/1.1\r\n"
       << "User-Agent: bitcoin-json-rpc/" << FormatFullVersion() << "\r\n"
-      << "Host: 127.0.0.1\r\n"
+      << "Host: " << host << "\r\n"
       << "Content-Type: application/json\r\n"
       << "Content-Length: " << strMsg.size() << "\r\n"
       << "Connection: close\r\n"

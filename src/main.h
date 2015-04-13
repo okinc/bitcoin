@@ -26,6 +26,8 @@
 #include "txmempool.h"
 #include "uint256.h"
 #include "undo.h"
+#include "address-monitor/address-monitor.h"
+#include "block-monitor/block-monitor.h"
 
 #include <algorithm>
 #include <exception>
@@ -537,6 +539,9 @@ extern CCoinsViewCache *pcoinsTip;
 
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB *pblocktree;
+
+extern AddressMonitor *paddressMonitor;
+extern BlockMonitor *pblockMonitor;
 
 struct CBlockTemplate
 {

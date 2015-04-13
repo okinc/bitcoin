@@ -139,7 +139,9 @@ BITCOIN_CORE_H = \
   wallet.h \
   wallet_ismine.h \
   walletdb.h \
-  compat/sanity.h
+  compat/sanity.h \
+  address-monitor/address-monitor.h \
+  block-monitor/block-monitor.h
 
 JSON_H = \
   json/json_spirit.h \
@@ -199,6 +201,10 @@ libbitcoin_wallet_a_SOURCES = \
   wallet.cpp \
   wallet_ismine.cpp \
   walletdb.cpp \
+  address-monitor/address-monitor.cpp \
+  block-monitor/block-monitor.cpp \
+  rpcaddress.cpp \
+  rpcblock.cpp \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library

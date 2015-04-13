@@ -83,6 +83,10 @@ static inline bool error(const char* format)
     LogPrintStr(std::string("ERROR: ") + format + "\n");
     return false;
 }
+void LogException(std::exception* pex, const char* pszThread);
+
+bool LogAddrmon(const std::string &str);
+bool LogBlock(const std::string &str);
 
 void PrintExceptionContinue(std::exception* pex, const char* pszThread);
 void ParseParameters(int argc, const char*const argv[]);

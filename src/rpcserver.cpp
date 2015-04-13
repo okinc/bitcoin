@@ -347,6 +347,12 @@ static const CRPCCommand vRPCCommands[] =
     { "wallet",             "walletlock",             &walletlock,             true,      false,      true },
     { "wallet",             "walletpassphrasechange", &walletpassphrasechange, true,      false,      true },
     { "wallet",             "walletpassphrase",       &walletpassphrase,       true,      false,      true },
+    { "extra",              "addmonitor",             &addmonitor,             true,      true,       false },
+    { "extra",              "delmonitor",             &delmonitor,             true,      true,       false },
+    { "extra",              "ismonitor",              &ismonitor,              true,      true,       false },
+    { "extra",              "ackmonitor",             &ackmonitor,             true,      true,       false },
+    { "extra",              "resynctx",               &resynctx,               true,      true,       false },
+    { "extra",              "ackblock",               &ackblock,               true,      true,       true },
 #endif // ENABLE_WALLET
 };
 

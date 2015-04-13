@@ -955,7 +955,9 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
             {
                 if (AddToWalletIfInvolvingMe(tx, &block, fUpdate))
                     ret++;
+                paddressMonitor->SyncTransaction(tx, NULL);
             }
+            paddressMonitor->SyncConnectBlock(&block, pindex);
             pindex = chainActive.Next(pindex);
             if (GetTime() >= nNow + 60) {
                 nNow = GetTime();
