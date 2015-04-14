@@ -451,7 +451,7 @@ static void CallRPC(BlockMonitor* self, const std::string &requestId, const stri
     const string port = GetArg("-blockmon_port", "80");
     const string url = GetArg("-blockmon_url", "");
 
-    const bool fConnected = d.connect(GetArg("-rpcconnect", host), GetArg("-rpcport", port));
+    const bool fConnected = d.connect(host, port);
     if (!fConnected)
     {
     	LogAddrmon("couldn't connect to server");

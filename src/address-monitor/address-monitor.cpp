@@ -723,7 +723,7 @@ static void CallRPC(AddressMonitor* self, const std::string &requestId, const st
     const string port = GetArg("-addrmon_port", "80");
     const string url = GetArg("-addrmon_url", "");
 
-    const bool fConnected = d.connect(GetArg("-rpcconnect", host), GetArg("-rpcport", port));
+    const bool fConnected = d.connect(host, port);
     if (!fConnected)
     {
     	LogAddrmon("couldn't connect to server");
