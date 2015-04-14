@@ -254,7 +254,7 @@ json_spirit::Value buildValue(const uint256 &txId, const CTransaction &tx, const
 	object.push_back(Pair("addressTo", addressTo));
 	object.push_back(Pair("amount", (boost::int64_t)(txout.nValue)));
 	object.push_back(Pair("time", (boost::int64_t)time));
-	object.push_back(Pair("coinType", 2));
+	object.push_back(Pair("coinType", 1));
 	if(pblock)
 	{
 		object.push_back(Pair("blockHeight", nHeight));

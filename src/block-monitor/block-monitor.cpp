@@ -162,7 +162,7 @@ static json_spirit::Object buildValue(const CBlock *pblock,
 	json_spirit::Object object;
 
 	object.push_back(Pair("time", time));
-	object.push_back(Pair("coinType", 2));
+	object.push_back(Pair("coinType", 1));
 	if(pblock)
 	{
 		object.push_back(Pair("blockHeight", nHeight));
