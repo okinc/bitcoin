@@ -25,6 +25,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/unordered_map.hpp>
 
 /**
  * Settings
@@ -279,7 +280,7 @@ public:
     void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
     bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblock, bool fUpdate);
     void EraseFromWallet(const uint256 &hash);
-    int ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false);
+    int ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
     void ReacceptWalletTransactions();
     void ResendWalletTransactions();
     CAmount GetBalance() const;

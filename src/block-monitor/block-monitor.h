@@ -106,7 +106,7 @@ public:
 
     void Load();
     bool ack(const std::string &requestId);
-    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex);
+    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
     void SyncDisconnectBlock(const CBlock *pblock);
 
     void Stop();

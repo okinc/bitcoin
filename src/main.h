@@ -557,13 +557,17 @@ struct CBlockTemplate
 
 class CValidationInterface {
 protected:
-    virtual void SyncTransaction(const CTransaction &tx, const CBlock *pblock) {};
+    virtual void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses) {};
     virtual void EraseFromWallet(const uint256 &hash) {};
     virtual void SetBestChain(const CBlockLocator &locator) {};
     virtual void UpdatedTransaction(const uint256 &hash) {};
     virtual void Inventory(const uint256 &hash) {};
     virtual void ResendWalletTransactions() {};
     virtual void BlockChecked(const CBlock&, const CValidationState&) {};
+
+    virtual void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>()) {};
+    virtual void SyncDisconnectBlock(const CBlock *pblock) {};
+
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterAllValidationInterfaces();

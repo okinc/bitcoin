@@ -173,7 +173,7 @@ static json_spirit::Object buildValue(const CBlock *pblock,
 	return object;
 }
 
-void BlockMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex)
+void BlockMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	json_spirit::Object ret;
 	int64_t now = 0;

@@ -266,7 +266,7 @@ json_spirit::Value buildValue(const uint256 &txId, const CTransaction &tx, const
 	return object;
 }
 
-unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransaction &tx)
+unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	unordered_map<int, uint160> monitorMap;
 
@@ -302,7 +302,7 @@ unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransac
 			keyAddress = keyID;
 		}
 
-		if(hasAddress(keyAddress))
+		if(addresses.empty() ? hasAddress(keyAddress) : addresses.find(keyAddress) != addresses.end())
 		{
 			monitorMap.insert(make_pair(i, keyAddress));
 		}
@@ -311,7 +311,7 @@ unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransac
 	return monitorMap;
 }
 
-void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
+void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	if(pblock)
 	{
@@ -325,7 +325,7 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 		LOCK(cs_address);
 
 		now = GetAdjustedTime();
-		const unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx);
+		const unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx, addresses);
 		const string blockHash;
 		const int nHeight = 0;
 		const int status = 0;
@@ -360,7 +360,7 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 	push_post(requestId, json);
 }
 
-void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx)
+void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	json_spirit::Array ret;
 	int64_t now = 0;
@@ -373,7 +373,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 		const int nHeight = pindex->nHeight;
 		const int status = 1;
 
-		unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx);
+		unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx, addresses);
 
 		for (unordered_map<int, uint160>::const_iterator it = monitorMap.begin(); it != monitorMap.end(); it++)
 		{
@@ -405,7 +405,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 	push_post(requestId, json);
 }
 
-void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex)
+void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	json_spirit::Array ret;
 	int64_t now = 0;
@@ -420,7 +420,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex)
 
 		BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 		{
-			unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx);
+			unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx, addresses);
 
 			for (unordered_map<int, uint160>::const_iterator it = monitorMap.begin(); it != monitorMap.end(); it++)
 			{

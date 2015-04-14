@@ -128,15 +128,15 @@ public:
     bool hasAddress(const uint160 &keyId);
     bool ack(const std::string &requestId);
 
-    void SyncTransaction(const CTransaction &tx, const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex);
+    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
     void SyncDisconnectBlock(const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx);
+    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
 
     void Stop();
 
 protected:
-    boost::unordered_map<int, uint160> GetMonitoredAddresses(const CTransaction &tx);
+    boost::unordered_map<int, uint160> GetMonitoredAddresses(const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
 
 private:
     void PostThread();

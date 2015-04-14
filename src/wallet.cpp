@@ -927,7 +927,7 @@ bool CWalletTx::WriteToDisk()
  * from or to us. If fUpdate is true, found transactions that already
  * exist in the wallet will be updated.
  */
-int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
+int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, const boost::unordered_map<uint160, std::string> &addresses)
 {
     int ret = 0;
     int64_t nNow = GetTime();
@@ -955,9 +955,10 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
             {
                 if (AddToWalletIfInvolvingMe(tx, &block, fUpdate))
                     ret++;
-                paddressMonitor->SyncTransaction(tx, NULL);
+                paddressMonitor->SyncTransaction(tx, NULL, addresses);
             }
-            paddressMonitor->SyncConnectBlock(&block, pindex);
+            paddressMonitor->SyncConnectBlock(&block, pindex, addresses);
+            pblockMonitor->SyncConnectBlock(&block, pindex, addresses);
             pindex = chainActive.Next(pindex);
             if (GetTime() >= nNow + 60) {
                 nNow = GetTime();

@@ -6,11 +6,13 @@
  */
 #include <stdexcept>
 
+#include "init.h"
 #include "main.h"
 #include "rpcserver.h"
 #include "sync.h"
 #include "key.h"
 #include "base58.h"
+#include "wallet.h"
 #include "json/json_spirit_value.h"
 #include "address-monitor/address-monitor.h"
 
@@ -276,6 +278,7 @@ json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp)
             "\nResult\n"
             "\"bool\"      (string) true if confirms > 0\n"
             "\nExamples\n"
+            + HelpExampleCli("resynctx", "\"txId\"")
         );
 
     uint256 txId = ParseHashV(params[0], "parameter 1");
@@ -317,4 +320,95 @@ json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp)
     return confirmed;
 }
 
+json_spirit::Value rescan(const json_spirit::Array& params, bool fHelp)
+{
+    if (fHelp)
+        throw runtime_error(
+            "rescan \"block\" \"addresses\"\n"
+            "\rescan from block.\n"
+            "\nResult\n"
+            "\"bool\"      (string) true if success\n"
+            "\nExamples\n"
+            + HelpExampleCli("rescan", "\"blockhash\"")
+        );
 
+
+    boost::unordered_map<uint160, std::string> addresses;
+
+    if(params.size() > 1)
+    {
+	   for(int i = 1; i < params.size(); i++)
+	   {
+			json_spirit::Array array;
+			json_spirit::Value param = params[i];
+			if(param.type() == str_type && !CBitcoinAddress().SetString(param.get_str()))
+			{
+				json_spirit::Value value;
+				read_string(param.get_str(), value);
+				array = value.get_array();
+			}
+			else if(param.type() == array_type)
+			{
+				json_spirit::Array tmpArray = param.get_array();
+				array.insert(array.end(), tmpArray.begin(), tmpArray.end());
+			}
+			else
+			{
+				array.push_back(param);
+			}
+
+			BOOST_FOREACH(json_spirit::Value value, array)
+			{
+				string strAddress = value.get_str();
+				CBitcoinAddress address;
+				if (!address.SetString(strAddress))
+					throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Bitcoin address: "+strAddress);
+
+				uint160 addressKey;
+				if(!address.IsScript())
+				{
+					CKeyID keyID;
+					if (!address.GetKeyID(keyID))
+						throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+					addressKey = keyID;
+				}
+				else
+				{
+					CScriptID cscriptID = boost::get<CScriptID>(address.Get());
+					addressKey = cscriptID;
+				}
+
+				addresses[addressKey] = strAddress;
+			}
+		}
+    }
+
+
+    {
+        LOCK2(cs_main, pwalletMain->cs_wallet);
+
+        CBlockIndex *pindexRescan;
+
+		if(params.size() > 0)
+		{
+			uint256 blockHash = ParseHashV(params[0], "parameter 1");
+
+			vector<uint256> vHaveIn;
+			vHaveIn.push_back(blockHash);
+			CBlockLocator locator(vHaveIn);
+			pindexRescan = FindForkInGlobalIndex(chainActive, locator);
+			if(pindexRescan == NULL)
+			{
+				throw runtime_error("can not find block: "+blockHash.ToString());
+			}
+		}
+		else
+		{
+			pindexRescan = chainActive.Genesis();
+		}
+
+		pwalletMain->ScanForWalletTransactions(pindexRescan, true, addresses);
+    }
+
+    return true;
+}

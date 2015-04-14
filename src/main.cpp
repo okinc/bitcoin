@@ -163,7 +163,7 @@ namespace {
 
 struct CMainSignals {
     /** Notifies listeners of updated transaction data (transaction, and optionally the block it is found in. */
-    boost::signals2::signal<void (const CTransaction &, const CBlock *)> SyncTransaction;
+    boost::signals2::signal<void (const CTransaction &, const CBlock *, const boost::unordered_map<uint160, std::string> &)> SyncTransaction;
     /** Notifies listeners of an erased transaction (currently disabled, requires transaction replacement). */
     boost::signals2::signal<void (const uint256 &)> EraseTransaction;
     /** Notifies listeners of an updated transaction without new data (for now: a coinbase potentially becoming visible). */
@@ -178,7 +178,7 @@ struct CMainSignals {
     boost::signals2::signal<void (const CBlock&, const CValidationState&)> BlockChecked;
 
     // Notifies listeners of updated transaction data (passing hash, transaction, and optionally the block it is found in.
-    boost::signals2::signal<void (const CBlock *, CBlockIndex*)> SyncConnectBlock;
+    boost::signals2::signal<void (const CBlock *, CBlockIndex*, const boost::unordered_map<uint160, std::string> &)> SyncConnectBlock;
     boost::signals2::signal<void (const CBlock *)> SyncDisconnectBlock;
 
 } g_signals;
@@ -192,7 +192,7 @@ BlockMonitor *pblockMonitor = NULL;
 
 
 void RegisterValidationInterface(CValidationInterface* pwalletIn) {
-    g_signals.SyncTransaction.connect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2));
+    g_signals.SyncTransaction.connect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2, _3));
     g_signals.EraseTransaction.connect(boost::bind(&CValidationInterface::EraseFromWallet, pwalletIn, _1));
     g_signals.UpdatedTransaction.connect(boost::bind(&CValidationInterface::UpdatedTransaction, pwalletIn, _1));
     g_signals.SetBestChain.connect(boost::bind(&CValidationInterface::SetBestChain, pwalletIn, _1));
@@ -200,11 +200,11 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.Broadcast.connect(boost::bind(&CValidationInterface::ResendWalletTransactions, pwalletIn));
     g_signals.BlockChecked.connect(boost::bind(&CValidationInterface::BlockChecked, pwalletIn, _1, _2));
 
-    g_signals.SyncTransaction.connect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2));
-    g_signals.SyncConnectBlock.connect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2));
+    g_signals.SyncTransaction.connect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.connect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.connect(boost::bind(&AddressMonitor::SyncDisconnectBlock, paddressMonitor, _1));
 
-    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2));
+    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.connect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
@@ -215,13 +215,13 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.SetBestChain.disconnect(boost::bind(&CValidationInterface::SetBestChain, pwalletIn, _1));
     g_signals.UpdatedTransaction.disconnect(boost::bind(&CValidationInterface::UpdatedTransaction, pwalletIn, _1));
     g_signals.EraseTransaction.disconnect(boost::bind(&CValidationInterface::EraseFromWallet, pwalletIn, _1));
-    g_signals.SyncTransaction.disconnect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2));
+    g_signals.SyncTransaction.disconnect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2, _3));
 
-    g_signals.SyncTransaction.disconnect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2));
-    g_signals.SyncConnectBlock.disconnect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2));
+    g_signals.SyncTransaction.disconnect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.disconnect(boost::bind(&AddressMonitor::SyncDisconnectBlock, paddressMonitor, _1));
 
-    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2));
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.disconnect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
@@ -239,7 +239,7 @@ void UnregisterAllValidationInterfaces() {
 }
 
 void SyncWithWallets(const CTransaction &tx, const CBlock *pblock) {
-    g_signals.SyncTransaction(tx, pblock);
+    g_signals.SyncTransaction(tx, pblock, unordered_map<uint160, std::string>());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1846,7 +1846,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime4 = GetTimeMicros(); nTimeCallbacks += nTime4 - nTime3;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime4 - nTime3), nTimeCallbacks * 0.000001);
 
-    g_signals.SyncConnectBlock(&block, pindex);
+    g_signals.SyncConnectBlock(&block, pindex, boost::unordered_map<uint160, std::string>());
 
     return true;
 }
