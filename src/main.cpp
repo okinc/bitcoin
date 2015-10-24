@@ -1693,6 +1693,12 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
     // move best block pointer to prevout block
     view.SetBestBlock(pindex->pprev->GetBlockHash());
 
+    //add by oklink
+    if(fClean)
+    {
+       GetMainSignals().SyncDisconnectBlock(&block);
+    }
+
     if (pfClean) {
         *pfClean = fClean;
         return true;
@@ -1969,6 +1975,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime4 = GetTimeMicros(); nTimeCallbacks += nTime4 - nTime3;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime4 - nTime3), nTimeCallbacks * 0.000001);
 
+    //add by oklink
+    SyncWithBlock(block, pindex);
+   
     return true;
 }
 

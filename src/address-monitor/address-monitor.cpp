@@ -270,7 +270,7 @@ unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransac
 {
 	unordered_map<int, uint160> monitorMap;
 
-	for(int i = 0; i < tx.vout.size(); i++)
+	for(unsigned long i = 0; i < tx.vout.size(); i++)
 	{
 		const CTxOut& txout = tx.vout[i];
 
@@ -718,7 +718,7 @@ static void CallRPC(AddressMonitor* self, const std::string &requestId, const st
     SSLIOStreamDevice<asio::ip::tcp> d(sslStream, fUseSSL);
     iostreams::stream< SSLIOStreamDevice<asio::ip::tcp> > stream(d);
 
-    const bool fWait = false;
+    //const bool fWait = false;
     const string host = GetArg("-addrmon_host", "127.0.0.1");
     const string port = GetArg("-addrmon_port", "80");
     const string url = GetArg("-addrmon_url", "");

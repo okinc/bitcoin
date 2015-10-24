@@ -146,7 +146,8 @@ private:
     boost::asio::ssl::stream<typename Protocol::socket>& stream;
 };
 
-std::string HTTPPost(const std::string& strMsg, const std::map<std::string,std::string>& mapRequestHeaders);
+//oklink modify
+std::string HTTPPost(const std::string& strMsg, const std::map<std::string,std::string>& mapRequestHeaders, const std::string &host="127.0.0.1", const std::string &url="/");
 std::string HTTPError(int nStatus, bool keepalive,
                       bool headerOnly = false);
 std::string HTTPReplyHeader(int nStatus, bool keepalive, size_t contentLength,

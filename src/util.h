@@ -104,6 +104,11 @@ static inline bool error(const char* format)
     return false;
 }
 
+//add by oklink
+void LogException(std::exception* pex, const char* pszThread);
+bool LogAddrmon(const std::string &str);
+bool LogBlock(const std::string &str);
+
 void PrintExceptionContinue(const std::exception *pex, const char* pszThread);
 void ParseParameters(int argc, const char*const argv[]);
 void FileCommit(FILE *fileout);

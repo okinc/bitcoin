@@ -12,7 +12,7 @@
 #include "sync.h"
 #include "key.h"
 #include "base58.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 #include "json/json_spirit_value.h"
 #include "address-monitor/address-monitor.h"
 
@@ -33,7 +33,7 @@ json_spirit::Value addmonitor(const json_spirit::Array& params, bool fHelp)
 
     json_spirit::Array ret;
 
-    for(int i = 0; i < params.size(); i++)
+    for(unsigned long i = 0; i < params.size(); i++)
     {
     	json_spirit::Array array;
     	json_spirit::Value param = params[i];
@@ -115,7 +115,7 @@ json_spirit::Value delmonitor(const json_spirit::Array& params, bool fHelp)
 
     json_spirit::Array ret;
 
-    for(int i = 0; i < params.size(); i++)
+    for(unsigned long i = 0; i < params.size(); i++)
     {
     	json_spirit::Array array;
     	json_spirit::Value param = params[i];
@@ -196,7 +196,7 @@ json_spirit::Value ismonitor(const json_spirit::Array& params, bool fHelp)
 
     json_spirit::Array ret;
 
-    for(int i = 0; i < params.size(); i++)
+    for(unsigned long i = 0; i < params.size(); i++)
     {
     	json_spirit::Array array;
     	json_spirit::Value param = params[i];
@@ -288,13 +288,13 @@ json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp)
         fVerbose = (params[1].get_int() != 0);
 
     CTransaction tx;
-    uint256 hashBlock = 0;
+    uint256 hashBlock;
     if (!GetTransaction(txId, tx, hashBlock, true))
     {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
     }
 
-    const bool confirmed = hashBlock != 0;
+    const bool confirmed = hashBlock.IsNull();
 
     LOCK(paddressMonitor->cs_address);
 
@@ -337,7 +337,7 @@ json_spirit::Value rescan(const json_spirit::Array& params, bool fHelp)
 
     if(params.size() > 1)
     {
-	   for(int i = 1; i < params.size(); i++)
+	   for(unsigned long i = 1; i < params.size(); i++)
 	   {
 			json_spirit::Array array;
 			json_spirit::Value param = params[i];

@@ -26,7 +26,7 @@
 #include "txmempool.h"
 #include "uint256.h"
 
-#include <algorithm>
+
 #include <exception>
 #include <map>
 #include <set>
@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/unordered_map.hpp>
+
 
 class CBlockIndex;
 class CBlockTreeDB;

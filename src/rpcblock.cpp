@@ -12,7 +12,7 @@
 #include "sync.h"
 #include "key.h"
 #include "base58.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 #include "json/json_spirit_value.h"
 
 using namespace json_spirit;

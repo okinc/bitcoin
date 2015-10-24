@@ -177,6 +177,19 @@ void Shutdown()
         if (pcoinsTip != NULL) {
             FlushStateToDisk();
         }
+        if(paddressMonitor)
+        {
+           paddressMonitor->Stop();
+           paddressMonitor->Sync();
+           paddressMonitor->Flush();
+        }
+        if(pblockMonitor)
+        {
+            pblockMonitor->Stop();
+            pblockMonitor->Sync();
+            pblockMonitor->Flush();
+        }
+
         delete pcoinsTip;
         pcoinsTip = NULL;
         delete pcoinscatcher;
@@ -185,6 +198,10 @@ void Shutdown()
         pcoinsdbview = NULL;
         delete pblocktree;
         pblocktree = NULL;
+        delete paddressMonitor;
+        paddressMonitor = NULL;
+        delete pblockMonitor;
+        pblockMonitor = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1223,6 +1240,26 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         mempool.ReadFeeEstimates(est_filein);
     fFeeEstimatesInitialized = true;
 
+    // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
+    // cache size calculations
+    size_t nmonitorCache = (GetArg("-moncache", nDefaultMonCache) << 20);
+    if (nmonitorCache < (nMinMonCache << 20))
+       nmonitorCache = (nMinMonCache << 20); // total cache cannot be less than nMinDbCache
+    else if (nmonitorCache > (nMaxMonCache << 20))
+       nmonitorCache = (nMaxMonCache << 20); // total cache cannot be greater than nMaxDbCache
+
+    paddressMonitor = new AddressMonitor(nmonitorCache);
+    nStart = GetTimeMillis();
+    printf("Start loading monitor address...\n");
+    paddressMonitor->Load();
+    printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
+
+    pblockMonitor = new BlockMonitor(nmonitorCache);
+    nStart = GetTimeMillis();
+    printf("Start loading monitor block...\n");
+    pblockMonitor->Load();
+    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
     if (fDisableWallet) {
@@ -1312,9 +1349,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         RegisterValidationInterface(pwalletMain);
 
         CBlockIndex *pindexRescan = chainActive.Tip();
-        if (GetBoolArg("-rescan", false))
+        //modified by oklink
+        string rescanStr = GetArg("-rescan", "false");
+        if (rescanStr == "true" || rescanStr == "1")
             pindexRescan = chainActive.Genesis();
-        else
+        else if(rescanStr == "false" || rescanStr == "0")
         {
             CWalletDB walletdb(strWalletFile);
             CBlockLocator locator;
@@ -1323,6 +1362,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             else
                 pindexRescan = chainActive.Genesis();
         }
+        else
+        {
+            uint256 blockHash = uint256S(rescanStr);
+            vector<uint256> vHaveIn;
+            vHaveIn.push_back(blockHash);
+            CBlockLocator locator(vHaveIn);
+            pindexRescan = FindForkInGlobalIndex(chainActive, locator);
+            if(pindexRescan == NULL)
+            {
+                throw runtime_error("can not find block: "+rescanStr);
+            }
+        }
+        
         if (chainActive.Tip() && chainActive.Tip() != pindexRescan)
         {
             uiInterface.InitMessage(_("Rescanning..."));
