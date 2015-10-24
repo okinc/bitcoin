@@ -46,14 +46,38 @@
         <translation>Duke marr adresen</translation>
     </message>
     <message>
+        <source>These are your Bitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Këto janë Bitcoin adresat e juaja për të dërguar pagesa. Gjithmon kontrolloni shumën dhe adresën pranuese para se të dërgoni monedha.</translation>
+    </message>
+    <message>
+        <source>These are your Bitcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Këto janë Bitcoin adresat e juaja për të pranuar pagesa. Rekomandohet që gjithmon të përdorni një adresë të re për çdo transaksion.</translation>
+    </message>
+    <message>
+        <source>Copy &amp;Label</source>
+        <translation>Kopjo &amp;Etiketë</translation>
+    </message>
+    <message>
         <source>&amp;Edit</source>
         <translation>&amp;Ndrysho</translation>
+    </message>
+    <message>
+        <source>Export Address List</source>
+        <translation>Eksporto listën e adresave</translation>
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
         <translation>Skedar i ndarë me pikëpresje(*.csv)</translation>
     </message>
-    </context>
+    <message>
+        <source>Exporting Failed</source>
+        <translation>Eksportimi dështoj</translation>
+    </message>
+    <message>
+        <source>There was an error trying to save the address list to %1. Please try again.</source>
+        <translation>Gabim gjatë ruajtjes së listës së adresave në %1. Ju lutem provoni prapë.</translation>
+    </message>
+</context>
 <context>
     <name>AddressTableModel</name>
     <message>
@@ -106,10 +130,6 @@
     <message>
         <source>Change passphrase</source>
         <translation>Ndrysho frazkalimin</translation>
-    </message>
-    <message>
-        <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>Futni frazkalimin e vjetër dhe të ri në portofol. </translation>
     </message>
     <message>
         <source>Confirm wallet encryption</source>
@@ -226,25 +246,9 @@
         <source>&amp;About Bitcoin Core</source>
         <translation>Rreth Berthames Bitkoin</translation>
     </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n ore</numerusform><numerusform>%n ore</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n dite</numerusform><numerusform>%n dite</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n jave</numerusform><numerusform>%n jave</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 dhe %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n vit</numerusform><numerusform>%n vite</numerusform></translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -649,10 +653,6 @@
         <translation>Lloji</translation>
     </message>
     <message>
-        <source>Address</source>
-        <translation>Adresë</translation>
-    </message>
-    <message>
         <source>Open until %1</source>
         <translation>Hapur deri më %1</translation>
     </message>
@@ -667,6 +667,10 @@
     <message>
         <source>Generated but not accepted</source>
         <translation>I krijuar por i papranuar</translation>
+    </message>
+    <message>
+        <source>Label</source>
+        <translation>Etiketë</translation>
     </message>
     <message>
         <source>Received with</source>
@@ -706,6 +710,10 @@
     <message>
         <source>Copy address</source>
         <translation>Kopjo adresën</translation>
+    </message>
+    <message>
+        <source>Exporting Failed</source>
+        <translation>Eksportimi dështoj</translation>
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>

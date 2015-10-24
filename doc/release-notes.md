@@ -1,10 +1,9 @@
-Bitcoin Core version 0.10.1 is now available from:
+Bitcoin Core version 0.11.1 is now available from:
 
-  <https://bitcoin.org/bin/bitcoin-core-0.10.1/>
+  <https://bitcoin.org/bin/bitcoin-core-0.11.1/>
 
-This is a new minor version release, bringing bug fixes and translation 
-updates. If you are using 0.10.0, it is recommended to upgrade to this
-version.
+This is a new minor version release, bringing security fixes. It is recommended
+to upgrade to this version as soon as possible.
 
 Please report bugs using the issue tracker at github:
 
@@ -42,80 +41,132 @@ bootstrap.dat) anew afterwards. It is possible that the data from a completely
 synchronised 0.10 node may be usable in older versions as-is, but this is not
 supported and may break as soon as the older version attempts to reindex.
 
-This does not affect wallet forward or backward compatibility.
+This does not affect wallet forward or backward compatibility. There are no
+known problems when downgrading from 0.11.x to 0.10.x.
 
 Notable changes
 ===============
 
-This is a minor release and hence there are no notable changes.
-For the notable changes in 0.10, refer to the release notes for the
-0.10.0 release at https://github.com/bitcoin/bitcoin/blob/v0.10.0/doc/release-notes.md
+Fix buffer overflow in bundled upnp
+------------------------------------
 
-0.10.1 Change log
+Bundled miniupnpc was updated to 1.9.20151008. This fixes a buffer overflow in
+the XML parser during initial network discovery.
+
+Details can be found here: http://talosintel.com/reports/TALOS-2015-0035/
+
+This applies to the distributed executables only, not when building from source or
+using distribution provided packages.
+
+Additionally, upnp has been disabled by default. This may result in a lower
+number of reachable nodes on IPv4, however this prevents future libupnpc
+vulnerabilities from being a structural risk to the network
+(see https://github.com/bitcoin/bitcoin/pull/6795).
+
+Test for LowS signatures before relaying
+-----------------------------------------
+
+Make the node require the canonical 'low-s' encoding for ECDSA signatures when
+relaying or mining.  This removes a nuisance malleability vector.
+
+Consensus behavior is unchanged.
+
+If widely deployed this change would eliminate the last remaining known vector
+for nuisance malleability on SIGHASH_ALL P2PKH transactions. On the down-side
+it will block most transactions made by sufficiently out of date software.
+
+Unlike the other avenues to change txids on transactions this
+one was randomly violated by all deployed bitcoin software prior to
+its discovery. So, while other malleability vectors where made
+non-standard as soon as they were discovered, this one has remained
+permitted. Even BIP62 did not propose applying this rule to
+old version transactions, but conforming implementations have become
+much more common since BIP62 was initially written.
+
+Bitcoin Core has produced compatible signatures since a28fb70e in
+September 2013, but this didn't make it into a release until 0.9
+in March 2014; Bitcoinj has done so for a similar span of time.
+Bitcoinjs and electrum have been more recently updated.
+
+This does not replace the need for BIP62 or similar, as miners can
+still cooperate to break transactions.  Nor does it replace the
+need for wallet software to handle malleability sanely[1]. This
+only eliminates the cheap and irritating DOS attack.
+
+[1] On the Malleability of Bitcoin Transactions
+Marcin Andrychowicz, Stefan Dziembowski, Daniel Malinowski, Łukasz Mazurek
+http://fc15.ifca.ai/preproceedings/bitcoin/paper_9.pdf
+
+Minimum relay fee default increase
+-----------------------------------
+
+The default for the `-minrelaytxfee` setting has been increased from `0.00001`
+to `0.00005`.
+
+This is necessitated by the current transaction flooding, causing
+outrageous memory usage on nodes due to the mempool ballooning. This is a
+temporary measure, bridging the time until a dynamic method for determining
+this fee is merged (which will be in 0.12).
+
+(see https://github.com/bitcoin/bitcoin/pull/6793, as well as the 0.11
+release notes, in which this value was suggested)
+
+0.11.1 Change log
 =================
 
-Detailed release notes follow. This overview includes changes that affect external
-behavior, not code moves, refactors or string updates.
+Detailed release notes follow. This overview includes changes that affect
+behavior, not code moves, refactors and string updates. For convenience in locating
+the code changes and accompanying discussion, both the pull request and
+git merge commit are mentioned.
 
-RPC:
-- `7f502be` fix crash: createmultisig and addmultisigaddress
-
-Block (database) and transaction handling:
-- `1d2cdd2` Fix InvalidateBlock to add chainActive.Tip to setBlockIndexCandidates
-- `c91c660` fix InvalidateBlock to repopulate setBlockIndexCandidates
-- `002c8a2` fix possible block db breakage during re-index
-- `a1f425b` Add (optional) consistency check for the block chain data structures
-- `1c62e84` Keep mempool consistent during block-reorgs
-
-P2P protocol and network code:
-- `78f64ef` don't trickle for whitelisted nodes
-- `ca301bf` Reduce fingerprinting through timestamps in 'addr' messages.
-- `200f293` Ignore getaddr messages on Outbound connections.
-- `d5d8998` Limit message sizes before transfer
-- `aeb9279` Better fingerprinting protection for non-main-chain getdatas.
-- `cf0218f` Make addrman's bucket placement deterministic (countermeasure 1 against eclipse attacks, see http://cs-people.bu.edu/heilman/eclipse/)
-- `0c6f334` Always use a 50% chance to choose between tried and new entries (countermeasure 2 against eclipse attacks)
-- `214154e` Do not bias outgoing connections towards fresh addresses (countermeasure 2 against eclipse attacks)
-- `aa587d4` Scale up addrman (countermeasure 6 against eclipse attacks)
-
-Validation:
-- `d148f62` Acquire CCheckQueue's lock to avoid race condition
-
-Build system:
-- `8752b5c` 0.10 fix for crashes on OSX 10.6
-
-Wallet:
-- N/A
-
-GUI:
-- `2c08406` some mac specifiy cleanup (memory handling, unnecessary code)
-- `81145a6` fix OSX dock icon window reopening
-- `786cf72` fix a issue where "command line options"-action overwrite "Preference"-action (on OSX)
-
-Tests:
-- `1117378` add RPC test for InvalidateBlock
-
-Miscellaneous:
-- `c9e022b` Initialization: set Boost path locale in main thread
-- `23126a0` Sanitize command strings before logging them.
+- #6438 `2531438` openssl: avoid config file load/race
+- #6439 `980f820` Updated URL location of netinstall for Debian
+- #6384 `8e5a969` qt: Force TLS1.0+ for SSL connections
+- #6471 `92401c2` Depends: bump to qt 5.5
+- #6224 `93b606a` Be even stricter in processing unrequested blocks
+- #6571 `100ac4e` libbitcoinconsensus: avoid a crash in multi-threaded environments
+- #6545 `649f5d9` Do not store more than 200 timedata samples.
+- #6694 `834e299` [QT] fix thin space word wrap line break issue
+- #6703 `1cd7952` Backport bugfixes to 0.11
+- #6750 `5ed8d0b` Recent rejects backport to v0.11
+- #6769 `71cc9d9` Test LowS in standardness, removes nuisance malleability vector.
+- #6789 `b4ad73f` Update miniupnpc to 1.9.20151008
+- #6785 `b4dc33e` Backport to v0.11: In (strCommand == "tx"), return if AlreadyHave()
+- #6412 `0095b9a` Test whether created sockets are select()able
+- #6795 `4dbcec0` net: Disable upnp by default
+- #6793 `e7bcc4a` Bump minrelaytxfee default
 
 Credits
 =======
 
-Thanks to everyone who contributed to this release:
+Thanks to everyone who directly contributed to this release:
 
+- Adam Weiss
 - Alex Morcos
+- Casey Rodarmor
 - Cory Fields
-- dexX7
-- fsb4000
-- Gavin Andresen
+- fanquake
 - Gregory Maxwell
-- Ivan Pustogarov
-- Jonas Nick
 - Jonas Schnelli
+- J Ross Nicoll
+- Luke Dashjr
+- Pavel Janík
+- Pavel Vasin
+- Peter Todd
 - Pieter Wuille
-- Ruben de Vries
+- randy-waterhouse
+- Ross Nicoll
 - Suhas Daftuar
+- tailsjoin
+- ฿tcDrak
+- Tom Harding
+- Veres Lajos
 - Wladimir J. van der Laan
 
+And those who contributed additional code review and/or security research:
+
+- timothy on IRC for reporting the issue
+- Vulnerability in miniupnp discovered by Aleksandar Nikolic of Cisco Talos
+
 As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
+

@@ -87,7 +87,7 @@
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
-        <translation>Vesszővel elválasztott fájl (*. csv)</translation>
+        <translation>Vesszővel elválasztott fájl (*.csv)</translation>
     </message>
     <message>
         <source>Exporting Failed</source>
@@ -156,10 +156,6 @@
         <translation>Jelszó megváltoztatása</translation>
     </message>
     <message>
-        <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>Írd be a tárca régi és új jelszavát.</translation>
-    </message>
-    <message>
         <source>Confirm wallet encryption</source>
         <translation>Biztosan titkosítani akarod a tárcát?</translation>
     </message>
@@ -186,10 +182,6 @@
     <message>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
         <translation>Add meg a tárca új jelszavát.&lt;br/&gt;Olyan jelszót válassz, ami &lt;b&gt;legalább tíz véletlenszerű karakterből&lt;/b&gt; vagy &lt;b&gt;legalább 8 véletlenszerű szóból&lt;/b&gt; áll.</translation>
-    </message>
-    <message>
-        <source>Bitcoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation>A Bitcoin Core most bezár, hogy befejezze a titkosítást. Ne feledd: a tárca titkosítása nem nyújt teljes védelmet azzal szemben, hogy adathalász programok megfertőzzék a számítógéped és ellopják a bitcoinjaid.</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
@@ -311,10 +303,6 @@
         <translation>Bitcoin küldése megadott címre</translation>
     </message>
     <message>
-        <source>Modify configuration options for Bitcoin</source>
-        <translation>Bitcoin konfigurációs opciók</translation>
-    </message>
-    <message>
         <source>Backup wallet to another location</source>
         <translation>Biztonsági másolat készítése a tárcáról egy másik helyre</translation>
     </message>
@@ -422,10 +410,6 @@
         <source>Show the Bitcoin Core help message to get a list with possible Bitcoin command-line options</source>
         <translation>A Bitcoin Core súgóüzenet megjelenítése a Bitcoin lehetséges parancssori kapcsolóival.</translation>
     </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network</source>
-        <translation><numerusform>%n aktív kapcsolat a Bitcoin-hálózattal</numerusform><numerusform>%n aktív kapcsolat a Bitcoin-hálózattal</numerusform></translation>
-    </message>
     <message>
         <source>No block source available...</source>
         <translation>Blokk forrása ismeretlen...</translation>
@@ -434,21 +418,9 @@
         <source>%n hour(s)</source>
         <translation><numerusform>%n óra</numerusform><numerusform>%n óra</numerusform></translation>
     </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n nap</numerusform><numerusform>%n nap</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n hét</numerusform><numerusform>%n hét</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 és %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n év</numerusform><numerusform>%n év</numerusform></translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -483,24 +455,24 @@
         <translation>Frissítés...</translation>
     </message>
     <message>
+        <source>Date: %1
+</source>
+        <translation>Dátum:  %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Típus: %1
+</translation>
+    </message>
+    <message>
         <source>Sent transaction</source>
         <translation>Tranzakció elküldve.</translation>
     </message>
     <message>
         <source>Incoming transaction</source>
         <translation>Beérkező tranzakció</translation>
-    </message>
-    <message>
-        <source>Date: %1
-Amount: %2
-Type: %3
-Address: %4
-</source>
-        <translation>Dátum: %1
-Összeg: %2
-Típus: %3
-Cím: %4
-</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
@@ -630,7 +602,7 @@ Cím: %4
     </message>
     <message>
         <source>Copy dust</source>
-        <translation>Por-határ másolása</translation>
+        <translation>Visszajáró másolása</translation>
     </message>
     <message>
         <source>Copy change</source>
@@ -693,10 +665,6 @@ Cím: %4
         <translation>nem</translation>
     </message>
     <message>
-        <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
-        <translation>Ez a címke piros lesz, ha tranzakció mérete nagyobb 1000 byte-nál.</translation>
-    </message>
-    <message>
         <source>This means a fee of at least %1 per kB is required.</source>
         <translation>Legalább %1 díj szüksége kB-onként.</translation>
     </message>
@@ -707,14 +675,6 @@ Cím: %4
     <message>
         <source>Transactions with higher priority are more likely to get included into a block.</source>
         <translation>Nagyobb prioritású tranzakciók nagyobb valószínűséggel kerülnek be egy blokkba.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Ez a címke piros lesz, ha a prioritás közepesnél alacsonyabb.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Ez a címke piros lesz, ha valamelyik elfogadó kevesebbet kap mint %1.</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -833,31 +793,6 @@ Cím: %4
         <source>command-line options</source>
         <translation>parancssoros opciók</translation>
     </message>
-    <message>
-        <source>UI options</source>
-        <translation>UI opciók</translation>
-    </message>
-    <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
-        <translation>Nyelvbeállítás, például "de_DE" (alapértelmezett: rendszer nyelve)</translation>
-    </message>
-    <message>
-        <source>Start minimized</source>
-        <translation>Indítás lekicsinyítve
-</translation>
-    </message>
-    <message>
-        <source>Set SSL root certificates for payment request (default: -system-)</source>
-        <translation>SLL gyökér-igazolások megadása fizetési kérelmekhez (alapértelmezett: -system-)</translation>
-    </message>
-    <message>
-        <source>Show splash screen on startup (default: 1)</source>
-        <translation>Indítóképernyő mutatása induláskor (alapértelmezett: 1)</translation>
-    </message>
-    <message>
-        <source>Choose data directory on startup (default: 0)</source>
-        <translation>Adatkönyvtár kiválasztása induláskor (alapbeállítás: 0)</translation>
-    </message>
 </context>
 <context>
     <name>Intro</name>
@@ -868,6 +803,10 @@ Cím: %4
     <message>
         <source>Welcome to Bitcoin Core.</source>
         <translation>Üdvözlünk a Bitcoin Core-ban.</translation>
+    </message>
+    <message>
+        <source>Bitcoin Core will download and store a copy of the Bitcoin block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>A Bitcoin Core le fogja tölteni és tárolni fogja a Bitcoin blokklánc egy másolatát. Legalább %1GB adat lesz tárolva ebben a mappában, és ez folyamatosan nőni fog. A tárca szintén itt lesz tárolva.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -924,14 +863,6 @@ Cím: %4
         <translation>&amp;Fő</translation>
     </message>
     <message>
-        <source>Automatically start Bitcoin after logging in to the system.</source>
-        <translation>Induljon el a Bitcoin a számítógép bekapcsolásakor</translation>
-    </message>
-    <message>
-        <source>&amp;Start Bitcoin on system login</source>
-        <translation>&amp;Induljon el a számítógép bekapcsolásakor</translation>
-    </message>
-    <message>
         <source>MB</source>
         <translation>MB</translation>
     </message>
@@ -960,12 +891,24 @@ Cím: %4
         <translation>&amp;Hálózat</translation>
     </message>
     <message>
+        <source>&amp;Start Bitcoin Core on system login</source>
+        <translation>A Bitcoin elindítása bejelentkezéskor</translation>
+    </message>
+    <message>
+        <source>Expert</source>
+        <translation>szakértő</translation>
+    </message>
+    <message>
         <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
         <translation>A Bitcoin-kliens portjának automatikus megnyitása a routeren. Ez csak akkor működik, ha a routered támogatja az UPnP-t és az engedélyezve is van rajta.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>&amp;UPnP port-feltérképezés</translation>
+    </message>
+    <message>
+        <source>Connect to the Bitcoin network through a SOCKS5 proxy.</source>
+        <translation>Csatlakozás a Bitcoin hálózatához SOCKS5 proxyn keresztül</translation>
     </message>
     <message>
         <source>Proxy &amp;IP:</source>
@@ -992,10 +935,6 @@ Cím: %4
         <translation>&amp;Kicsinyítés a tálcára az eszköztár helyett</translation>
     </message>
     <message>
-        <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>Az alkalmazásból való kilépés helyett az eszköztárba kicsinyíti az alkalmazást az ablak bezárásakor. Ez esetben az alkalmazás csak a Kilépés menüponttal zárható be.</translation>
-    </message>
-    <message>
         <source>M&amp;inimize on close</source>
         <translation>K&amp;icsinyítés záráskor</translation>
     </message>
@@ -1006,10 +945,6 @@ Cím: %4
     <message>
         <source>User Interface &amp;language:</source>
         <translation>Felhasználófelület nye&amp;lve:</translation>
-    </message>
-    <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Bitcoin.</source>
-        <translation>Itt beállíthatod a felhasználófelület nyelvét. Ez a beállítás a Bitcoin ujraindítása után lép érvénybe.</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
@@ -1098,11 +1033,7 @@ Cím: %4
         <source>Recent transactions</source>
         <translation>A legutóbbi tranzakciók</translation>
     </message>
-    <message>
-        <source>out of sync</source>
-        <translation>Nincs szinkronban.</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1116,6 +1047,10 @@ Cím: %4
     </context>
 <context>
     <name>PeerTableModel</name>
+    <message>
+        <source>User Agent</source>
+        <translation>User Agent</translation>
+    </message>
     <message>
         <source>Ping Time</source>
         <translation>Ping idő</translation>
@@ -1142,10 +1077,6 @@ Cím: %4
     <message>
         <source>%1 s</source>
         <translation>%1 mp</translation>
-    </message>
-    <message>
-        <source>NETWORK</source>
-        <translation>HÁLÓZAT</translation>
     </message>
     <message>
         <source>N/A</source>
@@ -1242,8 +1173,28 @@ Cím: %4
         <translation>Verzió</translation>
     </message>
     <message>
+        <source>User Agent</source>
+        <translation>User Agent</translation>
+    </message>
+    <message>
         <source>Services</source>
         <translation>Szolgáltatások</translation>
+    </message>
+    <message>
+        <source>Last Send</source>
+        <translation>Legutóbbi küldés</translation>
+    </message>
+    <message>
+        <source>Last Receive</source>
+        <translation>Legutóbbi fogadás</translation>
+    </message>
+    <message>
+        <source>Bytes Sent</source>
+        <translation>Küldött bájtok</translation>
+    </message>
+    <message>
+        <source>Bytes Received</source>
+        <translation>Fogadott bájtok</translation>
     </message>
     <message>
         <source>Ping Time</source>
@@ -1290,10 +1241,6 @@ Cím: %4
         <translation>Konzol törlése</translation>
     </message>
     <message>
-        <source>Welcome to the Bitcoin RPC console.</source>
-        <translation>Üdv a Bitcoin RPC konzoljában!</translation>
-    </message>
-    <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
         <translation>Navigálhat a fel és le nyilakkal, és &lt;b&gt;Ctrl-L&lt;/b&gt; -vel törölheti a képernyőt.</translation>
     </message>
@@ -1321,12 +1268,20 @@ Cím: %4
         <source>never</source>
         <translation>soha</translation>
     </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Ismeretlen</translation>
+    </message>
     </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>&amp;Label:</source>
         <translation>Címke:</translation>
+    </message>
+    <message>
+        <source>&amp;Message:</source>
+        <translation>&amp;Üzenet:</translation>
     </message>
     <message>
         <source>Clear</source>
@@ -1462,6 +1417,14 @@ Cím: %4
         <translation>Visszajáró:</translation>
     </message>
     <message>
+        <source>Transaction Fee:</source>
+        <translation>Tranzakciós díj</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Elrejtés</translation>
+    </message>
+    <message>
         <source>Send to multiple recipients at once</source>
         <translation>Küldés több címzettnek egyszerre</translation>
     </message>
@@ -1526,10 +1489,6 @@ Cím: %4
         <translation>vagy</translation>
     </message>
     <message>
-        <source>The recipient address is not valid, please recheck.</source>
-        <translation>A címzett címe érvénytelen, kérlek, ellenőrizd.</translation>
-    </message>
-    <message>
         <source>The amount to pay must be larger than 0.</source>
         <translation>A fizetendő összegnek nagyobbnak kell lennie 0-nál.</translation>
     </message>
@@ -1540,10 +1499,6 @@ Cím: %4
     <message>
         <source>The total exceeds your balance when the %1 transaction fee is included.</source>
         <translation>A küldeni kívánt összeg és a %1 tranzakciós díj együtt meghaladja az egyenlegeden rendelkezésedre álló összeget.</translation>
-    </message>
-    <message>
-        <source>Duplicate address found, can only send to each address once per send operation.</source>
-        <translation>Többször szerepel ugyanaz a cím. Egy küldési műveletben egy címre csak egyszer lehet küldeni.</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1612,10 +1567,6 @@ Cím: %4
         <translation>Üzenet aláírása...</translation>
     </message>
     <message>
-        <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Aláírhat a címeivel üzeneteket, amivel bizonyíthatja, hogy a címek az önéi. Vigyázzon, hogy ne írjon alá semmi félreérthetőt, mivel a phising támadásokkal megpróbálhatják becsapni, hogy az azonosságát átírja másokra. Csak olyan részletes állításokat írjon alá, amivel egyetért.</translation>
-    </message>
-    <message>
         <source>Alt+A</source>
         <translation>Alt+A</translation>
     </message>
@@ -1654,10 +1605,6 @@ Cím: %4
     <message>
         <source>&amp;Verify Message</source>
         <translation>Üzenet ellenőrzése</translation>
-    </message>
-    <message>
-        <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation>Írja be az aláírás címét, az üzenetet (ügyelve arra, hogy az új-sor, szóköz, tab, stb. karaktereket is pontosan) és az aláírást az üzenet ellenőrzéséhez. Ügyeljen arra, ne gondoljon többet az aláírásról, mint amennyi az aláírt szövegben ténylegesen áll, hogy elkerülje a köztes-ember (man-in-the-middle) támadást.</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
@@ -1704,7 +1651,7 @@ Cím: %4
     </message>
     <message>
         <source>The Bitcoin Core developers</source>
-        <translation>A Bitcoin fejlesztői</translation>
+        <translation>A Bitcoin Core fejlesztői</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -1722,7 +1669,7 @@ Cím: %4
     <name>TransactionDesc</name>
     <message>
         <source>Open until %1</source>
-        <translation>Megnyitva %1-ig</translation>
+        <translation>%1-ig megnyitva</translation>
     </message>
     <message>
         <source>%1/unconfirmed</source>
@@ -1767,10 +1714,6 @@ Cím: %4
     <message>
         <source>Credit</source>
         <translation>Jóváírás</translation>
-    </message>
-    <message numerus="yes">
-        <source>matures in %n more block(s)</source>
-        <translation><numerusform>beérik %n blokk múlva</numerusform><numerusform>beérik %n blokk múlva</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -1828,10 +1771,6 @@ Cím: %4
         <source>, has not been successfully broadcast yet</source>
         <translation>, még nem sikerült elküldeni.</translation>
     </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n további blokkra megnyitva</numerusform><numerusform>%n további blokkra megnyitva</numerusform></translation>
-    </message>
     <message>
         <source>unknown</source>
         <translation>ismeretlen</translation>
@@ -1859,14 +1798,6 @@ Cím: %4
         <translation>Típus</translation>
     </message>
     <message>
-        <source>Address</source>
-        <translation>Cím</translation>
-    </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n további blokkra megnyitva</numerusform><numerusform>%n további blokkra megnyitva</numerusform></translation>
-    </message>
-    <message>
         <source>Open until %1</source>
         <translation>%1-ig megnyitva</translation>
     </message>
@@ -1885,6 +1816,14 @@ Cím: %4
     <message>
         <source>Offline</source>
         <translation>Offline</translation>
+    </message>
+    <message>
+        <source>Label</source>
+        <translation>Címke</translation>
+    </message>
+    <message>
+        <source>Unconfirmed</source>
+        <translation>Megerősítetlen:</translation>
     </message>
     <message>
         <source>Received with</source>
@@ -1921,10 +1860,6 @@ Cím: %4
     <message>
         <source>Type of transaction.</source>
         <translation>Tranzakció típusa.</translation>
-    </message>
-    <message>
-        <source>Destination address of transaction.</source>
-        <translation>A tranzakció címzettjének címe.</translation>
     </message>
     <message>
         <source>Amount removed from or added to balance.</source>
@@ -2018,6 +1953,10 @@ Cím: %4
         <translation>Az exportálás sikertelen volt</translation>
     </message>
     <message>
+        <source>Exporting Successful</source>
+        <translation>Sikeres exportálás</translation>
+    </message>
+    <message>
         <source>Comma separated file (*.csv)</source>
         <translation>Vesszővel elválasztott fájl (*.csv)</translation>
     </message>
@@ -2071,7 +2010,7 @@ Cím: %4
     <name>WalletView</name>
     <message>
         <source>&amp;Export</source>
-        <translation>&amp;Exportálás...</translation>
+        <translation>&amp;Exportálás</translation>
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
@@ -2150,10 +2089,6 @@ Cím: %4
         <translation>Sérült blokk-adatbázis észlelve</translation>
     </message>
     <message>
-        <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
-        <translation>Saját IP-cím felfedezése (alapértelmezett: 1, amikor figyel és nem használt a -externalip)</translation>
-    </message>
-    <message>
         <source>Do you want to rebuild the block database now?</source>
         <translation>Újra akarod építeni a blokk adatbázist most?</translation>
     </message>
@@ -2194,10 +2129,6 @@ Cím: %4
         <translation>Nincs elég fájlleíró. </translation>
     </message>
     <message>
-        <source>Rebuild block chain index from current blk000??.dat files</source>
-        <translation>Blokklánc index újraalkotása az alábbi blk000??.dat fájlokból</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Blokkok ellenőrzése...</translation>
     </message>
@@ -2206,8 +2137,24 @@ Cím: %4
         <translation>Tárca ellenőrzése...</translation>
     </message>
     <message>
+        <source>Wallet options:</source>
+        <translation>Tárca beállítások:</translation>
+    </message>
+    <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
         <translation>Az adatbázist újra kell építeni -reindex használatával (módosítás -tindex).</translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: 0)</source>
+        <translation>Adatkönyvtár kiválasztása induláskor (alapbeállítás: 0)</translation>
+    </message>
+    <message>
+        <source>Copyright (C) 2009-%i The Bitcoin Core Developers</source>
+        <translation>Copyright (C) 2009-%i A Bitcoin Core Fejlesztői</translation>
+    </message>
+    <message>
+        <source>Error reading from database, shutting down.</source>
+        <translation>Hiba az adatbázis olvasásakor, leállítás</translation>
     </message>
     <message>
         <source>Information</source>
@@ -2226,8 +2173,25 @@ Cím: %4
         <translation>trace/debug információ küldése a konzolra a debog.log fájl helyett</translation>
     </message>
     <message>
+        <source>Set SSL root certificates for payment request (default: -system-)</source>
+        <translation>SLL gyökér-igazolások megadása fizetési kérelmekhez (alapértelmezett: -system-)</translation>
+    </message>
+    <message>
+        <source>Set language, for example "de_DE" (default: system locale)</source>
+        <translation>Nyelvbeállítás, például "de_DE" (alapértelmezett: rendszer nyelve)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: 1)</source>
+        <translation>Indítóképernyő mutatása induláskor (alapértelmezett: 1)</translation>
+    </message>
+    <message>
         <source>Signing transaction failed</source>
         <translation>Tranzakció aláírása sikertelen</translation>
+    </message>
+    <message>
+        <source>Start minimized</source>
+        <translation>Indítás lekicsinyítve
+</translation>
     </message>
     <message>
         <source>This is experimental software.</source>

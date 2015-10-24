@@ -1,5 +1,5 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2014 The Bitcoin developers
+// Copyright (c) 2009-2014 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,8 +26,6 @@
 #include "json/json_spirit_writer_template.h"
 
 using namespace std;
-using namespace boost;
-using namespace boost::asio;
 using namespace json_spirit;
 
 //! Number of bytes to allocate and read at most at once in post data
@@ -40,7 +38,7 @@ const size_t POST_READ_SIZE = 256 * 1024;
  * and to be compatible with other JSON-RPC implementations.
  */
 
-string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeaders, const std::string &host, const std::string &url)
+std::string HTTPPost(const std::string& strMsg, const std::map<std::string,std::string>& mapRequestHeaders, const std::string &host, const std::string &url)
 {
     ostringstream s;
     s << "POST " << url << " HTTP/1.1\r\n"

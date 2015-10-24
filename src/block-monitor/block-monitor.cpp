@@ -61,7 +61,7 @@ bool BlockMonitor::LoadBlocks()
 	leveldb::Iterator *pcursor = NewIterator();
 
 	CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);
-	ssKeySet << make_pair('B', make_pair(int64_t(0), uint256(0)));
+	ssKeySet << make_pair('B', make_pair(int64_t(0), uint256()));
 	pcursor->Seek(ssKeySet.str());
 
 	queue<pair<pair<int64_t, uint256>, pair<int, string> > > syncConnectQueue;
@@ -446,7 +446,7 @@ static void CallRPC(BlockMonitor* self, const std::string &requestId, const stri
     SSLIOStreamDevice<asio::ip::tcp> d(sslStream, fUseSSL);
     iostreams::stream< SSLIOStreamDevice<asio::ip::tcp> > stream(d);
 
-    const bool fWait = false;
+    //const bool fWait = false;
     const string host = GetArg("-blockmon_host", "127.0.0.1");
     const string port = GetArg("-blockmon_port", "80");
     const string url = GetArg("-blockmon_url", "");

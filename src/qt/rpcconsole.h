@@ -1,5 +1,5 @@
-// Copyright (c) 2011-2014 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2011-2014 The Bitcoin Core developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef BITCOIN_QT_RPCCONSOLE_H
@@ -10,7 +10,7 @@
 
 #include "net.h"
 
-#include <QDialog>
+#include <QWidget>
 
 class ClientModel;
 
@@ -23,7 +23,7 @@ class QItemSelection;
 QT_END_NAMESPACE
 
 /** Local Bitcoin RPC console. */
-class RPCConsole: public QDialog
+class RPCConsole: public QWidget
 {
     Q_OBJECT
 
@@ -43,8 +43,9 @@ public:
 
 protected:
     virtual bool eventFilter(QObject* obj, QEvent *event);
+    void keyPressEvent(QKeyEvent *);
 
-private slots:
+private Q_SLOTS:
     void on_lineEdit_returnPressed();
     void on_tabWidget_currentChanged(int index);
     /** open the debug.log from the current datadir */
@@ -57,14 +58,13 @@ private slots:
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
 
-public slots:
+public Q_SLOTS:
     void clear();
-    void reject();
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of blocks shown in the UI */
-    void setNumBlocks(int count);
+    /** Set number of blocks and last block date shown in the UI */
+    void setNumBlocks(int count, const QDateTime& blockDate);
     /** Go forward or back in history */
     void browseHistory(int offset);
     /** Scroll console view to end */
@@ -74,7 +74,7 @@ public slots:
     /** Handle updated peer information */
     void peerLayoutChanged();
 
-signals:
+Q_SIGNALS:
     // For RPC command executor
     void stopExecutor();
     void cmdRequest(const QString &command);

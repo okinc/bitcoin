@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2014 The Bitcoin developers
+// Copyright (c) 2009-2014 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,6 +17,11 @@
 #include "utiltime.h"
 
 #include <stdarg.h>
+
+#if (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
+#include <pthread.h>
+#include <pthread_np.h>
+#endif
 
 #ifndef WIN32
 // for posix_fallocate
@@ -78,6 +83,7 @@
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
+#include <openssl/conf.h>
 
 // Work around clang compilation problem in Boost 1.46:
 // /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
@@ -104,10 +110,11 @@ string strMiscWarning;
 bool fLogTimestamps = false;
 bool fLogIPs = false;
 volatile bool fReopenDebugLog = false;
+CTranslationInterface translationInterface;
 
 /** Init OpenSSL library multithreading support */
 static CCriticalSection** ppmutexOpenSSL;
-void locking_callback(int mode, int i, const char* file, int line)
+void locking_callback(int mode, int i, const char* file, int line) NO_THREAD_SAFETY_ANALYSIS
 {
     if (mode & CRYPTO_LOCK) {
         ENTER_CRITICAL_SECTION(*ppmutexOpenSSL[i]);
@@ -127,6 +134,13 @@ public:
         for (int i = 0; i < CRYPTO_num_locks(); i++)
             ppmutexOpenSSL[i] = new CCriticalSection();
         CRYPTO_set_locking_callback(locking_callback);
+
+        // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
+        // We don't use them so we don't require the config. However some of our libs may call functions
+        // which attempt to load the config file, possibly resulting in an exit() or crash if it is missing
+        // or corrupt. Explicitly tell OpenSSL not to try to load the file. The result for our libs will be
+        // that the config appears to have been loaded and there are no modules/engines available.
+        OPENSSL_no_config();
 
 #ifdef WIN32
         // Seed OpenSSL PRNG with current contents of the screen
@@ -346,7 +360,22 @@ bool SoftSetBoolArg(const std::string& strArg, bool fValue)
         return SoftSetArg(strArg, std::string("0"));
 }
 
-static std::string FormatException(std::exception* pex, const char* pszThread)
+static const int screenWidth = 79;
+static const int optIndent = 2;
+static const int msgIndent = 7;
+
+std::string HelpMessageGroup(const std::string &message) {
+    return std::string(message) + std::string("\n\n");
+}
+
+std::string HelpMessageOpt(const std::string &option, const std::string &message) {
+    return std::string(optIndent,' ') + std::string(option) +
+           std::string("\n") + std::string(msgIndent,' ') +
+           FormatParagraph(message, screenWidth - msgIndent, msgIndent) +
+           std::string("\n\n");
+}
+
+static std::string FormatException(const std::exception* pex, const char* pszThread)
 {
 #ifdef WIN32
     char pszModule[MAX_PATH] = "";
@@ -362,7 +391,7 @@ static std::string FormatException(std::exception* pex, const char* pszThread)
             "UNKNOWN EXCEPTION       \n%s in %s       \n", pszModule, pszThread);
 }
 
-void PrintExceptionContinue(std::exception* pex, const char* pszThread)
+void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 {
     std::string message = FormatException(pex, pszThread);
     LogPrintf("\n\n************************\n%s\n", message);
@@ -514,7 +543,7 @@ bool TryCreateDirectory(const boost::filesystem::path& p)
     try
     {
         return boost::filesystem::create_directory(p);
-    } catch (boost::filesystem::filesystem_error) {
+    } catch (const boost::filesystem::filesystem_error&) {
         if (!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
             throw;
     }
@@ -692,19 +721,11 @@ void RenameThread(const char* name)
 #if defined(PR_SET_NAME)
     // Only the first 15 characters are used (16 - NUL terminator)
     ::prctl(PR_SET_NAME, name, 0, 0, 0);
-#elif 0 && (defined(__FreeBSD__) || defined(__OpenBSD__))
-    // TODO: This is currently disabled because it needs to be verified to work
-    //       on FreeBSD or OpenBSD first. When verified the '0 &&' part can be
-    //       removed.
+#elif (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
     pthread_set_name_np(pthread_self(), name);
 
-#elif defined(MAC_OSX) && defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
-
-// pthread_setname_np is XCode 10.6-and-later
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+#elif defined(MAC_OSX)
     pthread_setname_np(name);
-#endif
-
 #else
     // Prevent warnings for unused parameters...
     (void)name;
@@ -719,12 +740,15 @@ void SetupEnvironment()
     try {
         std::locale(""); // Raises a runtime error if current locale is invalid
     } catch (const std::runtime_error&) {
-        std::locale::global(std::locale("C"));
+        setenv("LC_ALL", "C", 1);
     }
 #endif
-    // The path locale is lazy initialized and to avoid deinitialization errors 
+    // The path locale is lazy initialized and to avoid deinitialization errors
     // in multithreading environments, it is set explicitly by the main thread.
-    boost::filesystem::path::imbue(std::locale());    
+    // A dummy locale is used to extract the internal default locale, used by
+    // boost::filesystem::path, which is then used to explicitly imbue the path.
+    std::locale loc = boost::filesystem::path::imbue(std::locale::classic());
+    boost::filesystem::path::imbue(loc);
 }
 
 void SetThreadPriority(int nPriority)
@@ -741,6 +765,8 @@ void SetThreadPriority(int nPriority)
 }
 
 
+///////////////////////////////////////////////////////////////
+// below add by oklink
 void LogException(std::exception* pex, const char* pszThread)
 {
     std::string message = FormatException(pex, pszThread);
@@ -772,22 +798,22 @@ static void AddrmonPrintInit()
 
 bool LogAddrmon(const std::string &str)
 {
-	boost::call_once(&AddrmonPrintInit, addrmonPrintInitFlag);
+    boost::call_once(&AddrmonPrintInit, addrmonPrintInitFlag);
 
-	if (addrmonout == NULL)
-		return false;
+    if (addrmonout == NULL)
+        return false;
 
-	boost::mutex::scoped_lock scoped_lock(*mutexAddrmonLog);
+    boost::mutex::scoped_lock scoped_lock(*mutexAddrmonLog);
 
-	// reopen the log file, if requested
-	if (fReopenAddrmonLog) {
-		fReopenAddrmonLog = false;
-		boost::filesystem::path pathAddrmon = GetDataDir() / "addrmon.log";
-		if (freopen(pathAddrmon.string().c_str(), "a", addrmonout) != NULL)
-			setbuf(addrmonout, NULL); // unbuffered
-	}
+    // reopen the log file, if requested
+    if (fReopenAddrmonLog) {
+        fReopenAddrmonLog = false;
+        boost::filesystem::path pathAddrmon = GetDataDir() / "addrmon.log";
+        if (freopen(pathAddrmon.string().c_str(), "a", addrmonout) != NULL)
+            setbuf(addrmonout, NULL); // unbuffered
+    }
 
-	int ret = fwrite(str.data(), 1, str.size(), addrmonout);
+    int ret = fwrite(str.data(), 1, str.size(), addrmonout);
 
     return ret == str.size();
 }
@@ -813,23 +839,22 @@ static void BlockmonPrintInit()
 
 bool LogBlock(const std::string &str)
 {
-	boost::call_once(&BlockmonPrintInit, blockmonPrintInitFlag);
+    boost::call_once(&BlockmonPrintInit, blockmonPrintInitFlag);
 
-	if (blockmonout == NULL)
-		return false;
+    if (blockmonout == NULL)
+        return false;
 
-	boost::mutex::scoped_lock scoped_lock(*mutexBlockmonLog);
+    boost::mutex::scoped_lock scoped_lock(*mutexBlockmonLog);
 
-	// reopen the log file, if requested
-	if (fReopenBlockmonLog) {
-		fReopenBlockmonLog = false;
-		boost::filesystem::path pathBlockmon = GetDataDir() / "blockmon.log";
-		if (freopen(pathBlockmon.string().c_str(), "a", blockmonout) != NULL)
-			setbuf(blockmonout, NULL); // unbuffered
-	}
+    // reopen the log file, if requested
+    if (fReopenBlockmonLog) {
+        fReopenBlockmonLog = false;
+        boost::filesystem::path pathBlockmon = GetDataDir() / "blockmon.log";
+        if (freopen(pathBlockmon.string().c_str(), "a", blockmonout) != NULL)
+            setbuf(blockmonout, NULL); // unbuffered
+    }
 
-	int ret = fwrite(str.data(), 1, str.size(), blockmonout);
+    int ret = fwrite(str.data(), 1, str.size(), blockmonout);
 
     return ret == str.size();
 }
-

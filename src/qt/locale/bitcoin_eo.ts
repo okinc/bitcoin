@@ -2,6 +2,10 @@
 <context>
     <name>AddressBookPage</name>
     <message>
+        <source>Right-click to edit address or label</source>
+        <translation>Dekstre-klaku por redakti adreson aŭ etikedon</translation>
+    </message>
+    <message>
         <source>Create a new address</source>
         <translation>Krei novan adreson</translation>
     </message>
@@ -31,7 +35,7 @@
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
-        <translation>Eksporti al dosiero la datumojn el la aktuala langeto</translation>
+        <translation>Eksporti la datumojn el la aktuala langeto al dosiero</translation>
     </message>
     <message>
         <source>&amp;Export</source>
@@ -89,7 +93,11 @@
         <source>Exporting Failed</source>
         <translation>ekspotado malsukcesinta</translation>
     </message>
-    </context>
+    <message>
+        <source>There was an error trying to save the address list to %1. Please try again.</source>
+        <translation>Okazis eraron dum konservo de adreslisto al %1. Bonvolu provi denove.</translation>
+    </message>
+</context>
 <context>
     <name>AddressTableModel</name>
     <message>
@@ -148,10 +156,6 @@
         <translation>Ŝanĝi la pasfrazon</translation>
     </message>
     <message>
-        <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>Tajpu la malnovan kaj novan monujajn pasfrazojn.</translation>
-    </message>
-    <message>
         <source>Confirm wallet encryption</source>
         <translation>Konfirmo de ĉifrado de la monujo</translation>
     </message>
@@ -174,10 +178,6 @@
     <message>
         <source>Wallet encrypted</source>
         <translation>La monujo estas ĉifrita</translation>
-    </message>
-    <message>
-        <source>Bitcoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation>Bitmono nun fermiĝos por fini la ĉifradon. Memoru, ke eĉ ĉifrado ne protektas kontraŭ ĉiu atako, ekz. se viruso infektus vian komputilon.</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
@@ -299,10 +299,6 @@
         <translation>Sendi monon al Bitmon-adreso</translation>
     </message>
     <message>
-        <source>Modify configuration options for Bitcoin</source>
-        <translation>Modifi agordaĵojn por Bitmono</translation>
-    </message>
-    <message>
         <source>Backup wallet to another location</source>
         <translation>Krei alilokan sekurkopion de monujo</translation>
     </message>
@@ -337,6 +333,10 @@
     <message>
         <source>&amp;Receive</source>
         <translation>&amp;Ricevi</translation>
+    </message>
+    <message>
+        <source>Show information about Bitcoin Core</source>
+        <translation>Vidigi informon pri Bitmona Kerno</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -402,33 +402,13 @@
         <source>&amp;Command-line options</source>
         <translation>&amp;Komandliniaj agordaĵoj</translation>
     </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network</source>
-        <translation><numerusform>%n aktiva konekto al la bitmona reto</numerusform><numerusform>%n aktivaj konektoj al la bitmona reto</numerusform></translation>
-    </message>
     <message>
         <source>No block source available...</source>
         <translation>Neniu fonto de blokoj trovebla...</translation>
     </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n horo</numerusform><numerusform>%n horoj</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n tago</numerusform><numerusform>%n tagoj</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n semajno</numerusform><numerusform>%n semajnoj</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 kaj %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n jaro</numerusform><numerusform>%n jaroj</numerusform></translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -471,18 +451,6 @@
         <translation>Envenanta transakcio</translation>
     </message>
     <message>
-        <source>Date: %1
-Amount: %2
-Type: %3
-Address: %4
-</source>
-        <translation>Dato: %1
-Sumo: %2
-Tipo: %3
-Adreso: %4
-</translation>
-    </message>
-    <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
         <translation>Monujo estas &lt;b&gt;ĉifrita&lt;/b&gt; kaj aktuale &lt;b&gt;malŝlosita&lt;/b&gt;</translation>
     </message>
@@ -521,6 +489,10 @@ Adreso: %4
         <translation>Krompago:</translation>
     </message>
     <message>
+        <source>Dust:</source>
+        <translation>Polvo:</translation>
+    </message>
+    <message>
         <source>After Fee:</source>
         <translation>Post krompago:</translation>
     </message>
@@ -543,6 +515,14 @@ Adreso: %4
     <message>
         <source>Amount</source>
         <translation>Sumo</translation>
+    </message>
+    <message>
+        <source>Received with label</source>
+        <translation>Ricevita kun etikedo</translation>
+    </message>
+    <message>
+        <source>Received with address</source>
+        <translation>Ricevita kun adreso</translation>
     </message>
     <message>
         <source>Date</source>
@@ -605,6 +585,10 @@ Adreso: %4
         <translation>Kopii prioritaton</translation>
     </message>
     <message>
+        <source>Copy dust</source>
+        <translation>Kopii polvon</translation>
+    </message>
+    <message>
         <source>Copy change</source>
         <translation>Kopii restmonon</translation>
     </message>
@@ -661,10 +645,6 @@ Adreso: %4
         <translation>ne</translation>
     </message>
     <message>
-        <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
-        <translation>Tiu ĉi etikedo ruĝiĝas se la grando de la transakcio estas pli ol 1000 bajtoj.</translation>
-    </message>
-    <message>
         <source>This means a fee of at least %1 per kB is required.</source>
         <translation>Tio signifas, ke krompago de almenaŭ po %1 por ĉiu kB estas deviga.</translation>
     </message>
@@ -675,10 +655,6 @@ Adreso: %4
     <message>
         <source>Transactions with higher priority are more likely to get included into a block.</source>
         <translation>Transakcioj kun pli alta prioritato havas pli altan ŝancon inkluziviĝi en bloko.</translation>
-    </message>
-    <message>
-        <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Tiu ĉi etikedo ruĝiĝas se iu ajn ricevonto ricevos sumon malpli ol %1.</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -797,26 +773,6 @@ Adreso: %4
         <source>command-line options</source>
         <translation>komandliniaj agordaĵoj</translation>
     </message>
-    <message>
-        <source>UI options</source>
-        <translation>UI-agordaĵoj</translation>
-    </message>
-    <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
-        <translation>Agordi lingvon, ekzemple "de_DE" (defaŭlte: tiu de la sistemo)</translation>
-    </message>
-    <message>
-        <source>Start minimized</source>
-        <translation>Lanĉiĝi plejete</translation>
-    </message>
-    <message>
-        <source>Show splash screen on startup (default: 1)</source>
-        <translation>Montri salutŝildon dum lanĉo (defaŭlte: 1)</translation>
-    </message>
-    <message>
-        <source>Choose data directory on startup (default: 0)</source>
-        <translation>Elekti dosierujon por datumoj dum lanĉo (defaŭlte: 0)</translation>
-    </message>
 </context>
 <context>
     <name>Intro</name>
@@ -887,14 +843,6 @@ Adreso: %4
         <translation>Ĉ&amp;efa</translation>
     </message>
     <message>
-        <source>Automatically start Bitcoin after logging in to the system.</source>
-        <translation>Aŭtomate lanĉi Bitmonon post ensaluto al la sistemo.</translation>
-    </message>
-    <message>
-        <source>&amp;Start Bitcoin on system login</source>
-        <translation>&amp;Lanĉi Bitmonon tuj post ensaluto al la sistemo</translation>
-    </message>
-    <message>
         <source>Size of &amp;database cache</source>
         <translation>Dosiergrando de &amp;datumbasa kaŝmemoro</translation>
     </message>
@@ -913,6 +861,10 @@ Adreso: %4
     <message>
         <source>&amp;Network</source>
         <translation>&amp;Reto</translation>
+    </message>
+    <message>
+        <source>Expert</source>
+        <translation>Fakulo</translation>
     </message>
     <message>
         <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
@@ -947,10 +899,6 @@ Adreso: %4
         <translation>&amp;Minimumigi al la sistempleto anstataŭ al la taskopleto</translation>
     </message>
     <message>
-        <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>Minimumigi la aplikaĵon anstataŭ eliri kaj ĉesi kiam la fenestro estas fermita. Se tiu ĉi estas agordita, la aplikaĵo ĉesas nur kiam oni elektas "Eliri" el la menuo.</translation>
-    </message>
-    <message>
         <source>M&amp;inimize on close</source>
         <translation>M&amp;inimumigi je fermo</translation>
     </message>
@@ -961,10 +909,6 @@ Adreso: %4
     <message>
         <source>User Interface &amp;language:</source>
         <translation>&amp;Lingvo de la fasado:</translation>
-    </message>
-    <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Bitcoin.</source>
-        <translation>Vi povas elekti la lingvon uzata en la aplikaĵo ĉi tie. Tiu ekefikos nur post relanĉo de Bitmono.</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
@@ -1037,11 +981,7 @@ Adreso: %4
         <source>Your current total balance</source>
         <translation>via aktuala totala saldo</translation>
     </message>
-    <message>
-        <source>out of sync</source>
-        <translation>nesinkronigita</translation>
-    </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1181,6 +1121,10 @@ Adreso: %4
         <translation>Aktuala nombro de blokoj</translation>
     </message>
     <message>
+        <source>Bytes Sent</source>
+        <translation>Bajtoj Senditaj:</translation>
+    </message>
+    <message>
         <source>Last block time</source>
         <translation>Horo de la lasta bloko</translation>
     </message>
@@ -1221,16 +1165,8 @@ Adreso: %4
         <translation>Sencimiga protokoldosiero</translation>
     </message>
     <message>
-        <source>Open the Bitcoin debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Malfermi la sencimiga protokoldosiero de Bitmono el la aktuala dosierujo por datumoj. Tio eble daŭros plurajn sekundojn por granda protokoldosiero.</translation>
-    </message>
-    <message>
         <source>Clear console</source>
         <translation>Malplenigi konzolon</translation>
-    </message>
-    <message>
-        <source>Welcome to the Bitcoin RPC console.</source>
-        <translation>Bonvenon al la RPC-konzolo de Bitmono.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -1398,7 +1334,7 @@ Adreso: %4
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
-        <translation>Sendi Monon</translation>
+        <translation>Sendi Bitmonon</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
@@ -1453,8 +1389,12 @@ Adreso: %4
         <translation>Malplenigi ĉiujn kampojn de la formularo.</translation>
     </message>
     <message>
+        <source>Dust:</source>
+        <translation>Polvo:</translation>
+    </message>
+    <message>
         <source>Clear &amp;All</source>
-        <translation>&amp;Forigi ĉion</translation>
+        <translation>&amp;Forigi Ĉion</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -1505,16 +1445,8 @@ Adreso: %4
         <translation>Kopii restmonon</translation>
     </message>
     <message>
-        <source>Total Amount %1 (= %2)</source>
-        <translation>Totala Sumo %1 (= %2)</translation>
-    </message>
-    <message>
         <source>or</source>
         <translation>aŭ</translation>
-    </message>
-    <message>
-        <source>The recipient address is not valid, please recheck.</source>
-        <translation>La adreso de la ricevonto ne validas. Bonvolu kontroli.</translation>
     </message>
     <message>
         <source>The amount to pay must be larger than 0.</source>
@@ -1529,10 +1461,6 @@ Adreso: %4
         <translation>La sumo kun la %1 krompago estas pli granda ol via saldo.</translation>
     </message>
     <message>
-        <source>Duplicate address found, can only send to each address once per send operation.</source>
-        <translation>Iu adreso estas ripetita. Vi povas sendi al ĉiu adreso po unufoje en iu send-operacio.</translation>
-    </message>
-    <message>
         <source>Transaction creation failed!</source>
         <translation>Kreo de transakcio fiaskis!</translation>
     </message>
@@ -1543,6 +1471,10 @@ Adreso: %4
     <message>
         <source>(no label)</source>
         <translation>(neniu etikedo)</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopii polvon</translation>
     </message>
     <message>
         <source>Are you sure you want to send?</source>
@@ -1585,7 +1517,7 @@ Adreso: %4
     </message>
     <message>
         <source>Paste address from clipboard</source>
-        <translation>Alglui adreson el tondejo</translation>
+        <translation>Alglui adreson de tondejo</translation>
     </message>
     <message>
         <source>Alt+P</source>
@@ -1628,10 +1560,6 @@ Adreso: %4
     <message>
         <source>&amp;Sign Message</source>
         <translation>&amp;Subskribi Mesaĝon</translation>
-    </message>
-    <message>
-        <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Vi povas subskribi mesaĝon per viaj adresoj, por pravigi ke vi estas la posedanto de tiuj adresoj. Atentu, ke vi ne subskriu ion neprecizan, ĉar trompisto povus ruzi kontraŭ vi kaj ŝteli vian identecon. Subskribu nur plene detaligitaj deklaroj pri kiuj vi konsentas.</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -1680,10 +1608,6 @@ Adreso: %4
     <message>
         <source>&amp;Verify Message</source>
         <translation>&amp;Kontroli Mesaĝon</translation>
-    </message>
-    <message>
-        <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation>Enmeti la subskriban adreson, la mesaĝon (kune kun ĉiu linisalto, spaceto, taboj, ktp. precize) kaj la subskribon ĉi sube por kontroli la mesaĝon. Atentu, ke vi ne komprenu per la subskribo pli ol la enhavo de la mesaĝo mem, por eviti homo-en-la-mezo-atakon.</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Bitcoin address</source>
@@ -1794,10 +1718,6 @@ Adreso: %4
         <source>Status</source>
         <translation>Stato</translation>
     </message>
-    <message numerus="yes">
-        <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>, elsendita(j) tra %n nodo</numerusform><numerusform>, elsendita(j) tra %n nodoj</numerusform></translation>
-    </message>
     <message>
         <source>Date</source>
         <translation>Dato</translation>
@@ -1829,10 +1749,6 @@ Adreso: %4
     <message>
         <source>Credit</source>
         <translation>Kredito</translation>
-    </message>
-    <message numerus="yes">
-        <source>matures in %n more block(s)</source>
-        <translation><numerusform>maturiĝos post %n bloko</numerusform><numerusform>maturiĝos post %n blokoj</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -1898,10 +1814,6 @@ Adreso: %4
         <source>, has not been successfully broadcast yet</source>
         <translation>, ankoraŭ ne elsendita sukcese</translation>
     </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>Malferma dum ankoraŭ %n bloko</numerusform><numerusform>Malferma dum ankoraŭ %n blokoj</numerusform></translation>
-    </message>
     <message>
         <source>unknown</source>
         <translation>nekonata</translation>
@@ -1929,14 +1841,6 @@ Adreso: %4
         <translation>Tipo</translation>
     </message>
     <message>
-        <source>Address</source>
-        <translation>Adreso</translation>
-    </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>Malferma dum ankoraŭ %n bloko</numerusform><numerusform>Malferma dum ankoraŭ %n blokoj</numerusform></translation>
-    </message>
-    <message>
         <source>Open until %1</source>
         <translation>Malferma ĝis %1</translation>
     </message>
@@ -1955,6 +1859,10 @@ Adreso: %4
     <message>
         <source>Offline</source>
         <translation>Senkonekte</translation>
+    </message>
+    <message>
+        <source>Label</source>
+        <translation>Etikedo</translation>
     </message>
     <message>
         <source>Unconfirmed</source>
@@ -1995,10 +1903,6 @@ Adreso: %4
     <message>
         <source>Type of transaction.</source>
         <translation>Tipo de transakcio.</translation>
-    </message>
-    <message>
-        <source>Destination address of transaction.</source>
-        <translation>Celadreso de la transakcio.</translation>
     </message>
     <message>
         <source>Amount removed from or added to balance.</source>
@@ -2255,10 +2159,6 @@ Adreso: %4
         <translation>Difektita blokdatumbazo trovita</translation>
     </message>
     <message>
-        <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
-        <translation>Malkovri la propran IP-adreson (defaŭlte: 1 dum aŭskultado sen -externalip)</translation>
-    </message>
-    <message>
         <source>Do you want to rebuild the block database now?</source>
         <translation>Ĉu vi volas rekonstrui la blokdatumbazon nun?</translation>
     </message>
@@ -2299,10 +2199,6 @@ Adreso: %4
         <translation>Nesufiĉa nombro de dosierpriskribiloj disponeblas.</translation>
     </message>
     <message>
-        <source>Rebuild block chain index from current blk000??.dat files</source>
-        <translation>Rekontrui blokĉenan indekson el la aktualaj blk000??.dat dosieroj</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>Specifi monujan dosieron (ene de dosierujo por datumoj)</translation>
     </message>
@@ -2335,6 +2231,10 @@ Adreso: %4
         <translation>Plenumi komandon kiam rilata alerto riceviĝas, aŭ kiam ni vidas tre longan forkon (%s en cms anstataŭiĝas per mesaĝo)</translation>
     </message>
     <message>
+        <source>Choose data directory on startup (default: 0)</source>
+        <translation>Elekti dosierujon por datumoj dum lanĉo (defaŭlte: 0)</translation>
+    </message>
+    <message>
         <source>Information</source>
         <translation>Informoj</translation>
     </message>
@@ -2351,12 +2251,24 @@ Adreso: %4
         <translation>Sendi spurajn/sencimigajn informojn al la konzolo anstataŭ al dosiero debug.log</translation>
     </message>
     <message>
+        <source>Set language, for example "de_DE" (default: system locale)</source>
+        <translation>Agordi lingvon, ekzemple "de_DE" (defaŭlte: tiu de la sistemo)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: 1)</source>
+        <translation>Montri salutŝildon dum lanĉo (defaŭlte: 1)</translation>
+    </message>
+    <message>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
         <translation>Malpligrandigi la sencimigan protokol-dosieron kiam kliento lanĉiĝas (defaŭlte: 1 kiam mankas -debug)</translation>
     </message>
     <message>
         <source>Signing transaction failed</source>
         <translation>Subskriba transakcio fiaskis</translation>
+    </message>
+    <message>
+        <source>Start minimized</source>
+        <translation>Lanĉiĝi plejete</translation>
     </message>
     <message>
         <source>This is experimental software.</source>
@@ -2385,10 +2297,6 @@ Adreso: %4
     <message>
         <source>Warning</source>
         <translation>Averto</translation>
-    </message>
-    <message>
-        <source>Warning: This version is obsolete, upgrade required!</source>
-        <translation>Averto: tiu ĉi versio estas eksdata. Vi bezonas ĝisdatigon!</translation>
     </message>
     <message>
         <source>wallet.dat corrupt, salvage failed</source>
