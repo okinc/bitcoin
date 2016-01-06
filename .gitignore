@@ -113,3 +113,9 @@ qa/pull-tester/test.*/*
 /doc/doxygen/
 
 libbitcoinconsensus.pc
+oklink_bitcoin.creator
+oklink_bitcoin.config
+oklink_bitcoin.creator.user
+oklink_bitcoin.files
+oklink_bitcoin.includes
+oklink_onchain.creator.user
