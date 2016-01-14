@@ -97,7 +97,7 @@ bool AddressMonitor::LoadAddresses()
 	return true;
 }
 
-bool AddressMonitor::LoadTransactions()
+bool AddressMonitor::LoadCacheTransactions()
 {
 	leveldb::Iterator *pcursor = NewIterator();
 
@@ -158,7 +158,7 @@ bool AddressMonitor::LoadTransactions()
 				break;
 			}
 
-			pcursor->Next();
+            pcursor->Next();
 		}
 		catch(std::exception &e)
 		{
@@ -167,9 +167,9 @@ bool AddressMonitor::LoadTransactions()
 	}
 	delete pcursor;
 
-	threadGroup.create_thread(boost::bind(&AddressMonitor::LoadSyncTx, this, syncTxQueue));
-	threadGroup.create_thread(boost::bind(&AddressMonitor::LoadSyncConnect, this, syncConnectQueue));
-	threadGroup.create_thread(boost::bind(&AddressMonitor::LoadSyncDisconnect, this, syncDisconnectQueue));
+    threadGroup.create_thread(boost::bind(&AddressMonitor::PushSyncTx, this, syncTxQueue));
+    threadGroup.create_thread(boost::bind(&AddressMonitor::PushSyncTxConnect, this, syncConnectQueue));
+    threadGroup.create_thread(boost::bind(&AddressMonitor::PushSyncTxDisconnect, this, syncDisconnectQueue));
 
 	return true;
 }
@@ -204,29 +204,29 @@ bool AddressMonitor::DelAddress(const uint160 &keyId, const std::string &address
 	return addressMap.erase(keyId) == 1;
 }
 
-bool AddressMonitor::WriteTx(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json)
+bool AddressMonitor::WriteCacheTx(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json)
 {
 	return Write(std::make_pair('T', std::make_pair(timestamp, uuid)), std::make_pair(type, json), true);
 }
 
-bool AddressMonitor::DeleteTx(const int64_t &timestamp, const uint256 &uuid)
+bool AddressMonitor::DeleteCacheTx(const int64_t &timestamp, const uint256 &uuid)
 {
 	return Erase(std::make_pair('T', std::make_pair(timestamp, uuid)), true);
 }
 
-bool AddressMonitor::hasAddress(const uint160 &keyId)
+bool AddressMonitor::HasAddress(const uint160 &keyId)
 {
 	return addressMap.find(keyId) != addressMap.end();
 }
 
-void AddressMonitor::Load()
+void AddressMonitor::Start()
 {
 	if(!LoadAddresses())
 	{
 		throw runtime_error("AddressMonitor LoadAddresses fail!");
 	}
 
-	if(!LoadTransactions())
+    if(!LoadCacheTransactions())
 	{
 		throw runtime_error("AddressMonitor LoadTransactions fail!");
 	}
@@ -266,6 +266,12 @@ json_spirit::Value buildValue(const uint256 &txId, const CTransaction &tx, const
 	return object;
 }
 
+/**
+ * @brief AddressMonitor::GetMonitoredAddresses 获取监听地址包含在tx out_dest之中地址
+ * @param tx
+ * @param addresses
+ * @return
+ */
 unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	unordered_map<int, uint160> monitorMap;
@@ -302,7 +308,7 @@ unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransac
 			keyAddress = keyID;
 		}
 
-		if(addresses.empty() ? hasAddress(keyAddress) : addresses.find(keyAddress) != addresses.end())
+        if(addresses.empty() ? HasAddress(keyAddress) : addresses.find(keyAddress) != addresses.end())
 		{
 			monitorMap.insert(make_pair(i, keyAddress));
 		}
@@ -315,6 +321,7 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 {
 	if(pblock)
 	{
+        //被block确认
 		return;
 	}
 
@@ -328,7 +335,7 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 		const unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx, addresses);
 		const string blockHash;
 		const int nHeight = 0;
-		const int status = 0;
+        const int status = 0;   //为确认
 
 		for (unordered_map<int, uint160>::const_iterator it = monitorMap.begin(); it != monitorMap.end(); it++)
 		{
@@ -352,7 +359,7 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteTx(now, uuid, SYNC_TX, json))
+    if(!WriteCacheTx(now, uuid, SYNC_TX, json))
 	{
 		//TODO
 	}
@@ -360,6 +367,13 @@ void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pbloc
 	push_post(requestId, json);
 }
 
+/**
+ * @brief AddressMonitor::SyncConnectBlock  ->resynctx 同步tx，并发送tx所在确认block
+ * @param pblock
+ * @param pindex
+ * @param tx
+ * @param addresses
+ */
 void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	json_spirit::Array ret;
@@ -371,7 +385,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 		now = GetAdjustedTime();
 		const string blockHash = pblock->GetHash().GetHex();
 		const int nHeight = pindex->nHeight;
-		const int status = 1;
+        const int status = 1;   //1个确认
 
 		unordered_map<int, uint160> monitorMap = GetMonitoredAddresses(tx, addresses);
 
@@ -397,7 +411,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteTx(now, uuid, SYNC_CONNECT, json))
+    if(!WriteCacheTx(now, uuid, SYNC_CONNECT, json))
 	{
 		//TODO
 	}
@@ -405,6 +419,12 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 	push_post(requestId, json);
 }
 
+/**
+ * @brief AddressMonitor::SyncConnectBlock block生效遍历所有tx是否包含监听地址
+ * @param pblock
+ * @param pindex
+ * @param addresses
+ */
 void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
 {
 	json_spirit::Array ret;
@@ -445,7 +465,7 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteTx(now, uuid, SYNC_CONNECT, json))
+    if(!WriteCacheTx(now, uuid, SYNC_CONNECT, json))
 	{
 		//TODO
 	}
@@ -464,7 +484,7 @@ void AddressMonitor::SyncDisconnectBlock(const CBlock *pblock)
 		now = GetAdjustedTime();
 		string blockHash = pblock->GetHash().GetHex();
 		int nHeight = -2;
-		const int status = -2;
+        const int status = -2;//孤立
 
 		BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 		{
@@ -493,7 +513,7 @@ void AddressMonitor::SyncDisconnectBlock(const CBlock *pblock)
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteTx(now, uuid, SYNC_DISCONNECT, json))
+    if(!WriteCacheTx(now, uuid, SYNC_DISCONNECT, json))
 	{
 		//TODO
 	}
@@ -962,7 +982,7 @@ bool AddressMonitor::do_acked(const std::string &requestId)
 		requestMap.erase(requestId);
 	}
 
-	return DeleteTx(timestamp, uuid);
+    return DeleteCacheTx(timestamp, uuid);
 }
 
 bool AddressMonitor::do_resend(const std::string &requestId, const std::string * pjson)
@@ -1006,7 +1026,7 @@ void AddressMonitor::NoResponseCheck()
 	}
 }
 
-void AddressMonitor::LoadSyncTx(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncTxQueue)
+void AddressMonitor::PushSyncTx(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncTxQueue)
 {
     RenameThread("bitcoin-address-monitor-LoadSyncTx");
 
@@ -1032,7 +1052,7 @@ void AddressMonitor::LoadSyncTx(queue<pair<pair<int64_t, uint256>, pair<int, str
     }
 }
 
-void AddressMonitor::LoadSyncConnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncConnectQueue)
+void AddressMonitor::PushSyncTxConnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncConnectQueue)
 {
     RenameThread("bitcoin-address-monitor-LoadSyncConnect");
 
@@ -1058,7 +1078,7 @@ void AddressMonitor::LoadSyncConnect(queue<pair<pair<int64_t, uint256>, pair<int
     }
 }
 
-void AddressMonitor::LoadSyncDisconnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncDisconnectQueue)
+void AddressMonitor::PushSyncTxDisconnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncDisconnectQueue)
 {
     RenameThread("bitcoin-address-monitor-LoadSyncDisconnect");
 

@@ -114,26 +114,30 @@ private:
 	AddressMonitor(const AddressMonitor&);
     void operator=(const AddressMonitor&);
 
-    void LoadSyncTx(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncTxQueue);
-    void LoadSyncConnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncConnectQueue);
-    void LoadSyncDisconnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncDisconnectQueue);
+    void PushSyncTx(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncTxQueue);
+    void PushSyncTxConnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncConnectQueue);
+    void PushSyncTxDisconnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncDisconnectQueue);
 
 public:
     mutable CCriticalSection cs_address;
 
-    void Load();
-
+    void Start();
+    void Stop();
+    //添加监听地址
     bool AddAddress(const uint160 &keyId, const std::string &address);
+    //删除监听地址
     bool DelAddress(const uint160 &keyId, const std::string &address);
-    bool hasAddress(const uint160 &keyId);
+    //地址是否被监听
+    bool HasAddress(const uint160 &keyId);
     bool ack(const std::string &requestId);
 
     void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
-    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
     void SyncDisconnectBlock(const CBlock *pblock);
+    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+    //RPC:resynctx同步tx使用
     void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
 
-    void Stop();
+
 
 protected:
     boost::unordered_map<int, uint160> GetMonitoredAddresses(const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
@@ -149,9 +153,9 @@ private:
 private:
     int64_t retryDelay;
     int64_t httpPool;
-
+    //加载监听地址
     bool LoadAddresses();
-    bool LoadTransactions();
+    bool LoadCacheTransactions();
 
     bool WriteAddress(const uint160 &keyId, const std::string &address);
     bool DeleteAddress(const uint160 &keyId);
@@ -163,10 +167,10 @@ private:
     	SYNC_DISCONNECT = 3
     };
 
-    bool WriteTx(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json);
-    bool DeleteTx(const int64_t &timestamp, const uint256 &uuid);
+    bool WriteCacheTx(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json);
+    bool DeleteCacheTx(const int64_t &timestamp, const uint256 &uuid);
 
-    boost::unordered_map<uint160, std::string> addressMap;
+    boost::unordered_map<uint160, std::string> addressMap;//监听地址
     boost::unordered_map<std::pair<uint256, uint160>, std::pair<int, bool> > txMap;
 
     const uint256 NewRandomUUID() const;

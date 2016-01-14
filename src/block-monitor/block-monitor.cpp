@@ -56,7 +56,8 @@ BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 	httpPool = GetArg("-blockmon_http_pool", BLOCKMON_HTTP_POOL);
 }
 
-bool BlockMonitor::LoadBlocks()
+//从leveldb加载缓存blocks
+bool BlockMonitor::LoadCacheBlocks()
 {
 	leveldb::Iterator *pcursor = NewIterator();
 
@@ -67,19 +68,19 @@ bool BlockMonitor::LoadBlocks()
 	queue<pair<pair<int64_t, uint256>, pair<int, string> > > syncConnectQueue;
 	queue<pair<pair<int64_t, uint256>, pair<int, string> > > syncDisconnectQueue;
 
-	//Load addresses
+    //Load Blocks
 	while(pcursor->Valid())
 	{
 		boost::this_thread::interruption_point();
 		try
 		{
-			leveldb::Slice slKey = pcursor->key();
+            leveldb::Slice slKey = pcursor->key(); //key中包含timestamp，uuid信息
 			CDataStream ssKey(slKey.data(), slKey.data()+slKey.size(), SER_DISK, CLIENT_VERSION);
 			char chType;
 			ssKey >> chType;
 			if(chType == 'B')
 			{
-				leveldb::Slice slValue = pcursor->value();
+                leveldb::Slice slValue = pcursor->value();  //value中包括type,json信息
 				CDataStream ssValue(slValue.data(), slValue.data()+slValue.size(), SER_DISK, CLIENT_VERSION);
 
 				int64_t timestamp;
@@ -121,28 +122,28 @@ bool BlockMonitor::LoadBlocks()
 	}
 	delete pcursor;
 
-	threadGroup.create_thread(boost::bind(&BlockMonitor::LoadSyncConnect, this, syncConnectQueue));
-	threadGroup.create_thread(boost::bind(&BlockMonitor::LoadSyncDisconnect, this, syncDisconnectQueue));
+    threadGroup.create_thread(boost::bind(&BlockMonitor::PushCacheSyncConnect, this, syncConnectQueue));
+    threadGroup.create_thread(boost::bind(&BlockMonitor::PushCacheSyncDisconnect, this, syncDisconnectQueue));
 
 	return true;
 }
 
 
-bool BlockMonitor::WriteBlock(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json)
+bool BlockMonitor::WriteCacheBlock(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json)
 {
 	return Write(std::make_pair('B', std::make_pair(timestamp, uuid)), std::make_pair(type, json), true);
 }
 
-bool BlockMonitor::DeleteBlock(const int64_t &timestamp, const uint256 &uuid)
+bool BlockMonitor::DeleteCacheBlock(const int64_t &timestamp, const uint256 &uuid)
 {
 	return Erase(std::make_pair('B', std::make_pair(timestamp, uuid)), true);
 }
 
-void BlockMonitor::Load()
+void BlockMonitor::Start()
 {
-	if(!LoadBlocks())
+    if(!LoadCacheBlocks())
 	{
-		throw runtime_error("BlockMonitor LoadTransactions fail!");
+        throw runtime_error("BlockMonitor LoadBlocks fail!");
 	}
 
 	for(int i = 0; i < httpPool; i++)
@@ -195,7 +196,7 @@ void BlockMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, c
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteBlock(now, uuid, SYNC_CONNECT, json))
+    if(!WriteCacheBlock(now, uuid, SYNC_CONNECT, json))
 	{
 		//TODO
 	}
@@ -225,7 +226,7 @@ void BlockMonitor::SyncDisconnectBlock(const CBlock *pblock)
 	result.push_back(Pair("content", ret));
 	string json = write_string(Value(result), false);
 
-	if(!WriteBlock(now, uuid, SYNC_DISCONNECT, json))
+    if(!WriteCacheBlock(now, uuid, SYNC_DISCONNECT, json))
 	{
 		//TODO
 	}
@@ -424,7 +425,7 @@ bool BlockMonitor::pull_resend(std::string &requestId, const std::string ** cons
 
 		*ppjson = &it->second;
 
-		resendQueue.push(make_pair(requestId, now + retryDelay));
+        resendQueue.push(make_pair(requestId, now + retryDelay));//继续放入重发队列，并延迟retryDelay
 
 		sem_resend.post();
 
@@ -632,6 +633,7 @@ void BlockMonitor::ResendThread()
 	}
 }
 
+//检测httppost无响应（ack）requestId,并放入重发队列
 void BlockMonitor::NoResponseCheckThread()
 {
     RenameThread("bitcoin-block-monitor-NoResponseCheck");
@@ -691,7 +693,7 @@ bool BlockMonitor::do_acked(const std::string &requestId)
 		requestMap.erase(requestId);
 	}
 
-	return DeleteBlock(timestamp, uuid);
+    return DeleteCacheBlock(timestamp, uuid);
 }
 
 bool BlockMonitor::do_resend(const std::string &requestId, const std::string * pjson)
@@ -729,13 +731,13 @@ void BlockMonitor::NoResponseCheck()
 
 		BOOST_FOREACH(const string &requestId, timeoutRequestIds)
 		{
-			resendQueue.push(make_pair(requestId, now));
+            resendQueue.push(make_pair(requestId, now));    //加入重发队列
 			sem_resend.post();
 		}
 	}
 }
 
-void BlockMonitor::LoadSyncConnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncConnectQueue)
+void BlockMonitor::PushCacheSyncConnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncConnectQueue)
 {
     RenameThread("bitcoin-block-monitor-LoadSyncConnect");
 
@@ -761,7 +763,7 @@ void BlockMonitor::LoadSyncConnect(queue<pair<pair<int64_t, uint256>, pair<int, 
     }
 }
 
-void BlockMonitor::LoadSyncDisconnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncDisconnectQueue)
+void BlockMonitor::PushCacheSyncDisconnect(queue<pair<pair<int64_t, uint256>, pair<int, string> > > &syncDisconnectQueue)
 {
     RenameThread("bitcoin-block-monitor-LoadSyncDisconnect");
 

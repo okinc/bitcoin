@@ -69,6 +69,7 @@ namespace boost
 #ifndef LESS_THAN_BY_TIME
 #define LESS_THAN_BY_TIME
 
+//用于resendQueue优先级队列Compare
 struct LessThanByTime
 {
 	inline bool operator()(const std::pair<std::string, int64_t>& r1, const std::pair<std::string, int64_t>& r2) const
@@ -93,23 +94,32 @@ struct LessThanByTime
 
 class BlockMonitor : public CLevelDBWrapper
 {
+private:
+    int64_t retryDelay;
+    int64_t httpPool;
+
+    enum
+    {
+        SYNC_CONNECT = 1,
+        SYNC_DISCONNECT = 2
+    };
+
 public:
 	BlockMonitor(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 private:
 	BlockMonitor(const BlockMonitor&);
     void operator=(const BlockMonitor&);
 
-    void LoadSyncConnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncConnectQueue);
-    void LoadSyncDisconnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncDisconnectQueue);
-
 public:
 
-    void Load();
-    bool ack(const std::string &requestId);
+    void Start();
+    void Stop();
+
+    bool ack(const std::string &requestId);//异步通知requestID请求成功完成
     void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
     void SyncDisconnectBlock(const CBlock *pblock);
 
-    void Stop();
+
 
 private:
     void PostThread();
@@ -119,20 +129,12 @@ private:
 
     void NoResponseCheck();
 
-private:
-    int64_t retryDelay;
-    int64_t httpPool;
+    bool LoadCacheBlocks();
+    void PushCacheSyncConnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncConnectQueue);
+    void PushCacheSyncDisconnect(std::queue<std::pair<std::pair<int64_t, uint256>, std::pair<int, std::string> > > &syncDisconnectQueue);
 
-    bool LoadBlocks();
-
-    enum
-    {
-    	SYNC_CONNECT = 1,
-    	SYNC_DISCONNECT = 2
-    };
-
-    bool WriteBlock(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json);
-    bool DeleteBlock(const int64_t &timestamp, const uint256 &uuid);
+    bool WriteCacheBlock(const int64_t &timestamp, const uint256 &uuid, const int type, const std::string &json);
+    bool DeleteCacheBlock(const int64_t &timestamp, const uint256 &uuid);
 
     const uint256 NewRandomUUID() const;
     const std::string NewRequestId() const;
@@ -141,6 +143,8 @@ private:
     bool decodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
 
 private:
+    boost::thread_group threadGroup;
+    bool is_stop;
 
     mutable CCriticalSection cs_post;
     mutable CCriticalSection cs_postMap;
@@ -153,12 +157,12 @@ private:
     mutable CSemaphore sem_resend;
 
     std::queue<std::string> postQueue;
-    boost::unordered_map<std::string, int64_t> postMap;
     std::queue<std::string> ackedQueue;
     std::priority_queue<std::pair<std::string, int64_t>,
-    	std::vector<std::pair<std::string, int64_t> >, LessThanByTime> resendQueue;
-    boost::unordered_map<std::string, std::string>
-    	requestMap;
+        std::vector<std::pair<std::string, int64_t> >, LessThanByTime> resendQueue;
+    boost::unordered_map<std::string, int64_t> postMap; //<requestID, post_time>
+    boost::unordered_map<std::string, std::string> requestMap;  //<requestID,jsonContent>
+
 
     void push_post(const std::string &requestId, const std::string &json);
     void push_acked(const std::string &requestId);
@@ -172,8 +176,6 @@ private:
     bool do_acked(const std::string &requestId);
     bool do_resend(const std::string &requestId, const std::string * pjson);
 
-    boost::thread_group threadGroup;
-    bool is_stop;
 };
 
 

@@ -68,6 +68,13 @@ AC_PATH_PROG(HEXDUMP,hexdump)
 dnl pkg-config check.
 PKG_PROG_PKG_CONFIG
 
+# OKLink 地址监听
+AC_ARG_ENABLE([okmonitor],
+  [AS_HELP_STRING([--enable-okmonitor],
+  [enable okmonitor (default is yes)])],
+  [enable-okmonitor=$enableval],
+  [enable-okmonitor=yes])
+
 # Enable wallet
 AC_ARG_ENABLE([wallet],
   [AS_HELP_STRING([--enable-wallet],
@@ -748,6 +755,16 @@ if test "x$use_ccache" != "xno"; then
 fi
 if test "x$use_ccache" = "xyes"; then
     AX_CHECK_PREPROC_FLAG([-Qunused-arguments],[CPPFLAGS="-Qunused-arguments $CPPFLAGS"])
+fi
+
+dnl enable okmonitor
+AC_MSG_CHECKING([if okmonitor should be enabled])
+if test x$enable_okmonitor != xno; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE_UNQUOTED([ENABLE_OKMONITOR],[1],[Define to 1 to enable okmonitor functions])
+
+else
+  AC_MSG_RESULT(no)
 fi
 
 dnl enable wallet

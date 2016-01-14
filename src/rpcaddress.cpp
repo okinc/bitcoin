@@ -77,7 +77,7 @@ json_spirit::Value addmonitor(const json_spirit::Array& params, bool fHelp)
     		LOCK(paddressMonitor->cs_address);
 
     		bool insertNew;
-    		if(paddressMonitor->hasAddress(addressKey))
+            if(paddressMonitor->HasAddress(addressKey))
     		{
     			insertNew = false;
     		}
@@ -158,7 +158,7 @@ json_spirit::Value delmonitor(const json_spirit::Array& params, bool fHelp)
 
 			LOCK(paddressMonitor->cs_address);
 			bool alreadyHas;
-			if(!paddressMonitor->hasAddress(addressKey))
+            if(!paddressMonitor->HasAddress(addressKey))
 			{
 				alreadyHas = false;
 			}
@@ -241,7 +241,7 @@ json_spirit::Value ismonitor(const json_spirit::Array& params, bool fHelp)
 
 			json_spirit::Object object;
 			object.push_back(Pair("address", strAddress));
-			object.push_back(Pair("ret", paddressMonitor->hasAddress(addressKey)));
+            object.push_back(Pair("ret", paddressMonitor->HasAddress(addressKey)));
 			ret.push_back(object);
     	}
     }
