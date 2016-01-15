@@ -237,13 +237,13 @@ extern json_spirit::Value invalidateblock(const json_spirit::Array& params, bool
 extern json_spirit::Value reconsiderblock(const json_spirit::Array& params, bool fHelp);
 
 //add by oklink
-extern json_spirit::Value addmonitor(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value delmonitor(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value ismonitor(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value ackmonitor(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value ackblock(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value rescan(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value addmonitor(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value delmonitor(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value ismonitor(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value ackmonitor(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value ackblock(const json_spirit::Array& params, bool fHelp);
+//extern json_spirit::Value rescan(const json_spirit::Array& params, bool fHelp);
 
 // in rest.cpp
 extern bool HTTPReq_REST(AcceptedConnection *conn,

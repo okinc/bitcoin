@@ -1,6 +1,13 @@
 DIST_SUBDIRS = secp256k1
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS)
 
+#mac path
+LD_LIBRARY_PATH = /usr/local/mysql-5.6.17-osx10.7-x86_64/lib
+#linux path
+LD_LIBRARY_PATH = /usr/local/mysql/lib
+MYSQL_CONN_PATH = mysql_conn_lib/lib
+MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a -ldl -lz
 
 if EMBEDDED_LEVELDB
 LEVELDB_CPPFLAGS += -I$(srcdir)/leveldb/include
@@ -154,7 +161,10 @@ BITCOIN_CORE_H = \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
-  address-monitor/address-monitor.h \
+  mysql_wrapper/mysql_connpool.h \
+  mysql_wrapper/okcoin_log.h  \
+  block-monitor/eventmonitor.h \
+  block-monitor/transaction-monitor.h \
   block-monitor/block-monitor.h
 
 JSON_H = \
@@ -167,6 +177,24 @@ JSON_H = \
   json/json_spirit_value.h \
   json/json_spirit_writer.h \
   json/json_spirit_writer_template.h
+
+MYSQL_H = \
+  mysql_conn_lib/include/mysql_connection.h \
+  mysql_conn_lib/include/mysql_driver.h \
+  mysql_conn_lib/include/cppconn/build_config.h \
+  mysql_conn_lib/include/cppconn/config.h \
+  mysql_conn_lib/include/cppconn/connection.h \
+  mysql_conn_lib/include/cppconn/datatype.h \
+  mysql_conn_lib/include/cppconn/driver.h \
+  mysql_conn_lib/include/cppconn/exception.h \
+  mysql_conn_lib/include/cppconn/metadata.h \
+  mysql_conn_lib/include/cppconn/parameter_metadata.h \
+  mysql_conn_lib/include/cppconn/prepared_statement.h \
+  mysql_conn_lib/include/cppconn/resultset_metadata.h \
+  mysql_conn_lib/include/cppconn/resultset.h \
+  mysql_conn_lib/include/cppconn/sqlstring.h \
+  mysql_conn_lib/include/cppconn/statement.h \
+  mysql_conn_lib/include/cppconn/warning.h
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -203,8 +231,14 @@ libbitcoin_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   validationinterface.cpp \
+  block-monitor/eventmonitor.cpp \
+  block-monitor/transaction-monitor.cpp \
+  block-monitor/block-monitor.cpp \
+  mysql_wrapper/mysql_connpool.cpp \
+  mysql_wrapper/okcoin_log.cpp \
   $(JSON_H) \
-  $(BITCOIN_CORE_H)
+  $(BITCOIN_CORE_H) \
+  $(MYSQL_H)
 
 # wallet: shared between bitcoind and bitcoin-qt, but only linked
 # when wallet enabled
@@ -217,10 +251,6 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
-  address-monitor/address-monitor.cpp \
-  block-monitor/block-monitor.cpp \
-  rpcaddress.cpp \
-  rpcblock.cpp \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library
@@ -329,7 +359,8 @@ bitcoind_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBMYSQL)
 
 if ENABLE_WALLET
 bitcoind_LDADD += libbitcoin_wallet.a

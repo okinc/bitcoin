@@ -38,6 +38,11 @@
 #include <signal.h>
 #endif
 
+//okcoin
+#if 1
+#include "mysql_wrapper/okcoin_log.h"
+#endif
+
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/bind.hpp>
@@ -178,11 +183,12 @@ void Shutdown()
             FlushStateToDisk();
         }
 
-        if(paddressMonitor)
+        //ok监听
+        if(ptxMonitor)
         {
-           paddressMonitor->Stop();
-           paddressMonitor->Sync();
-           paddressMonitor->Flush();
+           ptxMonitor->Stop();
+           ptxMonitor->Sync();
+           ptxMonitor->Flush();
         }
         if(pblockMonitor)
         {
@@ -190,6 +196,10 @@ void Shutdown()
             pblockMonitor->Sync();
             pblockMonitor->Flush();
         }
+#ifdef OKCOIN_LOG
+        OKCoin_Log_deInit();
+#endif
+
 
         delete pcoinsTip;
         pcoinsTip = NULL;
@@ -199,8 +209,9 @@ void Shutdown()
         pcoinsdbview = NULL;
         delete pblocktree;
         pblocktree = NULL;
-        delete paddressMonitor;
-        paddressMonitor = NULL;
+
+        delete ptxMonitor;
+        ptxMonitor = NULL;
         delete pblockMonitor;
         pblockMonitor = NULL;
     }
@@ -1242,17 +1253,21 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     fFeeEstimatesInitialized = true;
 
     // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
-    // cache size calculations
-    size_t nmonitorCache = (GetArg("-moncache", nDefaultMonCache) << 20);
-    if (nmonitorCache < (nMinMonCache << 20))
-       nmonitorCache = (nMinMonCache << 20); // total cache cannot be less than nMinDbCache
-    else if (nmonitorCache > (nMaxMonCache << 20))
-       nmonitorCache = (nMaxMonCache << 20); // total cache cannot be greater than nMaxDbCache
+#ifdef OKCOIN_LOG
+    OKCoin_Log_init();  //event log 连接池初始化
+#endif
 
-    paddressMonitor = new AddressMonitor(nmonitorCache);
+    // cache size calculations
+    size_t nmonitorCache = (GetArg("-moncache", nDefaultEventCache) << 20);
+    if (nmonitorCache < (nMinEventCache << 20))
+       nmonitorCache = (nMinEventCache << 20); // total cache cannot be less than nMinDbCache
+    else if (nmonitorCache > (nMaxEventCache << 20))
+       nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
+
+    ptxMonitor = new TransactionMonitor(nmonitorCache);
     nStart = GetTimeMillis();
     printf("Start loading monitor address...\n");
-    paddressMonitor->Start();
+    ptxMonitor->Start();
     printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
 
     pblockMonitor = new BlockMonitor(nmonitorCache);

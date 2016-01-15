@@ -8,7 +8,7 @@
 
 #include <boost/signals2/signal.hpp>
 #include <boost/unordered_map.hpp>
-#include "address-monitor/address-monitor.h"
+#include "block-monitor/transaction-monitor.h"
 #include "block-monitor/block-monitor.h"
 
 #include <algorithm>
@@ -76,7 +76,7 @@ struct CMainSignals {
 
 CMainSignals& GetMainSignals();
 /** add by oklink */
-extern AddressMonitor *paddressMonitor;
+extern TransactionMonitor *ptxMonitor;
 extern BlockMonitor *pblockMonitor;
 
 
