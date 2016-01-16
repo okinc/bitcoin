@@ -1254,7 +1254,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
     LogPrintf(" ok_log_init\n");
-    //OKCoin_Log_init();  //event log 连接池初始化
+    OKCoin_Log_init();  //event log 连接池初始化
 
     LogPrintf(" OK_monitor_init\n");
     // cache size calculations
