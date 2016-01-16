@@ -63,6 +63,8 @@ static inline int OKCoinLogPrint(const char* format)
 
 #endif
 
+class COKLogEvent;
+
 
 enum OKCoin_EventType{
     OC_TYPE_BLOCK = 0,//block
@@ -75,10 +77,8 @@ enum OKCoin_Action {
     OC_ACTION_ORPHANE = -1,//tx,block 孤立
  } ;
 
-class COKLogEvent;
-
-bool OKCoin_Log_init();
-bool OKCoin_Log_deInit();
+extern bool OKCoin_Log_init();
+extern bool OKCoin_Log_deInit();
 
 /**
 * 2014/07/11 chenzs

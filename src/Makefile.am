@@ -2,10 +2,10 @@ DIST_SUBDIRS = secp256k1
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS)
 
 #mac path
-LD_LIBRARY_PATH = /usr/local/mysql-5.6.17-osx10.7-x86_64/lib
-#linux path
 LD_LIBRARY_PATH = /usr/local/mysql/lib
-MYSQL_CONN_PATH = mysql_conn_lib/lib
+#linux path
+LD_LIBRARY_PATH = /usr/lib64/mysql
+MYSQL_CONN_PATH = /usr/local/lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
 LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a -ldl -lz
 
@@ -179,22 +179,23 @@ JSON_H = \
   json/json_spirit_writer_template.h
 
 MYSQL_H = \
-  mysql_conn_lib/include/mysql_connection.h \
-  mysql_conn_lib/include/mysql_driver.h \
-  mysql_conn_lib/include/cppconn/build_config.h \
-  mysql_conn_lib/include/cppconn/config.h \
-  mysql_conn_lib/include/cppconn/connection.h \
-  mysql_conn_lib/include/cppconn/datatype.h \
-  mysql_conn_lib/include/cppconn/driver.h \
-  mysql_conn_lib/include/cppconn/exception.h \
-  mysql_conn_lib/include/cppconn/metadata.h \
-  mysql_conn_lib/include/cppconn/parameter_metadata.h \
-  mysql_conn_lib/include/cppconn/prepared_statement.h \
-  mysql_conn_lib/include/cppconn/resultset_metadata.h \
-  mysql_conn_lib/include/cppconn/resultset.h \
-  mysql_conn_lib/include/cppconn/sqlstring.h \
-  mysql_conn_lib/include/cppconn/statement.h \
-  mysql_conn_lib/include/cppconn/warning.h
+  mysql_connection.h \
+  mysql_driver.h \
+  cppconn/build_config.h \
+  cppconn/config.h \
+  cppconn/connection.h \
+  cppconn/datatype.h \
+  cppconn/driver.h \
+  cppconn/exception.h \
+  cppconn/metadata.h \
+  cppconn/parameter_metadata.h \
+  cppconn/prepared_statement.h \
+  cppconn/resultset_metadata.h \
+  cppconn/resultset.h \
+  cppconn/sqlstring.h \
+  cppconn/statement.h \
+  cppconn/warning.h
+# mysql_conn_lib/include/
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -231,14 +232,14 @@ libbitcoin_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   validationinterface.cpp \
+  mysql_wrapper/mysql_connpool.cpp \
+  mysql_wrapper/okcoin_log.cpp \
   block-monitor/eventmonitor.cpp \
   block-monitor/transaction-monitor.cpp \
   block-monitor/block-monitor.cpp \
-  mysql_wrapper/mysql_connpool.cpp \
-  mysql_wrapper/okcoin_log.cpp \
   $(JSON_H) \
-  $(BITCOIN_CORE_H) \
-  $(MYSQL_H)
+  $(BITCOIN_CORE_H)
+ # $(MYSQL_H)
 
 # wallet: shared between bitcoind and bitcoin-qt, but only linked
 # when wallet enabled

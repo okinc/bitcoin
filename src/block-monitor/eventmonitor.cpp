@@ -29,7 +29,7 @@
 
 
 #define MONITOR_RETRY_DELAY	60
-#define MONITOR_WORK_POOL	5
+#define MONITOR_WORK_POOL	10
 
 
 using namespace std;
@@ -50,13 +50,21 @@ static void io_service_run(void)
 
 /////////////////////////////
 
-CEventMonitor::CEventMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
-    CLevelDBWrapper(GetDataDir() / "blocks" / "blockmon", nCacheSize, fMemory, fWipe),
+CEventMonitor::CEventMonitor() : CLevelDBWrapper(GetDataDir() / "blocks" , 0, true, false),
+    retryDelay(MONITOR_RETRY_DELAY), workPool(MONITOR_WORK_POOL), is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
+{
+
+}
+
+CEventMonitor::CEventMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe) :
+    CLevelDBWrapper(path, nCacheSize, fMemory, fWipe),
     retryDelay(MONITOR_RETRY_DELAY), workPool(MONITOR_WORK_POOL), is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
 {
     retryDelay = GetArg("-blockmon_retry_delay", MONITOR_RETRY_DELAY);
     workPool = GetArg("-blockmon_work_pool", MONITOR_WORK_POOL);
 }
+
+
 
 void CEventMonitor::Start()
 {

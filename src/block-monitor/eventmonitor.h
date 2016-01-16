@@ -120,8 +120,11 @@ protected:
 
 
 public:
-    CEventMonitor(size_t nCacheSize, bool fMemory, bool fWipe);
+    CEventMonitor();
+     CEventMonitor(const CEventMonitor& mo);
+    CEventMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe);
     virtual ~CEventMonitor(){};
+
 
 public:
 
@@ -131,9 +134,9 @@ public:
     bool ack(const std::string &requestId);//异步通知requestID请求成功完成
 
 protected:
-    virtual bool LoadCacheEvents();
-    virtual bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);
-    virtual bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid);
+    virtual bool LoadCacheEvents(){return false;};
+    virtual bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent){return false; };
+    virtual bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid){return false; };
 
 
 protected:

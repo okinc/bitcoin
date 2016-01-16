@@ -61,7 +61,7 @@ public:
     string message;
 };
 
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool fInfo = false);
 extern Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool txDetails = false);
 extern void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
 

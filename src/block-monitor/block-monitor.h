@@ -15,11 +15,12 @@ class BlockMonitor : public CEventMonitor
 {
 
 public:
+    BlockMonitor();
 	BlockMonitor(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
-    virtual ~BlockMonitor();
+     ~BlockMonitor();
 private:
-	BlockMonitor(const BlockMonitor&);
-    void operator=(const BlockMonitor&);
+    //BlockMonitor(const BlockMonitor&);
+    //void operator=(const BlockMonitor&);
 
 public:
 

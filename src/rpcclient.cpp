@@ -91,6 +91,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "estimatepriority", 0 },
     { "prioritisetransaction", 1 },
     { "prioritisetransaction", 2 },
+    { "getblockbyheight", 0},
+    { "getblockbyheight", 1},
+    { "getblockbyheight", 2},
 };
 
 class CRPCConvertTable

@@ -1253,10 +1253,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     fFeeEstimatesInitialized = true;
 
     // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
-#ifdef OKCOIN_LOG
-    OKCoin_Log_init();  //event log 连接池初始化
-#endif
+    LogPrintf(" ok_log_init\n");
+    //OKCoin_Log_init();  //event log 连接池初始化
 
+    LogPrintf(" OK_monitor_init\n");
     // cache size calculations
     size_t nmonitorCache = (GetArg("-moncache", nDefaultEventCache) << 20);
     if (nmonitorCache < (nMinEventCache << 20))
@@ -1264,17 +1264,17 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     else if (nmonitorCache > (nMaxEventCache << 20))
        nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
 
+    LogPrintf("Start loading monitor transaction cached...\n");
     ptxMonitor = new TransactionMonitor(nmonitorCache);
     nStart = GetTimeMillis();
-    printf("Start loading monitor address...\n");
     ptxMonitor->Start();
-    printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
+    LogPrintf("End loading monitor transaction: %lldms\n", GetTimeMillis() - nStart);
 
     pblockMonitor = new BlockMonitor(nmonitorCache);
     nStart = GetTimeMillis();
-    printf("Start loading monitor block...\n");
+    LogPrintf("Start loading monitor block cached...\n");
     pblockMonitor->Start();
-    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+    LogPrintf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET

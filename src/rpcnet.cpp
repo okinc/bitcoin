@@ -82,6 +82,7 @@ Value getpeerinfo(const Array& params, bool fHelp)
             "getpeerinfo\n"
             "\nReturns data about each connected network node as a json array of objects.\n"
             "\nbResult:\n"
+           "{infos:[\n"
             "[\n"
             "  {\n"
             "    \"id\": n,                   (numeric) Peer index\n"
@@ -110,6 +111,7 @@ Value getpeerinfo(const Array& params, bool fHelp)
             "  }\n"
             "  ,...\n"
             "]\n"
+             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getpeerinfo", "")
             + HelpExampleRpc("getpeerinfo", "")
@@ -121,6 +123,7 @@ Value getpeerinfo(const Array& params, bool fHelp)
     CopyNodeStats(vstats);
 
     Array ret;
+    Object infos;//使用infos节点 封装Array结果
 
     BOOST_FOREACH(const CNodeStats& stats, vstats) {
         Object obj;
@@ -162,7 +165,8 @@ Value getpeerinfo(const Array& params, bool fHelp)
         ret.push_back(obj);
     }
 
-    return ret;
+    infos.push_back(Pair("infos", ret)); //okcoin
+    return infos;
 }
 
 Value addnode(const Array& params, bool fHelp)

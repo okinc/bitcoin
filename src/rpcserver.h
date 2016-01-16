@@ -244,6 +244,7 @@ extern json_spirit::Value reconsiderblock(const json_spirit::Array& params, bool
 //extern json_spirit::Value resynctx(const json_spirit::Array& params, bool fHelp);
 //extern json_spirit::Value ackblock(const json_spirit::Array& params, bool fHelp);
 //extern json_spirit::Value rescan(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getblockbyheight(const json_spirit::Array& params, bool fHelp);
 
 // in rest.cpp
 extern bool HTTPReq_REST(AcceptedConnection *conn,

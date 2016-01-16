@@ -32,7 +32,7 @@ static void io_service_run(void)
 */
 
 BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
-    CEventMonitor(nCacheSize, fMemory, fWipe)
+    CEventMonitor(GetDataDir() / "blocks" / "moniblock", nCacheSize, fMemory, fWipe)
 {
 
 }
@@ -132,14 +132,18 @@ bool BlockMonitor::DeleteCacheEvent(const int64_t &timestamp, const uint256 &uui
 
 void BlockMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
 {
-    if(pblock)
+    if(pblock){
+         LogPrintf("block_monitor syncConnectBlock:%s\n",pblock->GetHash().ToString());
          BuildEvent(OC_ACTION_NEW, pblock);
+    }
 }
 
 void BlockMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
-    if(pblock)
+    if(pblock){
+         LogPrintf("block_monitor dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
          BuildEvent(OC_ACTION_ORPHANE, pblock);
+    }
 }
 
 

@@ -12,9 +12,9 @@
 
 #if LOG2DB
 #define DB_SERVER 		"127.0.0.1:3306"
-#define DB_USER	 		"root"
-#define DB_PASSWORD		"root"
-#define DB_NAME			"blockchain"
+#define DB_USER	 		"coinuser"
+#define DB_PASSWORD		"123456"
+#define DB_NAME			"coinokdata"
 #define MAX_CONNCOUNT	50
 
 
@@ -40,6 +40,7 @@ static bool fInited = false;
 
 
 bool OKCoin_Log_init(){
+    LogPrintf("OKCoin_Log_init flag 1\n");
 	if(fInited == true){
 		LogPrint("okcoin_log", "okcoin_log allready inited\n");
 		return false;
@@ -47,12 +48,13 @@ bool OKCoin_Log_init(){
 #if LOG2DB
 	/* Create a connection */
 	//load config
+    LogPrintf("OKCoin_Log_init get config args\n");
 	db_server= GetArg("-okdbhost", DB_SERVER);
 	db_user = GetArg("-okdbuser", DB_USER);
 	db_password = GetArg("-okdbpassword", DB_PASSWORD);
 	db_name= GetArg("-okdbname", DB_NAME);
 	
-	LogPrint("okcoin_log", "OKCoin_Log_init loadconfig ok_db_host = %s\n", db_server);
+    LogPrintf( "OKCoin_Log_init loadconfig ok_db_host = %s\n", db_server);
 
     pConnPool = ConnPool::GetInstance(db_server,db_user,db_password,db_name,MAX_CONNCOUNT);
   	fInited = pConnPool ? true: false;
@@ -71,6 +73,7 @@ bool OKCoin_Log_init(){
     }
     mutexOkcoinLog = new boost::mutex();
 #endif
+    LogPrintf("OKCoin_Log_init result = %d\n", fInited);
     return fInited;
 }
 
@@ -96,7 +99,7 @@ bool OKCoin_Log_deInit(){
 #endif
 
 	fInited = false;
-	LogPrint("okcoin_log", "OKCoin_Log_deInit\n");
+    LogPrintf("OKCoin_Log_deInit\n");
 	return true;
 }
 

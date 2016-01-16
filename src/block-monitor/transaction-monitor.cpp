@@ -16,7 +16,7 @@ using boost::lexical_cast;
 using boost::unordered_map;
 
 TransactionMonitor::TransactionMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
-    CEventMonitor(nCacheSize, fMemory, fWipe)
+    CEventMonitor(GetDataDir() / "blocks" / "monitx", nCacheSize, fMemory, fWipe)
 {
 
 }
@@ -52,6 +52,7 @@ void TransactionMonitor::SyncTransaction(const CTransaction &tx, const CBlock *p
         return;
     }
 
+    LogPrintf("tx_monitor SyncTransaction:%s\n",tx.GetHash().ToString());
    BuildEvent(OC_ACTION_NEW, tx);
 }
 
@@ -64,6 +65,7 @@ void TransactionMonitor::SyncTransaction(const CTransaction &tx, const CBlock *p
  */
 void TransactionMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
 {
+     LogPrintf("tx_monitor SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
@@ -72,7 +74,7 @@ void TransactionMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pin
 
 void TransactionMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
-
+    LogPrintf("tx_monitor dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
     {
         BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
         {
