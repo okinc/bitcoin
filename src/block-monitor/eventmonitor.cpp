@@ -331,7 +331,7 @@ void CEventMonitor::SendThread()
 
         if(!pull_send(requestId, &logEvent))
         {
-            MilliSleep(10);
+            MilliSleep(1);
             continue;
         }
 
@@ -373,7 +373,7 @@ void CEventMonitor::AckThread()
 
         if(!pull_acked(requestId, &logEvent))
         {
-            MilliSleep(50);
+            MilliSleep(1);
             continue;
         }
 
@@ -416,7 +416,7 @@ void CEventMonitor::ResendThread()
 
         if(!pull_resend(requestId, &logEvent))
         {
-            MilliSleep(500);
+            MilliSleep(50);
             continue;
         }
 
