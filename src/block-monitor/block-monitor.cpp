@@ -21,15 +21,6 @@ using namespace boost::asio;
 using boost::lexical_cast;
 using boost::unordered_map;
 
-/*
-static boost::asio::io_service ioService;
-static boost::asio::io_service::work threadPool(ioService);
-
-static void io_service_run(void)
-{
-	ioService.run();
-}
-*/
 
 BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
     CEventMonitor(GetDataDir() / "blocks" / "moniblock", nCacheSize, fMemory, fWipe)
@@ -37,13 +28,10 @@ BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 
 }
 
-BlockMonitor::~BlockMonitor(){
-
-}
-
 //从leveldb加载缓存blocks events
 bool BlockMonitor::LoadCacheEvents()
 {
+
 	leveldb::Iterator *pcursor = NewIterator();
 
 	CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);
@@ -115,6 +103,7 @@ bool BlockMonitor::DeleteCacheEvent(const int64_t &timestamp, const uint256 &uui
  void BlockMonitor::BuildEvent(const int &action, const CBlock *pblock){
     int64_t now = 0;
     now = GetAdjustedTime();
+
 
     const std::string blockHash = pblock->GetHash().ToString();
     COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash);

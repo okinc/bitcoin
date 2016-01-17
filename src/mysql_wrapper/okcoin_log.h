@@ -33,33 +33,7 @@
 	
 #else
 
-/*
- Log to file
- */
-#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/predicate.hpp> 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/foreach.hpp>
-#define strprintf tfm::format
-#define OKCoinLogPrintf(...) OKCoinLogPrint(__VA_ARGS__)
 
-
-int OKCoinLogPrintStr(const std::string &str);
-
-#define MAKE_OKCOIN_LOG_FUNC(n)                                        \
-    template<TINYFORMAT_ARGTYPES(n)>                                          \
-    static inline int OKCoinLogPrint(const char* format, TINYFORMAT_VARARGS(n))  \
-    {                                                                         \
-        return OKCoinLogPrintStr(tfm::format(format, TINYFORMAT_PASSARGS(n))); \
-    }                                                                         \
-    
-TINYFORMAT_FOREACH_ARGNUM(MAKE_OKCOIN_LOG_FUNC)
-static inline int OKCoinLogPrint(const char* format)
-{
-    return LogPrintStr(format);
-}
 
 #endif
 

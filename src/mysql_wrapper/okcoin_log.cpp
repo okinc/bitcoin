@@ -30,19 +30,16 @@ static ConnPool *pConnPool;
 
 
 #else
-//static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
-static FILE* okcoinFileout = NULL;
-static boost::mutex* mutexOkcoinLog = NULL;
-#define  OKCOIN_LOG_FILENAME		"okcoin_tx.log"
+
 #endif
 
 static bool fInited = false;
 
 
 bool OKCoin_Log_init(){
-    LogPrintf("OKCoin_Log_init flag 1\n");
+    LogPrintf("ok-- OKCoin_Log_init flag 1\n");
 	if(fInited == true){
-		LogPrint("okcoin_log", "okcoin_log allready inited\n");
+        LogPrintf("ok-- OKCoin_Log_init allready inited\n");
 		return false;
 	}
 #if LOG2DB
@@ -62,18 +59,9 @@ bool OKCoin_Log_init(){
 
 	
 #else
-	assert(okcoinFileout == NULL);
-    assert(mutexOkcoinLog == NULL);
-
-    boost::filesystem::path pathDebug = GetDataDir() / OKCOIN_LOG_FILENAME;
-    okcoinFileout = fopen(pathDebug.string().c_str(), "a");
-    if (okcoinFileout) {
-    	setbuf(okcoinFileout, NULL); // unbuffered
-    	fInited = true;
-    }
-    mutexOkcoinLog = new boost::mutex();
+    fInited = true;
 #endif
-    LogPrintf("OKCoin_Log_init result = %d\n", fInited);
+    LogPrintf("ok-- OKCoin_Log_init result = %d\n", fInited);
     return fInited;
 }
 
@@ -86,20 +74,11 @@ bool OKCoin_Log_deInit(){
 		pConnPool = NULL;
 	}
 #else
-	if(okcoinFileout != NULL)
-	{
-		fclose(okcoinFileout);
-		okcoinFileout = NULL;
-	}
-	
-	if(mutexOkcoinLog != NULL){
-		delete mutexOkcoinLog;
-		mutexOkcoinLog = NULL;
-	}
+
 #endif
 
 	fInited = false;
-    LogPrintf("OKCoin_Log_deInit\n");
+    LogPrintf("ok-- OKCoin_Log_deInit\n");
 	return true;
 }
 
@@ -136,9 +115,9 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 	pConnPool->ReleaseConnection(pConn);
 
 #else
-	ret = OKCoinLogPrint("action:%d, type:%d block:%s ip:%s rt:%lu\n", action, type, hash.data(), fromip.data(), GetTime());
+    ret = 0;
 #endif
-	LogPrint("okcoin_log", "okcoin_log Insert Event type=%d result= %s \n", type, ret);
+    LogPrintf("ok-- Log_Event Event(type=%d, action= %d, hash=%s, from=%s),result(%d)\n", type, action,hash,fromip,ret);
 	return ret;
 }
 
@@ -151,20 +130,7 @@ int OKCoin_Log_Event(const COKLogEvent &event){
 }
 
 
-#if !LOG2DB
-int OKCoinLogPrintStr(const std::string &str)
-{
-	int ret = 0; // Returns total number of characters written
-	
-    if (okcoinFileout == NULL)
-        return ret;
 
-    boost::mutex::scoped_lock scoped_lock(*mutexOkcoinLog);
-    ret += fprintf(okcoinFileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
-    ret = fwrite(str.data(), 1, str.size(), okcoinFileout);
-    return ret;
-}
-#endif
 
 int OKCoin_Log_EarseOrphaneBlk(std::string blkHash){
    return OKCoin_Log_Event(OC_TYPE_BLOCK, OC_ACTION_ORPHANE,  blkHash, "127.0.0.1");
@@ -176,11 +142,11 @@ int OKCoin_Log_EarseOrphaneTx(std::string txHash){
 
 std::string COKLogEvent::ToString() const{
     return strprintf(
-        "COKLogEvent(\n"
-        "    type    = %d\n"
-        "    action  = %d\n"
-        "    hash    = %s\n"
-        "    ip      = %s\n"
+        "COKLogEvent("
+        "    type    = %d"
+        "    action  = %d"
+        "    hash    = %s"
+        "    ip      = %s"
         ")\n",
         mType,
         mAction,

@@ -25,6 +25,7 @@ void TransactionMonitor::BuildEvent(const int &action, const CTransaction& tx){
     if(tx.IsNull())
         return;
 
+
     int64_t now = 0;
     now = GetAdjustedTime();
 
@@ -41,6 +42,25 @@ void TransactionMonitor::BuildEvent(const int &action, const CTransaction& tx){
 
     push_send(requestId, logEvent);
 
+}
+
+void TransactionMonitor::BuildEvent(const int &action, const CBlock *pblock){
+   int64_t now = 0;
+   now = GetAdjustedTime();
+
+
+   const std::string blockHash = pblock->GetHash().ToString();
+   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash);
+
+   uint256 uuid = NewRandomUUID();
+   string requestId = "event-" + NewRequestId(now, uuid);
+
+   if(!WriteCacheEvent(now, uuid, logEvent))
+   {
+       //TODO
+   }
+
+   push_send(requestId, logEvent);
 }
 
 
@@ -70,22 +90,26 @@ void TransactionMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pin
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
 //        }
+     BuildEvent(OC_ACTION_NEW,pblock);
 }
 
 void TransactionMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
     LogPrintf("tx_monitor dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
-    {
+
         BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
         {
              BuildEvent(OC_ACTION_ORPHANE, tx);  //孤立
         }
-    }
+
+        BuildEvent(OC_ACTION_ORPHANE,pblock);
+
 }
 
 //从leveldb加载缓存tx events
 bool TransactionMonitor::LoadCacheEvents()
 {
+
     leveldb::Iterator *pcursor = NewIterator();
 
     CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);

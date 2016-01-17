@@ -31,6 +31,7 @@ public:
 
 protected:
      void BuildEvent(const int &action, const CTransaction& tx);
+     void BuildEvent(const int &action, const CBlock *pblock);
 
      bool LoadCacheEvents();
      bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);

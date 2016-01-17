@@ -39,32 +39,35 @@ using namespace boost::asio;
 using boost::lexical_cast;
 using boost::unordered_map;
 
-static boost::asio::io_service ioService;
-static boost::asio::io_service::work threadPool(ioService);
+//static boost::asio::io_service ioService;
+//static boost::asio::io_service::work threadPool(ioService);
 
 
-static void io_service_run(void)
-{
-    ioService.run();
-}
+//static void io_service_run(void)
+//{
+//    ioService.run();
+//}
 
 /////////////////////////////
 
 CEventMonitor::CEventMonitor() : CLevelDBWrapper(GetDataDir() / "blocks" , 0, true, false),
-    retryDelay(MONITOR_RETRY_DELAY), workPool(MONITOR_WORK_POOL), is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
+    retryDelay(MONITOR_RETRY_DELAY),is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
 {
 
 }
 
 CEventMonitor::CEventMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe) :
     CLevelDBWrapper(path, nCacheSize, fMemory, fWipe),
-    retryDelay(MONITOR_RETRY_DELAY), workPool(MONITOR_WORK_POOL), is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
+    retryDelay(MONITOR_RETRY_DELAY),  is_stop(false), sem_send(0), sem_acked(0),  sem_resend(0)
 {
     retryDelay = GetArg("-blockmon_retry_delay", MONITOR_RETRY_DELAY);
-    workPool = GetArg("-blockmon_work_pool", MONITOR_WORK_POOL);
+//    workPool = GetArg("-blockmon_work_pool", MONITOR_WORK_POOL);
 }
 
-
+//void CEventMonitor::Run_io_service(void)
+//{
+//    ioService.run();
+//}
 
 void CEventMonitor::Start()
 {
@@ -72,11 +75,11 @@ void CEventMonitor::Start()
     {
         throw runtime_error("CEventMonitor LoadEvent fail!");
     }
-
-    for(int i = 0; i < workPool; i++)
-    {
-        threadGroup.create_thread(boost::bind(&io_service_run));
-    }
+//    LogPrintf("CEventMonitor:Start workPool: %d\n",workPool);
+//    for(int i = 0; i < workPool; i++)
+//    {
+//        threadGroup.create_thread(boost::bind(&CEventMonitor::Run_io_service,this));
+//    }
 
     threadGroup.create_thread(boost::bind(&CEventMonitor::SendThread, this));
     threadGroup.create_thread(boost::bind(&CEventMonitor::AckThread, this));
@@ -93,7 +96,7 @@ void CEventMonitor::Stop()
     sem_acked.post();
     sem_resend.post();
 
-    ioService.stop();
+//    ioService.stop();
     threadGroup.interrupt_all();
     threadGroup.join_all();
 }
@@ -161,7 +164,7 @@ const std::string CEventMonitor::NewRequestId() const
 void CEventMonitor::push_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
     LOCK2(cs_map, cs_send);
-
+     LogPrintf("ok-- CEventMonitor:push_send: %s\n",logEvent.ToString());
     requestMap.insert(make_pair(requestId, logEvent));
     sendQueue.push(requestId);
 
@@ -171,7 +174,7 @@ void CEventMonitor::push_send(const std::string &requestId, const COKLogEvent& l
 void CEventMonitor::push_acked(const std::string &requestId)
 {
     LOCK(cs_acked);
-
+     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
     ackedQueue.push(requestId);
 
     sem_acked.post();
@@ -180,7 +183,7 @@ void CEventMonitor::push_acked(const std::string &requestId)
 void CEventMonitor::push_resend(const std::string &requestId)
 {
     LOCK(cs_resend);
-
+    LogPrintf("ok-- CEventMonitor:push_resend requestId: %s\n",requestId);
     resendQueue.push(make_pair(requestId, GetAdjustedTime() + retryDelay));
 
     sem_resend.post();
@@ -297,13 +300,14 @@ bool CEventMonitor::pull_resend(std::string &requestId, const COKLogEvent ** con
 
 
 
-static void CallOKLogEvent(CEventMonitor* self, const std::string &requestId, const COKLogEvent& logEvent){
+void CEventMonitor::CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent){
     if(logEvent.IsNull())
         return;
 
+
     int ret = OKCoin_Log_Event(logEvent);
     if(ret > 0){
-        self->ack(requestId);
+        ack(requestId);
     }
 }
 
@@ -318,8 +322,8 @@ void CEventMonitor::SendThread()
     }
     fOneThread = true;
 
-    MilliSleep(retryDelay * 1000);
-
+    MilliSleep(1 * 1000);
+    LogPrintf("CEventMonitor:SendThread ...\n");
     while(!is_stop)
     {
         string requestId;
@@ -327,7 +331,7 @@ void CEventMonitor::SendThread()
 
         if(!pull_send(requestId, &logEvent))
         {
-            MilliSleep(1000);
+            MilliSleep(10);
             continue;
         }
 
@@ -344,7 +348,9 @@ void CEventMonitor::SendThread()
         {
             LogBlock("CEventMonitor::SendThread() -> unknow exception\n");
         }
+
     }
+     LogPrintf("CEventMonitor:SendThread end...\n");
 }
 
 void CEventMonitor::AckThread()
@@ -358,7 +364,7 @@ void CEventMonitor::AckThread()
     }
     fOneThread = true;
 
-    MilliSleep(retryDelay * 1000);
+    MilliSleep(2 * 1000);
 
     while(!is_stop)
     {
@@ -367,7 +373,7 @@ void CEventMonitor::AckThread()
 
         if(!pull_acked(requestId, &logEvent))
         {
-            MilliSleep(1000);
+            MilliSleep(50);
             continue;
         }
 
@@ -401,7 +407,7 @@ void CEventMonitor::ResendThread()
     }
     fOneThread = true;
 
-    MilliSleep(retryDelay * 1000);
+    MilliSleep(3 * 1000);
 
     while(!is_stop)
     {
@@ -410,7 +416,7 @@ void CEventMonitor::ResendThread()
 
         if(!pull_resend(requestId, &logEvent))
         {
-            MilliSleep(1000);
+            MilliSleep(500);
             continue;
         }
 
@@ -466,8 +472,9 @@ void CEventMonitor::NoResponseCheckThread()
 
 bool CEventMonitor::do_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
-    LogBlock("do_send -> requestId: "+requestId+", event: "+logEvent.ToString()+"\n");
-    ioService.post(boost::bind(CallOKLogEvent, this, requestId, logEvent));
+    LogPrintf("do_send -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
+//    ioService.post(boost::bind(CallOKLogEvent, this, requestId, logEvent));
+    CallOKLogEvent(requestId, logEvent);
     return true;
 }
 
@@ -495,8 +502,9 @@ bool CEventMonitor::do_acked(const std::string &requestId)
 
 bool CEventMonitor::do_resend(const std::string &requestId, const COKLogEvent& logEvent)
 {
-    LogBlock("do_resend -> requestId: "+requestId+", event: "+logEvent.ToString()+"\n");
-    ioService.post(boost::bind(CallOKLogEvent, this, requestId, logEvent));
+     LogPrintf("do_resend -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
+    //ioService.post(boost::bind(CallOKLogEvent, this, requestId, logEvent));
+     CallOKLogEvent(requestId, logEvent);
     return true;
 }
 

@@ -77,7 +77,7 @@ struct CMainSignals {
 CMainSignals& GetMainSignals();
 /** add by oklink */
 extern TransactionMonitor *ptxMonitor;
-extern BlockMonitor *pblockMonitor;
+//extern BlockMonitor *pblockMonitor;
 
 
 #endif // BITCOIN_VALIDATIONINTERFACE_H

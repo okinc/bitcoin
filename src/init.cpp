@@ -190,12 +190,12 @@ void Shutdown()
            ptxMonitor->Sync();
            ptxMonitor->Flush();
         }
-        if(pblockMonitor)
-        {
-            pblockMonitor->Stop();
-            pblockMonitor->Sync();
-            pblockMonitor->Flush();
-        }
+//        if(pblockMonitor)
+//        {
+//            pblockMonitor->Stop();
+//            pblockMonitor->Sync();
+//            pblockMonitor->Flush();
+//        }
 #ifdef OKCOIN_LOG
         OKCoin_Log_deInit();
 #endif
@@ -212,8 +212,8 @@ void Shutdown()
 
         delete ptxMonitor;
         ptxMonitor = NULL;
-        delete pblockMonitor;
-        pblockMonitor = NULL;
+//        delete pblockMonitor;
+//        pblockMonitor = NULL;
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -1264,17 +1264,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     else if (nmonitorCache > (nMaxEventCache << 20))
        nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
 
+//    pblockMonitor = new BlockMonitor(nmonitorCache);
+//    nStart = GetTimeMillis();
+//    LogPrintf("Start loading monitor block cached...\n");
+//    pblockMonitor->Start();
+//    LogPrintf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+
     LogPrintf("Start loading monitor transaction cached...\n");
     ptxMonitor = new TransactionMonitor(nmonitorCache);
     nStart = GetTimeMillis();
     ptxMonitor->Start();
     LogPrintf("End loading monitor transaction: %lldms\n", GetTimeMillis() - nStart);
 
-    pblockMonitor = new BlockMonitor(nmonitorCache);
-    nStart = GetTimeMillis();
-    LogPrintf("Start loading monitor block cached...\n");
-    pblockMonitor->Start();
-    LogPrintf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET

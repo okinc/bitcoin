@@ -110,7 +110,10 @@ class CEventMonitor : public CLevelDBWrapper
 {
 protected:
     int64_t retryDelay;
-    int64_t workPool;
+//    int64_t workPool;
+//    boost::asio::io_service ioService;
+//   // boost::asio::io_service::work threadPool(ioService);
+//    void Run_io_service(void);
 
     enum
     {
@@ -134,9 +137,9 @@ public:
     bool ack(const std::string &requestId);//异步通知requestID请求成功完成
 
 protected:
-    virtual bool LoadCacheEvents(){return false;};
-    virtual bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent){return false; };
-    virtual bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid){return false; };
+    virtual bool LoadCacheEvents()=0;
+    virtual bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent)=0;
+    virtual bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid)=0;
 
 
 protected:
@@ -149,6 +152,7 @@ protected:
 
 
     void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
+    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
 
     const uint256 NewRandomUUID() const;
     const std::string NewRequestId() const;

@@ -13,7 +13,7 @@ CMainSignals& GetMainSignals()
 }
 
 TransactionMonitor *ptxMonitor = NULL;
-BlockMonitor *pblockMonitor = NULL;
+//BlockMonitor *pblockMonitor = NULL;
 
 void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.SyncTransaction.connect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2, _3));
@@ -30,8 +30,8 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.SyncConnectBlock.connect(boost::bind(&TransactionMonitor::SyncConnectBlock, ptxMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.connect(boost::bind(&TransactionMonitor::SyncDisconnectBlock, ptxMonitor, _1));
 
-    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
-    g_signals.SyncDisconnectBlock.connect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
+//    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
+//    g_signals.SyncDisconnectBlock.connect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
 void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
@@ -49,8 +49,8 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.SyncConnectBlock.disconnect(boost::bind(&TransactionMonitor::SyncConnectBlock, ptxMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.disconnect(boost::bind(&TransactionMonitor::SyncDisconnectBlock, ptxMonitor, _1));
 
-    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
-    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
+//    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
+//    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
 void UnregisterAllValidationInterfaces() {
@@ -63,8 +63,8 @@ void UnregisterAllValidationInterfaces() {
     g_signals.SyncTransaction.disconnect_all_slots();
     ////////////////////////////////////////
     //below add by oklink
-    g_signals.SyncConnectBlock.disconnect_all_slots();
-    g_signals.SyncDisconnectBlock.disconnect_all_slots();
+//    g_signals.SyncConnectBlock.disconnect_all_slots();
+//    g_signals.SyncDisconnectBlock.disconnect_all_slots();
 }
 
 void SyncWithWallets(const CTransaction &tx, const CBlock *pblock) {
