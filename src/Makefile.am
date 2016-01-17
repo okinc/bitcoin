@@ -7,7 +7,7 @@ LD_LIBRARY_PATH = /usr/local/mysql/lib
 LD_LIBRARY_PATH = /usr/lib64/mysql
 MYSQL_CONN_PATH = /usr/local/lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
-LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a -ldl -lz
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.so -ldl -lz
 
 if EMBEDDED_LEVELDB
 LEVELDB_CPPFLAGS += -I$(srcdir)/leveldb/include
