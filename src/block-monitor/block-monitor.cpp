@@ -90,12 +90,12 @@ bool BlockMonitor::LoadCacheEvents()
 
 bool BlockMonitor::WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid, const COKLogEvent& logEvent)
 {
-    return Write(std::make_pair('B', std::make_pair(timestamp, uuid)), logEvent, true);
+    return true;// Write(std::make_pair('B', std::make_pair(timestamp, uuid)), logEvent, true);
 }
 
 bool BlockMonitor::DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid)
 {
-	return Erase(std::make_pair('B', std::make_pair(timestamp, uuid)), true);
+    return true;//Erase(std::make_pair('B', std::make_pair(timestamp, uuid)), true);
 }
 
 

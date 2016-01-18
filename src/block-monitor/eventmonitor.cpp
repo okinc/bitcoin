@@ -82,7 +82,7 @@ void CEventMonitor::Start()
 //    }
 
     threadGroup.create_thread(boost::bind(&CEventMonitor::SendThread, this));
-    threadGroup.create_thread(boost::bind(&CEventMonitor::AckThread, this));
+//    threadGroup.create_thread(boost::bind(&CEventMonitor::AckThread, this));
     threadGroup.create_thread(boost::bind(&CEventMonitor::ResendThread, this));
 
      //非网络无需做无响应检测
@@ -173,11 +173,11 @@ void CEventMonitor::push_send(const std::string &requestId, const COKLogEvent& l
 
 void CEventMonitor::push_acked(const std::string &requestId)
 {
-    LOCK(cs_acked);
-     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
-    ackedQueue.push(requestId);
+//    LOCK(cs_acked);
+//     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
+//    ackedQueue.push(requestId);
 
-    sem_acked.post();
+//    sem_acked.post();
 }
 
 void CEventMonitor::push_resend(const std::string &requestId)
