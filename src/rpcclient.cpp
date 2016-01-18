@@ -94,6 +94,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "getblockbyheight", 0},
     { "getblockbyheight", 1},
     { "getblockbyheight", 2},
+    { "getblock", 1},
+    { "getblock", 2},
 };
 
 class CRPCConvertTable
