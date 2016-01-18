@@ -196,9 +196,8 @@ void Shutdown()
 //            pblockMonitor->Sync();
 //            pblockMonitor->Flush();
 //        }
-#ifdef OKCOIN_LOG
+
         OKCoin_Log_deInit();
-#endif
 
 
         delete pcoinsTip;
