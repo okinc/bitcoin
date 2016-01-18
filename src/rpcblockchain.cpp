@@ -61,7 +61,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool txDe
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    result.push_back(Pair("confirmations", confirmations));
+    result.push_back(Pair("confirmations", (int)confirmations));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", block.nVersion));
@@ -69,17 +69,21 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool txDe
     Array txs;
     BOOST_FOREACH(const CTransaction&tx, block.vtx)
     {
-        if(txDetails)
-        {
-            Object objTx;
-            TxToJSON(tx, uint256(), objTx);
-            txs.push_back(objTx);
-        }
-        else
+        //chenzs 2014/07/05
+        if(!txDetails){
             txs.push_back(tx.GetHash().GetHex());
+        }else{
+            Object oTx;
+            TxToJSON(tx, block.GetHash(), oTx,false);
+            txs.push_back(oTx);
+        }
     }
-    result.push_back(Pair("tx", txs));
-    result.push_back(Pair("time", block.GetBlockTime()));
+    if(txDetails)
+        result.push_back(Pair("tx", txs));
+    else
+        result.push_back(Pair("txid", txs));
+
+    result.push_back(Pair("time",(uint64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (uint64_t)block.nNonce));
     result.push_back(Pair("bits", (uint64_t)block.nBits));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
