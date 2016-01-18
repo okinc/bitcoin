@@ -1,13 +1,13 @@
-
 /*
- * eventmonitor.h
+ * transaction-monitor.h
  *
  *  Created on: 2016年1月15日
  *      Author: chenzs
  */
 
-#ifndef CEVENTMONITOR_H
-#define CEVENTMONITOR_H
+
+#ifndef OKBLOCKCHAIN_MONITOR_H
+#define OKBLOCKCHAIN_MONITOR_H
 
 #include <string>
 #include <vector>
@@ -44,6 +44,7 @@ static const int64_t nDefaultEventCache = 100;
 static const int64_t nMaxEventCache = sizeof(void*) > 4 ? 4096 : 1024;
 // min. -moncache in (MiB)
 static const int64_t nMinEventCache = 4;
+
 
 class CBlock;
 class CBlockIndex;
@@ -106,61 +107,11 @@ struct LessThanByTime
 #endif /* LESS_THAN_BY_TIME */
 
 
-class CEventMonitor : public CLevelDBWrapper
+
+class COKBlockChainMonitor : public CLevelDBWrapper
 {
 protected:
     int64_t retryDelay;
-//    int64_t workPool;
-//    boost::asio::io_service ioService;
-//   // boost::asio::io_service::work threadPool(ioService);
-//    void Run_io_service(void);
-
-    enum
-    {
-        SYNC_CONNECT = 1,
-        SYNC_DISCONNECT = 2
-    };
-
-
-public:
-    CEventMonitor();
-     CEventMonitor(const CEventMonitor& mo);
-    CEventMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe);
-    virtual ~CEventMonitor(){};
-
-
-public:
-
-    void Start();
-    void Stop();
-
-    bool ack(const std::string &requestId);//异步通知requestID请求成功完成
-
-protected:
-    virtual bool LoadCacheEvents()=0;
-    virtual bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent)=0;
-    virtual bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid)=0;
-
-
-protected:
-    void SendThread();
-    void AckThread();
-    void ResendThread();
-    void NoResponseCheckThread();
-
-    void NoResponseCheck();
-
-
-    void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
-    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
-
-    const uint256 NewRandomUUID() const;
-    const std::string NewRequestId() const;
-    const std::string NewRequestId(const int64_t &now, const uint256 &uuid) const;
-    bool decodeRequestIdWithoutPrefix(const std::string &requestIdWithoutPrefix, int64_t &now, uint256 &uuid);
-    bool decodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
-
-protected:
     boost::thread_group threadGroup;
     bool is_stop;
 
@@ -181,18 +132,64 @@ protected:
     boost::unordered_map<std::string, int64_t> sendMap; //<requestID, post_time>
     boost::unordered_map<std::string, COKLogEvent> requestMap;  //<requestID,logEvent>
 
+    enum
+    {
+        SYNC_CONNECT = 1,
+        SYNC_DISCONNECT = 2
+    };
 
-    void push_send(const std::string &requestId, const COKLogEvent& logEvent);
-    void push_acked(const std::string &requestId);
-    void push_resend(const std::string &requestId);
+public:
+    COKBlockChainMonitor(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+private:
+    COKBlockChainMonitor(const COKBlockChainMonitor&);
+    void operator=(const COKBlockChainMonitor&);
 
-    bool pull_send(std::string &requestId,  const COKLogEvent ** const ppjson);
-    bool pull_acked(std::string &requestId, const COKLogEvent ** const ppjson);
-    bool pull_resend(std::string &requestId, const COKLogEvent ** const ppjson);
+public:
+    void Start();
+    void Stop();
 
-    bool do_send(const std::string &requestId, const COKLogEvent& logEvent);
-    bool do_acked(const std::string &requestId);
-    bool do_resend(const std::string &requestId, const COKLogEvent& logEvent);
+    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+    void SyncDisconnectBlock(const CBlock *pblock);
+    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+
+protected:
+    void SendThread();
+    void AckThread();
+    void ResendThread();
+    void NoResponseCheckThread();
+
+    void NoResponseCheck();
+
+
+    void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
+    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
+
+    const uint256 NewRandomUUID() const;
+    const std::string NewRequestId() const;
+    const std::string NewRequestId(const int64_t &now, const uint256 &uuid) const;
+    bool decodeRequestIdWithoutPrefix(const std::string &requestIdWithoutPrefix, int64_t &now, uint256 &uuid);
+    bool decodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
+
+protected:
+     void BuildEvent(const int &action, const CTransaction& tx);
+     void BuildEvent(const int &action, const CBlock *pblock);
+
+     bool LoadCacheEvents();
+     bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);
+     bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid);
+
+     void push_send(const std::string &requestId, const COKLogEvent& logEvent);
+     void push_acked(const std::string &requestId);
+     void push_resend(const std::string &requestId);
+
+     bool pull_send(std::string &requestId,  const COKLogEvent ** const ppjson);
+     bool pull_acked(std::string &requestId, const COKLogEvent ** const ppjson);
+     bool pull_resend(std::string &requestId, const COKLogEvent ** const ppjson);
+
+     bool do_send(const std::string &requestId, const COKLogEvent& logEvent);
+     bool do_acked(const std::string &requestId);
+     bool do_resend(const std::string &requestId, const COKLogEvent& logEvent);
+
 };
 
-#endif // CEVENTMONITOR_H
+#endif //  OKBLOCKCHAIN_MONITOR_H

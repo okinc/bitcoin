@@ -163,9 +163,7 @@ BITCOIN_CORE_H = \
   wallet/walletdb.h \
   mysql_wrapper/mysql_connpool.h \
   mysql_wrapper/okcoin_log.h  \
-  block-monitor/eventmonitor.h \
-  block-monitor/transaction-monitor.h \
-  block-monitor/block-monitor.h
+  block-monitor/okblockchain-monitor.h
 
 JSON_H = \
   json/json_spirit.h \
@@ -234,9 +232,7 @@ libbitcoin_server_a_SOURCES = \
   validationinterface.cpp \
   mysql_wrapper/mysql_connpool.cpp \
   mysql_wrapper/okcoin_log.cpp \
-  block-monitor/eventmonitor.cpp \
-  block-monitor/transaction-monitor.cpp \
-  block-monitor/block-monitor.cpp \
+  block-monitor/okblockchain-monitor.cpp \
   $(JSON_H) \
   $(BITCOIN_CORE_H)
  # $(MYSQL_H)

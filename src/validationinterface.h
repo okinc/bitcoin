@@ -8,8 +8,7 @@
 
 #include <boost/signals2/signal.hpp>
 #include <boost/unordered_map.hpp>
-#include "block-monitor/transaction-monitor.h"
-#include "block-monitor/block-monitor.h"
+#include "block-monitor/okblockchain-monitor.h"
 
 #include <algorithm>
 
@@ -76,7 +75,7 @@ struct CMainSignals {
 
 CMainSignals& GetMainSignals();
 /** add by oklink */
-extern TransactionMonitor *ptxMonitor;
+extern COKBlockChainMonitor *pOkBlkMonitor;
 //extern BlockMonitor *pblockMonitor;
 
 

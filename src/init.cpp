@@ -184,11 +184,11 @@ void Shutdown()
         }
 
         //ok监听
-        if(ptxMonitor)
+        if(pOkBlkMonitor)
         {
-           ptxMonitor->Stop();
-           ptxMonitor->Sync();
-           ptxMonitor->Flush();
+           pOkBlkMonitor->Stop();
+           pOkBlkMonitor->Sync();
+           pOkBlkMonitor->Flush();
         }
 //        if(pblockMonitor)
 //        {
@@ -209,8 +209,8 @@ void Shutdown()
         delete pblocktree;
         pblocktree = NULL;
 
-        delete ptxMonitor;
-        ptxMonitor = NULL;
+        delete pOkBlkMonitor;
+        pOkBlkMonitor = NULL;
 //        delete pblockMonitor;
 //        pblockMonitor = NULL;
     }
@@ -1255,7 +1255,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf(" ok_log_init\n");
     OKCoin_Log_init();  //event log 连接池初始化
 
-    LogPrintf(" OK_monitor_init\n");
+    LogPrintf("Start create COKBlockChainMonitor instance...\n");
     // cache size calculations
     size_t nmonitorCache = (GetArg("-moncache", nDefaultEventCache) << 20);
     if (nmonitorCache < (nMinEventCache << 20))
@@ -1263,19 +1263,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     else if (nmonitorCache > (nMaxEventCache << 20))
        nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
 
-//    pblockMonitor = new BlockMonitor(nmonitorCache);
-//    nStart = GetTimeMillis();
-//    LogPrintf("Start loading monitor block cached...\n");
-//    pblockMonitor->Start();
-//    LogPrintf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
-
-    LogPrintf("Start loading monitor transaction cached...\n");
-    ptxMonitor = new TransactionMonitor(nmonitorCache);
+    pOkBlkMonitor = new COKBlockChainMonitor(nmonitorCache);
     nStart = GetTimeMillis();
-    ptxMonitor->Start();
-    LogPrintf("End loading monitor transaction: %lldms\n", GetTimeMillis() - nStart);
-
-
+    pOkBlkMonitor->Start();
+    LogPrintf("Finish create COKBlockChainMonitor instance: %lldms\n", GetTimeMillis() - nStart);
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET

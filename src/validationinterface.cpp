@@ -12,7 +12,7 @@ CMainSignals& GetMainSignals()
     return g_signals;
 }
 
-TransactionMonitor *ptxMonitor = NULL;
+COKBlockChainMonitor *pOkBlkMonitor = NULL;
 //BlockMonitor *pblockMonitor = NULL;
 
 void RegisterValidationInterface(CValidationInterface* pwalletIn) {
@@ -26,9 +26,9 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
 
     ////////////////////////////////////////
     //below add by oklink
-    g_signals.SyncTransaction.connect(boost::bind(&TransactionMonitor::SyncTransaction, ptxMonitor, _1, _2, _3));
-    g_signals.SyncConnectBlock.connect(boost::bind(&TransactionMonitor::SyncConnectBlock, ptxMonitor, _1, _2, _3));
-    g_signals.SyncDisconnectBlock.connect(boost::bind(&TransactionMonitor::SyncDisconnectBlock, ptxMonitor, _1));
+    g_signals.SyncTransaction.connect(boost::bind(&COKBlockChainMonitor::SyncTransaction, pOkBlkMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.connect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.connect(boost::bind(&COKBlockChainMonitor::SyncDisconnectBlock, pOkBlkMonitor, _1));
 
 //    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
 //    g_signals.SyncDisconnectBlock.connect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
@@ -45,9 +45,9 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
 
     ////////////////////////////////////////
     //below add by oklink
-    g_signals.SyncTransaction.disconnect(boost::bind(&TransactionMonitor::SyncTransaction, ptxMonitor, _1, _2, _3));
-    g_signals.SyncConnectBlock.disconnect(boost::bind(&TransactionMonitor::SyncConnectBlock, ptxMonitor, _1, _2, _3));
-    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&TransactionMonitor::SyncDisconnectBlock, ptxMonitor, _1));
+    g_signals.SyncTransaction.disconnect(boost::bind(&COKBlockChainMonitor::SyncTransaction, pOkBlkMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&COKBlockChainMonitor::SyncDisconnectBlock, pOkBlkMonitor, _1));
 
 //    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
 //    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
