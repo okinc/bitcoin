@@ -252,7 +252,7 @@ Value getblockhash(const Array& params, bool fHelp)
 
 Value getblock(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() < 1 || params.size() > 3)
         throw runtime_error(
             "getblock \"hash\" ( verbose )\n"
             "\nIf verbose is false, returns a string that is serialized, hex-encoded data for block 'hash'.\n"
@@ -315,7 +315,11 @@ Value getblock(const Array& params, bool fHelp)
         return strHex;
     }
 
-    return blockToJSON(block, pblockindex);
+    bool fDecode = false; //解码Transaction by chenzs
+        if(params.size() > 2)
+            fDecode = params[2].get_bool();
+
+    return blockToJSON(block, pblockindex, fDecode);
 }
 
 Value gettxoutsetinfo(const Array& params, bool fHelp)
