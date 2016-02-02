@@ -176,14 +176,14 @@ bool COKBlockChainMonitor::LoadCacheEvents()
 bool COKBlockChainMonitor::WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid, const COKLogEvent& logEvent)
 {
     bool ret = Write(std::make_pair('T', std::make_pair(timestamp, uuid)), logEvent, false);
-    LogPrintf("ok-- COKBlockChainMonitor:write %lld, ret=%d\n", timestamp,ret);
+//    LogPrintf("ok-- COKBlockChainMonitor:write %lld, ret=%d\n", timestamp,ret);
     return ret;
 }
 
 bool COKBlockChainMonitor::DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid)
 {
     bool ret =  Erase(std::make_pair('T', std::make_pair(timestamp, uuid)), false);
-    LogPrintf("ok-- COKBlockChainMonitor:delete requestId: %lld, ret=%d\n",timestamp, ret);
+//    LogPrintf("ok-- COKBlockChainMonitor:delete requestId: %lld, ret=%d\n",timestamp, ret);
     return ret;
 }
 
@@ -269,7 +269,7 @@ const std::string COKBlockChainMonitor::NewRequestId() const
 void COKBlockChainMonitor::push_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
     LOCK2(cs_map, cs_send);
-     LogPrintf("ok-- COKBlockChainMonitor:push_send: %s\n",logEvent.ToString());
+//     LogPrintf("ok-- COKBlockChainMonitor:push_send: %s\n",logEvent.ToString());
     requestMap.insert(make_pair(requestId, logEvent));
     sendQueue.push(requestId);
 
@@ -279,7 +279,7 @@ void COKBlockChainMonitor::push_send(const std::string &requestId, const COKLogE
 void COKBlockChainMonitor::push_acked(const std::string &requestId)
 {
     LOCK(cs_acked);
-     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
+//     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
     ackedQueue.push(requestId);
 
     sem_acked.post();
@@ -288,7 +288,7 @@ void COKBlockChainMonitor::push_acked(const std::string &requestId)
 void COKBlockChainMonitor::push_resend(const std::string &requestId)
 {
     LOCK(cs_resend);
-    LogPrintf("ok-- CEventMonitor:push_resend requestId: %s\n",requestId);
+//    LogPrintf("ok-- CEventMonitor:push_resend requestId: %s\n",requestId);
     resendQueue.push(make_pair(requestId, GetAdjustedTime() + retryDelay));
 
     sem_resend.post();
@@ -577,7 +577,7 @@ void COKBlockChainMonitor::NoResponseCheckThread()
 
 bool COKBlockChainMonitor::do_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
-    LogPrintf("do_send -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
+//    LogPrintf("do_send -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
     CallOKLogEvent(requestId, logEvent);
     return true;
 }
@@ -600,7 +600,7 @@ bool COKBlockChainMonitor::do_acked(const std::string &requestId)
         LOCK(cs_map);
         requestMap.erase(requestId);
     }
-    LogPrintf("ok-- do_acked requestId:%s", requestId);
+//    LogPrintf("ok-- do_acked requestId:%s", requestId);
     return  DeleteCacheEvent(timestamp, uuid);
 }
 

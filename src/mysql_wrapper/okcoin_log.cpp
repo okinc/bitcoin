@@ -15,7 +15,7 @@
 #define DB_USER	 		"coinuser"
 #define DB_PASSWORD		"123456"
 #define DB_NAME			"coinokdata"
-#define MAX_CONNCOUNT	200
+#define MAX_CONNCOUNT	100
 
 
 using namespace sql;
@@ -67,15 +67,10 @@ bool OKCoin_Log_init(){
 
 
 bool OKCoin_Log_deInit(){
-#if LOG2DB
-
 	if(pConnPool){
 		delete pConnPool;
 		pConnPool = NULL;
 	}
-#else
-
-#endif
 
 	fInited = false;
     LogPrintf("ok-- OKCoin_Log_deInit\n");

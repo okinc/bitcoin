@@ -183,19 +183,15 @@ void Shutdown()
             FlushStateToDisk();
         }
 
-        //ok监听
+        //ok监听....
         if(pOkBlkMonitor)
         {
            pOkBlkMonitor->Stop();
            pOkBlkMonitor->Sync();
            pOkBlkMonitor->Flush();
         }
-//        if(pblockMonitor)
-//        {
-//            pblockMonitor->Stop();
-//            pblockMonitor->Sync();
-//            pblockMonitor->Flush();
-//        }
+        delete pOkBlkMonitor;
+        pOkBlkMonitor = NULL;
 
         OKCoin_Log_deInit();
 
@@ -209,10 +205,7 @@ void Shutdown()
         delete pblocktree;
         pblocktree = NULL;
 
-        delete pOkBlkMonitor;
-        pOkBlkMonitor = NULL;
-//        delete pblockMonitor;
-//        pblockMonitor = NULL;
+
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
