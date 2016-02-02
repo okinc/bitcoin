@@ -39,9 +39,9 @@
 #include "mysql_wrapper/okcoin_log.h"
 
 // -moncache default (MiB)
-static const int64_t nDefaultEventCache = 100;
+static const int64_t nDefaultEventCache = 20;
 // max. -moncache in (MiB)
-static const int64_t nMaxEventCache = sizeof(void*) > 4 ? 4096 : 1024;
+static const int64_t nMaxEventCache = sizeof(void*) > 2 ? 256 : 128;
 // min. -moncache in (MiB)
 static const int64_t nMinEventCache = 4;
 
