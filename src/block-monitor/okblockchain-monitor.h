@@ -36,6 +36,7 @@
 #include "timedata.h"
 #include "sync.h"
 #include "leveldbwrapper.h"
+#include "net.h"
 #include "mysql_wrapper/okcoin_log.h"
 
 // -moncache default (MiB)
@@ -148,9 +149,9 @@ public:
     void Start();
     void Stop();
 
-    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>(), const CNode *pfrom = NULL);
     void SyncDisconnectBlock(const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
+    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>(), const CNode *pfrom = NULL);
 
 protected:
     void SendThread();
@@ -171,8 +172,8 @@ protected:
     bool decodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
 
 protected:
-     void BuildEvent(const int &action, const CTransaction& tx);
-     void BuildEvent(const int &action, const CBlock *pblock);
+     void BuildEvent(const int &action, const CTransaction& tx, const CNode *pfrom = NULL);
+     void BuildEvent(const int &action, const CBlock *pblock, const CNode *pfrom = NULL);
 
      bool LoadCacheEvents();
      bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);

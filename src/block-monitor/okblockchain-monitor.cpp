@@ -27,7 +27,7 @@ COKBlockChainMonitor::COKBlockChainMonitor(size_t nCacheSize, bool fMemory, bool
 }
 
 
-void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx){
+void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx, const CNode *pfrom){
     if(tx.IsNull())
         return;
 
@@ -36,7 +36,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx)
     now = GetAdjustedTime();
 
     const std::string txHash = tx.GetHash().ToString();
-    COKLogEvent logEvent(OC_TYPE_TX, action, txHash);
+    COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
 
     uint256 uuid = NewRandomUUID();
     string requestId = "event-" + NewRequestId(now, uuid);
@@ -50,13 +50,13 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx)
 
 }
 
-void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock){
+void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, const CNode *pfrom){
    int64_t now = 0;
    now = GetAdjustedTime();
 
 
    const std::string blockHash = pblock->GetHash().ToString();
-   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash);
+   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash,pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
 
    uint256 uuid = NewRandomUUID();
    string requestId = "event-" + NewRequestId(now, uuid);
@@ -70,7 +70,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock){
 }
 
 
-void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses)
+void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses, const CNode *pfrom)
 {
     if(pblock)
     {
@@ -79,7 +79,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
     }
 
     LogPrintf("tx_monitor SyncTransaction:%s\n",tx.GetHash().ToString());
-   BuildEvent(OC_ACTION_NEW, tx);
+   BuildEvent(OC_ACTION_NEW, tx, pfrom);
 }
 
 
@@ -89,14 +89,14 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
  * @param pindex
  * @param addresses
  */
-void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses)
+void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses, const CNode *pfrom)
 {
      LogPrintf("tx_monitor SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
 //        }
-     BuildEvent(OC_ACTION_NEW,pblock);
+     BuildEvent(OC_ACTION_NEW,pblock, pfrom);
 }
 
 void COKBlockChainMonitor::SyncDisconnectBlock(const CBlock *pblock)
