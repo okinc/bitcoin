@@ -413,6 +413,9 @@ void COKBlockChainMonitor::CallOKLogEvent(const std::string &requestId, const CO
     if(ret > 0){
         push_acked(requestId);
     }
+    else{
+        push_resend(requestId);
+    }
 }
 
 void COKBlockChainMonitor::SendThread()
