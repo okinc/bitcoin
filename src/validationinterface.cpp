@@ -27,7 +27,7 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     ////////////////////////////////////////
     //below add by oklink
     g_signals.SyncTransaction.connect(boost::bind(&COKBlockChainMonitor::SyncTransaction, pOkBlkMonitor, _1, _2, _3, _4));
-    g_signals.SyncConnectBlock.connect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3, _4));
+    g_signals.SyncConnectBlock.connect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.connect(boost::bind(&COKBlockChainMonitor::SyncDisconnectBlock, pOkBlkMonitor, _1));
 
 }
@@ -44,7 +44,7 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     ////////////////////////////////////////
     //below add by oklink
     g_signals.SyncTransaction.disconnect(boost::bind(&COKBlockChainMonitor::SyncTransaction, pOkBlkMonitor, _1, _2, _3, _4));
-    g_signals.SyncConnectBlock.disconnect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3, _4));
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&COKBlockChainMonitor::SyncConnectBlock, pOkBlkMonitor, _1, _2, _3));
     g_signals.SyncDisconnectBlock.disconnect(boost::bind(&COKBlockChainMonitor::SyncDisconnectBlock, pOkBlkMonitor, _1));
 
 }
@@ -59,14 +59,14 @@ void UnregisterAllValidationInterfaces() {
     g_signals.SyncTransaction.disconnect_all_slots();
     ////////////////////////////////////////
     //below add by oklink
-//    g_signals.SyncConnectBlock.disconnect_all_slots();
-//    g_signals.SyncDisconnectBlock.disconnect_all_slots();
+    g_signals.SyncConnectBlock.disconnect_all_slots();
+    g_signals.SyncDisconnectBlock.disconnect_all_slots();
 }
 
-void SyncWithWallets(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom) {
-    g_signals.SyncTransaction(tx, pblock, boost::unordered_map<uint160, std::string>(), pfrom);
+void SyncWithWallets(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom, bool fConflicted) {
+    g_signals.SyncTransaction(tx, pblock, pfrom, fConflicted);
 }
 
 void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex, const CNode *pfrom){
-    g_signals.SyncConnectBlock(&block, pindex, boost::unordered_map<uint160, std::string>(), pfrom);
+    g_signals.SyncConnectBlock(&block, pindex,  pfrom);
 }

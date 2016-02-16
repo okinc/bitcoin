@@ -28,7 +28,7 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn);
 /** Unregister all wallets from core */
 void UnregisterAllValidationInterfaces();
 /** Push an updated transaction to all registered wallets */
-void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL, const CNode *pfrom = NULL);
+void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL, const CNode *pfrom = NULL,  bool fConflicted = false);
 
 /** add by oklink*/
 void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex, const CNode *pfrom = NULL);
@@ -53,7 +53,7 @@ protected:
 
 struct CMainSignals {
     /** Notifies listeners of updated transaction data (transaction, and optionally the block it is found in. */
-    boost::signals2::signal<void (const CTransaction &, const CBlock *, const boost::unordered_map<uint160, std::string> &, const CNode*)> SyncTransaction;
+    boost::signals2::signal<void (const CTransaction &, const CBlock *, const CNode *, bool)> SyncTransaction;
     /** Notifies listeners of an erased transaction (currently disabled, requires transaction replacement). */
     boost::signals2::signal<void (const uint256 &)> EraseTransaction;
     /** Notifies listeners of an updated transaction without new data (for now: a coinbase potentially becoming visible). */
@@ -69,7 +69,7 @@ struct CMainSignals {
 
     //add by oklink
     // Notifies listeners of updated transaction data (passing hash, transaction, and optionally the block it is found in.
-    boost::signals2::signal<void (const CBlock *, CBlockIndex*, const boost::unordered_map<uint160, std::string> &, const CNode *)> SyncConnectBlock;
+    boost::signals2::signal<void (const CBlock *, CBlockIndex*, const CNode *)> SyncConnectBlock;
     boost::signals2::signal<void (const CBlock *)> SyncDisconnectBlock;
 };
 

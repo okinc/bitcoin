@@ -149,9 +149,9 @@ public:
     void Start();
     void Stop();
 
-    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>(), const CNode *pfrom = NULL);
+    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom = NULL, bool fConflicted = false);
     void SyncDisconnectBlock(const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>(), const CNode *pfrom = NULL);
+    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const CNode *pfrom = NULL);
 
 protected:
     void SendThread();

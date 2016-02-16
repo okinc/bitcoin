@@ -56,7 +56,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 
 
    const std::string blockHash = pblock->GetHash().ToString();
-   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash,pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
+   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
 
    uint256 uuid = NewRandomUUID();
    string requestId = "event-" + NewRequestId(now, uuid);
@@ -70,7 +70,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 }
 
 
-void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses, const CNode *pfrom)
+void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom, bool fConflicted)
 {
     if(pblock)
     {
@@ -78,8 +78,8 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
         return;
     }
 
-    LogPrintf("tx_monitor SyncTransaction:%s\n",tx.GetHash().ToString());
-   BuildEvent(OC_ACTION_NEW, tx, pfrom);
+   LogPrintf("tx_monitor SyncTransaction:%s, fConflicted:%d\n",tx.GetHash().ToString(), fConflicted);
+   BuildEvent(fConflicted == true ? OC_ACTION_ORPHANE:OC_ACTION_NEW, tx, pfrom);
 }
 
 
@@ -89,7 +89,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
  * @param pindex
  * @param addresses
  */
-void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses, const CNode *pfrom)
+void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const CNode *pfrom)
 {
      LogPrintf("tx_monitor SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
@@ -103,13 +103,12 @@ void COKBlockChainMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
     LogPrintf("tx_monitor dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
 
-        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
-        {
-             BuildEvent(OC_ACTION_ORPHANE, tx);  //孤立
-        }
-
+   // （不再写记录）在冲突tx中记录OC_ACTION_ORPHANE事件
+//        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
+//        {
+//             BuildEvent(OC_ACTION_ORPHANE, tx);  //孤立，
+//        }
         BuildEvent(OC_ACTION_ORPHANE,pblock);
-
 }
 
 //从leveldb加载缓存tx events
