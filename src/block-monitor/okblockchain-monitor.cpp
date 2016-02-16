@@ -36,7 +36,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
     now = GetAdjustedTime();
 
     const std::string txHash = tx.GetHash().ToString();
-    COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
+    COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP());
 
     uint256 uuid = NewRandomUUID();
     string requestId = "event-" + NewRequestId(now, uuid);
@@ -44,6 +44,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
     if(!WriteCacheEvent(now, uuid, logEvent))
     {
         //TODO
+        LogPrintf("ok-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
     }
 
     push_send(requestId, logEvent);
@@ -56,7 +57,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 
 
    const std::string blockHash = pblock->GetHash().ToString();
-   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom ? pfrom->addr.ToStringIP() : "oklink.com");
+   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP() );
 
    uint256 uuid = NewRandomUUID();
    string requestId = "event-" + NewRequestId(now, uuid);
@@ -64,6 +65,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
    if(!WriteCacheEvent(now, uuid, logEvent))
    {
        //TODO
+       LogPrintf("ok-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
    }
 
    push_send(requestId, logEvent);
