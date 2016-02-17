@@ -27,7 +27,7 @@ COKBlockChainMonitor::COKBlockChainMonitor(size_t nCacheSize, bool fMemory, bool
 }
 
 
-void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx, const CNode *pfrom){
+void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,  CNode *pfrom){
     if(tx.IsNull())
         return;
 
@@ -36,10 +36,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
     now = GetAdjustedTime();
 
     const std::string txHash = tx.GetHash().ToString();
-    LogPrintf("ok------1\n");
-    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP());
-    COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP());
-    LogPrintf("ok------2\n");
+    COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom ? pfrom->addr.ToStringIP(): "oklink.com");
     uint256 uuid = NewRandomUUID();
     string requestId = "event-" + NewRequestId(now, uuid);
 
@@ -53,16 +50,14 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
 
 }
 
-void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, const CNode *pfrom){
+void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, CNode *pfrom){
    int64_t now = 0;
    now = GetAdjustedTime();
 
 
    const std::string blockHash = pblock->GetHash().ToString();
-    LogPrintf("ok------1\n");
-    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP());
-   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP() );
-    LogPrintf("ok------2\n");
+
+   COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom ? pfrom->addr.ToStringIP(): "oklink.com");
    uint256 uuid = NewRandomUUID();
    string requestId = "event-" + NewRequestId(now, uuid);
 
@@ -76,7 +71,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 }
 
 
-void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock,  CNode *pfrom, bool fConflicted)
+void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, CNode *pfrom, bool fConflicted)
 {
     if(pblock)
     {
@@ -102,7 +97,7 @@ void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIn
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
 //        }
-     BuildEvent(OC_ACTION_NEW,pblock, pfrom);
+     BuildEvent(OC_ACTION_NEW, pblock, pfrom);
 }
 
 void COKBlockChainMonitor::SyncDisconnectBlock(const CBlock *pblock)

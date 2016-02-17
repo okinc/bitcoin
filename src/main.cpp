@@ -932,7 +932,7 @@ CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowF
 
 
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, bool fRejectAbsurdFee,const CNode *pfrom)
+                        bool* pfMissingInputs, bool fRejectAbsurdFee, CNode *pfrom)
 {
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
@@ -1829,7 +1829,7 @@ static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
-bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck, const CNode *pfrom)
+bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck,  CNode *pfrom)
 {
     const CChainParams& chainparams = Params();
     AssertLockHeld(cs_main);
@@ -2005,7 +2005,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime4 - nTime3), nTimeCallbacks * 0.000001);
 
     //add by oklink
-    SyncWithBlock(block, pindex,pfrom);
+    SyncWithBlock(block, pindex, pfrom);
    
     return true;
 }
@@ -2221,7 +2221,7 @@ static int64_t nTimePostConnect = 0;
  * Connect a new block to chainActive. pblock is either NULL or a pointer to a CBlock
  * corresponding to pindexNew, to bypass loading it again from disk.
  */
-bool static ConnectTip(CValidationState &state, CBlockIndex *pindexNew, CBlock *pblock, const CNode *pfrom) {
+bool static ConnectTip(CValidationState &state, CBlockIndex *pindexNew, CBlock *pblock,  CNode *pfrom) {
     assert(pindexNew->pprev == chainActive.Tip());
     mempool.check(pcoinsTip);
     // Read block from disk.
@@ -2239,7 +2239,7 @@ bool static ConnectTip(CValidationState &state, CBlockIndex *pindexNew, CBlock *
     {
         CCoinsViewCache view(pcoinsTip);
         CInv inv(MSG_BLOCK, pindexNew->GetBlockHash());
-        bool rv = ConnectBlock(*pblock, state, pindexNew, view, pfrom);
+        bool rv = ConnectBlock(*pblock, state, pindexNew, view, false, pfrom);
         GetMainSignals().BlockChecked(*pblock, state);
         if (!rv) {
             if (state.IsInvalid())
@@ -2266,10 +2266,12 @@ bool static ConnectTip(CValidationState &state, CBlockIndex *pindexNew, CBlock *
     UpdateTip(pindexNew);
     // Tell wallet about transactions that went from mempool
     // to conflicted:
+    int i =0;
     BOOST_FOREACH(const CTransaction &tx, txConflicted) {
         SyncWithWallets(tx, NULL, pfrom, true);   //
     }
     // ... and about transactions that got confirmed:
+    i = 0;
     BOOST_FOREACH(const CTransaction &tx, pblock->vtx) {
         SyncWithWallets(tx, pblock, pfrom);
     }
@@ -2354,7 +2356,7 @@ static void PruneBlockIndexCandidates() {
  * Try to make some progress towards making pindexMostWork the active block.
  * pblock is either NULL or a pointer to a CBlock corresponding to pindexMostWork.
  */
-static bool ActivateBestChainStep(CValidationState &state, CBlockIndex *pindexMostWork, CBlock *pblock, const CNode *pfrom) {
+static bool ActivateBestChainStep(CValidationState &state, CBlockIndex *pindexMostWork, CBlock *pblock,  CNode *pfrom) {
     AssertLockHeld(cs_main);
     bool fInvalidFound = false;
     const CBlockIndex *pindexOldTip = chainActive.Tip();
@@ -2423,7 +2425,7 @@ static bool ActivateBestChainStep(CValidationState &state, CBlockIndex *pindexMo
  * or an activated best chain. pblock is either NULL or a pointer to a block
  * that is already loaded (to avoid loading it again from disk).
  */
-bool ActivateBestChain(CValidationState &state, CBlock *pblock, const CNode *pfrom) {
+bool ActivateBestChain(CValidationState &state, CBlock *pblock,  CNode *pfrom) {
     CBlockIndex *pindexNewTip = NULL;
     CBlockIndex *pindexMostWork = NULL;
     const CChainParams& chainParams = Params();
@@ -3485,7 +3487,7 @@ bool InitBlockIndex() {
             CBlockIndex *pindex = AddToBlockIndex(block);
             if (!ReceivedBlockTransactions(block, state, pindex, blockPos))
                 return error("LoadBlockIndex(): genesis block not accepted");
-            if (!ActivateBestChain(state, &block, NULL))
+            if (!ActivateBestChain(state, &block))
                 return error("LoadBlockIndex(): genesis block cannot be activated");
             // Force a chainstate write so that when we VerifyDB in a moment, it doesn't check stale data
             return FlushStateToDisk(state, FLUSH_STATE_ALWAYS);
@@ -4426,7 +4428,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (AlreadyHave(inv))
             return true;
 
-        if (AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs, pfrom))
+        if (AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs,false, pfrom))
         {
             mempool.check(pcoinsTip);
             RelayTransaction(tx);
@@ -4460,7 +4462,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
                     if (setMisbehaving.count(fromPeer))
                         continue;
-                    if (AcceptToMemoryPool(mempool, stateDummy, orphanTx, true, &fMissingInputs2, pfrom))
+                    if (AcceptToMemoryPool(mempool, stateDummy, orphanTx, true, &fMissingInputs2, false, pfrom))
                     {
                         LogPrint("mempool", "   accepted orphan tx %s\n", orphanHash.ToString());
                         RelayTransaction(orphanTx);

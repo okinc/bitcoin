@@ -151,7 +151,7 @@ public:
 
     void SyncTransaction(const CTransaction &tx, const CBlock *pblock,  CNode *pfrom = NULL, bool fConflicted = false);
     void SyncDisconnectBlock(const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex,  CNode *pfrom = NULL);
+    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, CNode *pfrom = NULL);
 
 protected:
     void SendThread();
@@ -171,8 +171,8 @@ protected:
     bool decodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
 
 protected:
-     void BuildEvent(const int &action, const CTransaction& tx, const CNode *pfrom = NULL);
-     void BuildEvent(const int &action, const CBlock *pblock, const CNode *pfrom = NULL);
+     void BuildEvent(const int &action, const CTransaction& tx,  CNode *pfrom = NULL);
+     void BuildEvent(const int &action, const CBlock *pblock,  CNode *pfrom = NULL);
 
      bool LoadCacheEvents();
      bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);

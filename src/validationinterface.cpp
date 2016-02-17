@@ -63,10 +63,10 @@ void UnregisterAllValidationInterfaces() {
     g_signals.SyncDisconnectBlock.disconnect_all_slots();
 }
 
-void SyncWithWallets(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom, bool fConflicted) {
+void SyncWithWallets(const CTransaction &tx, const CBlock *pblock,  CNode *pfrom, bool fConflicted) {
     g_signals.SyncTransaction(tx, pblock, pfrom, fConflicted);
 }
 
-void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex, const CNode *pfrom){
+void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex,  CNode *pfrom){
     g_signals.SyncConnectBlock(&block, pindex,  pfrom);
 }
