@@ -76,7 +76,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 }
 
 
-void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom, bool fConflicted)
+void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock,  CNode *pfrom, bool fConflicted)
 {
     if(pblock)
     {
@@ -95,7 +95,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
  * @param pindex
  * @param addresses
  */
-void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const CNode *pfrom)
+void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex,  CNode *pfrom)
 {
      LogPrintf("tx_monitor SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)

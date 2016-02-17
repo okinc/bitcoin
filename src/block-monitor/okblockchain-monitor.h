@@ -149,9 +149,9 @@ public:
     void Start();
     void Stop();
 
-    void SyncTransaction(const CTransaction &tx, const CBlock *pblock, const CNode *pfrom = NULL, bool fConflicted = false);
+    void SyncTransaction(const CTransaction &tx, const CBlock *pblock,  CNode *pfrom = NULL, bool fConflicted = false);
     void SyncDisconnectBlock(const CBlock *pblock);
-    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, const CNode *pfrom = NULL);
+    void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex,  CNode *pfrom = NULL);
 
 protected:
     void SendThread();
