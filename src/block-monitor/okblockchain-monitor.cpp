@@ -36,8 +36,10 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
     now = GetAdjustedTime();
 
     const std::string txHash = tx.GetHash().ToString();
+    LogPrintf("ok------1\n");
+    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP())
     COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP());
-
+    LogPrintf("ok------2\n");
     uint256 uuid = NewRandomUUID();
     string requestId = "event-" + NewRequestId(now, uuid);
 
@@ -57,8 +59,10 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 
 
    const std::string blockHash = pblock->GetHash().ToString();
+    LogPrintf("ok------1\n");
+    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP())
    COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP() );
-
+    LogPrintf("ok------2\n");
    uint256 uuid = NewRandomUUID();
    string requestId = "event-" + NewRequestId(now, uuid);
 
@@ -545,39 +549,39 @@ void COKBlockChainMonitor::ResendThread()
     }
 }
 
-//检测httppost无响应（ack）requestId,并放入重发队列
-void COKBlockChainMonitor::NoResponseCheckThread()
-{
-    RenameThread("bitcoin-block-monitor-NoResponseCheck");
+//检测无响应（ack）requestId,并放入重发队列
+//void COKBlockChainMonitor::NoResponseCheckThread()
+//{
+//    RenameThread("bitcoin-block-monitor-NoResponseCheck");
 
-    static bool fOneThread;
-    if (fOneThread)
-    {
-        return;
-    }
-    fOneThread = true;
+//    static bool fOneThread;
+//    if (fOneThread)
+//    {
+//        return;
+//    }
+//    fOneThread = true;
 
-    MilliSleep(retryDelay * 1000);
+//    MilliSleep(retryDelay * 1000);
 
-    while(true)
-    {
-        try
-        {
-            NoResponseCheck();
-        }
-        catch(std::exception &e)
-        {
-            LogException(&e, string("COKBlockChainMonitor::NoResponseCheckThread() -> "+string(e.what())).c_str());
-            LogBlock("COKBlockChainMonitor::NoResponseCheckThread() -> "+string(e.what())+"\n");
-        }
-        catch(...)
-        {
-            LogBlock("COKBlockChainMonitor::NoResponseCheckThread() -> unknow exception\n");
-        }
+//    while(true)
+//    {
+//        try
+//        {
+//            NoResponseCheck();
+//        }
+//        catch(std::exception &e)
+//        {
+//            LogException(&e, string("COKBlockChainMonitor::NoResponseCheckThread() -> "+string(e.what())).c_str());
+//            LogBlock("COKBlockChainMonitor::NoResponseCheckThread() -> "+string(e.what())+"\n");
+//        }
+//        catch(...)
+//        {
+//            LogBlock("COKBlockChainMonitor::NoResponseCheckThread() -> unknow exception\n");
+//        }
 
-        MilliSleep(retryDelay * 1000);
-    }
-}
+//        MilliSleep(retryDelay * 1000);
+//    }
+//}
 
 bool COKBlockChainMonitor::do_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
@@ -616,39 +620,7 @@ bool COKBlockChainMonitor::do_resend(const std::string &requestId, const COKLogE
     return true;
 }
 
-void COKBlockChainMonitor::NoResponseCheck()
-{
-    vector<string> timeoutRequestIds;
 
-    {
-        LOCK(cs_sendMap);
-        int64_t now = GetAdjustedTime();
-
-        for(boost::unordered_map<string, int64_t>::const_iterator it = sendMap.begin(); it != sendMap.end(); ++it)
-        {
-            if(it->second < now)
-            {
-                timeoutRequestIds.push_back(it->first);
-            }
-        }
-
-        BOOST_FOREACH(const string &requestId, timeoutRequestIds)
-        {
-            sendMap.erase(requestId);
-        }
-    }
-
-    {
-        LOCK(cs_resend);
-        int64_t now = GetAdjustedTime();
-
-        BOOST_FOREACH(const string &requestId, timeoutRequestIds)
-        {
-            resendQueue.push(make_pair(requestId, now));    //加入重发队列
-            sem_resend.post();
-        }
-    }
-}
 
 void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent> > &cachedEventQueue)
 {

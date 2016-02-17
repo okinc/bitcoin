@@ -157,9 +157,8 @@ protected:
     void SendThread();
     void AckThread();
     void ResendThread();
-    void NoResponseCheckThread();
+//    void NoResponseCheckThread();
 
-    void NoResponseCheck();
 
 
     void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
