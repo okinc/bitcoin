@@ -37,7 +37,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
 
     const std::string txHash = tx.GetHash().ToString();
     LogPrintf("ok------1\n");
-    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP())
+    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP());
     COKLogEvent logEvent(OC_TYPE_TX, action, txHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP());
     LogPrintf("ok------2\n");
     uint256 uuid = NewRandomUUID();
@@ -60,7 +60,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, c
 
    const std::string blockHash = pblock->GetHash().ToString();
     LogPrintf("ok------1\n");
-    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP())
+    LogPrintf("ok------1,%s\n", pfrom->addr.ToStringIP());
    COKLogEvent logEvent(OC_TYPE_BLOCK, action, blockHash, pfrom == NULL ? "oklink.com" : pfrom->addr.ToStringIP() );
     LogPrintf("ok------2\n");
    uint256 uuid = NewRandomUUID();
