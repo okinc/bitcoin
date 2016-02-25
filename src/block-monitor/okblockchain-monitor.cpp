@@ -9,7 +9,7 @@
 #include "mysql_wrapper/okcoin_log.h"
 
 #define MONITOR_RETRY_DELAY	60
-#define SQL_WRITE_THREAD_COUNT    5
+#define SQL_WRITE_THREAD_COUNT   2
 
 using namespace std;
 using namespace boost;
@@ -282,7 +282,6 @@ const std::string COKBlockChainMonitor::NewRequestId() const
 void COKBlockChainMonitor::push_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
     LOCK2(cs_map, cs_send);
-//     LogPrintf("ok-- COKBlockChainMonitor:push_send: %s\n",logEvent.ToString());
     requestMap.insert(make_pair(requestId, logEvent));
     sendQueue.push(requestId);
 
@@ -292,18 +291,14 @@ void COKBlockChainMonitor::push_send(const std::string &requestId, const COKLogE
 void COKBlockChainMonitor::push_acked(const std::string &requestId)
 {
     LOCK(cs_acked);
-//     LogPrintf("ok-- CEventMonitor:push_acked requestId: %s\n",requestId);
     ackedQueue.push(requestId);
-
     sem_acked.post();
 }
 
 void COKBlockChainMonitor::push_resend(const std::string &requestId)
 {
     LOCK(cs_resend);
-//    LogPrintf("ok-- CEventMonitor:push_resend requestId: %s\n",requestId);
     resendQueue.push(make_pair(requestId, GetAdjustedTime() + retryDelay));
-
     sem_resend.post();
 }
 
@@ -324,21 +319,21 @@ bool COKBlockChainMonitor::pull_send(std::string &requestId, const COKLogEvent *
         boost::unordered_map<string, COKLogEvent>::const_iterator it = requestMap.find(requestId);
         if(it == requestMap.end())
         {
-            throw runtime_error("pull_send can not find request in map: "+requestId);
+            return false;
         }
 
         *logEvent = &it->second;
     }
 
-    {
-        LOCK(cs_sendMap);
-        sendMap.insert(make_pair(requestId, GetAdjustedTime() + retryDelay));
-    }
+//    {
+//        LOCK(cs_sendMap);
+//        sendMap.insert(make_pair(requestId, GetAdjustedTime() + retryDelay));
+//    }
 
     return true;
 }
 
-bool COKBlockChainMonitor::pull_acked(std::string &requestId, const COKLogEvent ** const logEvent)
+bool COKBlockChainMonitor::pull_acked(std::string &requestId /*, const COKLogEvent ** const logEvent*/)
 {
     sem_acked.wait();
     if(is_stop)
@@ -346,29 +341,26 @@ bool COKBlockChainMonitor::pull_acked(std::string &requestId, const COKLogEvent 
         return false;
     }
 
-    LOCK2(cs_map, cs_acked);
+    LOCK(cs_acked);
 
     requestId = ackedQueue.front();
     ackedQueue.pop();
 
-    boost::unordered_map<string, COKLogEvent>::const_iterator it = requestMap.find(requestId);
-    if(it == requestMap.end())
-    {
-        LogBlock("pull_acked can not find request in map: "+requestId+"\n");
-        return false;
-    }
-
-    *logEvent = &it->second;
+//    boost::unordered_map<string, COKLogEvent>::const_iterator it = requestMap.find(requestId);
+//    if(it == requestMap.end())
+//    {
+//        LogBlock("pull_acked can not find request in map: "+requestId+"\n");
+//        return false;
+//    }
+//        *logEvent = &it->second;
 
     return true;
 }
 
 bool COKBlockChainMonitor::pull_resend(std::string &requestId, const COKLogEvent ** const logEvent)
 {
-    if(!sem_resend.try_wait())
-    {
-        return false;
-    }
+    sem_resend.wait();
+
     if(is_stop)
     {
         return false;
@@ -378,59 +370,31 @@ bool COKBlockChainMonitor::pull_resend(std::string &requestId, const COKLogEvent
 
     const int64_t now = GetAdjustedTime();
 
-    for(int i = 0; i < 100; i++)
+    pair<std::string, int64_t> requestAndTime = resendQueue.top();
+    if(requestAndTime.second > now)
     {
-        pair<std::string, int64_t> requestAndTime = resendQueue.top();
-        if(requestAndTime.second > now)
-        {
-            sem_resend.post();
-            return false;
-        }
-
-        resendQueue.pop();
-
-        requestId = requestAndTime.first;
-
-        boost::unordered_map<string, COKLogEvent>::const_iterator it = requestMap.find(requestId);
-        if(it == requestMap.end())
-        {
-            if(resendQueue.empty())
-            {
-                return false;
-            }
-            else
-            {
-                continue;
-            }
-        }
-
-        *logEvent = &it->second;
-
-        resendQueue.push(make_pair(requestId, now + retryDelay));//继续放入重发队列，并延迟retryDelay
-
         sem_resend.post();
-
-        return true;
+        return false;
     }
 
-    return false;
+    resendQueue.pop();
+
+    requestId = requestAndTime.first;
+
+    boost::unordered_map<string, COKLogEvent>::const_iterator it = requestMap.find(requestId);
+    if(it == requestMap.end())
+    {
+        return false;
+    }
+
+    *logEvent = &it->second;
+
+    return true;
 }
 
 
 static void CallOKLogEventWrappedException(COKBlockChainMonitor* self, const std::string &requestId, const COKLogEvent& logEvent){
     self->CallOKLogEvent(requestId, logEvent);
-//    try
-//    {
-//        self->CallOKLogEvent(requestId, logEvent);
-//    }
-//    catch(const std::exception& e)
-//    {
-//         LogPrintf("exception in CallOKLogEvent ->%s \n ", string(e.what()));
-//    }
-//    catch(...)
-//    {
-//         LogPrintf("unknow exception in CallOKLogEvent\n");
-//    }
 }
 
 
@@ -453,6 +417,7 @@ void COKBlockChainMonitor::CallOKLogEvent(const std::string &requestId, const CO
 void COKBlockChainMonitor::SendThread()
 {
     RenameThread("bitcoin-block-monitor-send");
+    LogPrintf("CEventMonitor:SendThread ...\n");
 
     static bool fOneThread;
     if (fOneThread)
@@ -462,15 +427,15 @@ void COKBlockChainMonitor::SendThread()
     fOneThread = true;
 
     MilliSleep(1 * 1000);
-    LogPrintf("CEventMonitor:SendThread ...\n");
+
     while(!is_stop)
     {
         string requestId;
-        const COKLogEvent * logEvent;
+        const COKLogEvent *logEvent;
 
         if(!pull_send(requestId, &logEvent))
         {
-            MilliSleep(1);
+            MilliSleep(200);
             continue;
         }
 
@@ -507,11 +472,9 @@ void COKBlockChainMonitor::AckThread()
     while(!is_stop)
     {
         string requestId;
-        const COKLogEvent * logEvent;
-
-        if(!pull_acked(requestId, &logEvent))
+        if(!pull_acked(requestId))
         {
-            MilliSleep(1);
+            MilliSleep(500);
             continue;
         }
 
@@ -551,7 +514,7 @@ void COKBlockChainMonitor::ResendThread()
 
         if(!pull_resend(requestId, &logEvent))
         {
-            MilliSleep(50);
+            MilliSleep(1000);
             continue;
         }
 
@@ -621,11 +584,6 @@ bool COKBlockChainMonitor::do_acked(const std::string &requestId)
     if(!decodeRequestIdWitPrefix(requestId, timestamp, uuid))
     {
         return false;
-    }
-
-    {
-        LOCK(cs_sendMap);
-        sendMap.erase(requestId);
     }
 
     {
