@@ -15,7 +15,7 @@
 #define DB_USER	 		"coinuser"
 #define DB_PASSWORD		"123456"
 #define DB_NAME			"coinokdata"
-#define MAX_CONNCOUNT	100
+#define MAX_CONNCOUNT	50
 
 
 using namespace sql;
@@ -91,11 +91,11 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 		pstmtEvent = mysqlConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)");
 	}
 	*/
-	sql::Connection *pConn = pConnPool->GetConnection();
+    sql::Connection *pConn = pConnPool->GetConnectionTry(100);
     if(pConn == NULL)
         return ret;
-//    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
-    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
+    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
+//    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
 	try{
 		pstmtEvent->setInt(1, type);
 		pstmtEvent->setInt(2, action);
@@ -114,7 +114,7 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 #else
     ret = 0;
 #endif
-    LogPrintf("ok-- Log_Event Event(type=%d, action= %d, hash=%s, from=%s),result(%d)\n", type, action,hash,fromip,ret);
+    LogPrintf("okcoin_log Event(type=%d,action=%d,hash=%s,from=%s),result(%d)\n", type, action,hash,fromip,ret);
 	return ret;
 }
 

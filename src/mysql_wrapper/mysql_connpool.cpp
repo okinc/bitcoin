@@ -108,9 +108,9 @@ void ConnPool::TerminateConnection(sql::Connection * conn){
 }
 
 sql::Connection * ConnPool::GetConnection(){
-    sql::Connection * conn;
+    sql::Connection * conn = NULL;
     
-     pthread_mutex_lock(&lock);   
+    pthread_mutex_lock(&lock);
     if(conns.size() > 0){//有空闲连接,则返回
         conn = conns.front();
         conns.pop_front();
@@ -123,36 +123,30 @@ sql::Connection * ConnPool::GetConnection(){
         if(conn == NULL){ //创建连接不成功
             --curSize;
         }
-        pthread_mutex_unlock(&lock);  
-        return conn;
+
     }
     else{
         if(curSize < maxSize){//还可以创建新的连接
             conn = this->CreateConnection();
             if(conn){
                 ++curSize;
-                  pthread_mutex_unlock(&lock);  
-                return conn;
-            }
-            else{
-                 pthread_mutex_unlock(&lock);  
-                return NULL;
             }
         }
         else{//连接池已经满了
-              pthread_mutex_unlock(&lock);  
-            return NULL;
+          conn = NULL;
         }
     }    
+
+    pthread_mutex_unlock(&lock);
+    return conn;
 }
 
 void ConnPool::ReleaseConnection(sql::Connection * conn){
     if(conn){
         pthread_mutex_lock(&lock);  
         
-        conns.push_back(conn);
-        
-         pthread_mutex_unlock(&lock);  
+        conns.push_back(conn);    
+        pthread_mutex_unlock(&lock);
     }
 }
 
@@ -165,7 +159,7 @@ sql::Connection * ConnPool::GetConnectionTry(int maxNum){
             return conn;
         }
         else {
-            sleep(2);
+            sleep(50);
         }
     }
     

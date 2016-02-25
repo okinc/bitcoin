@@ -153,6 +153,8 @@ public:
     void SyncDisconnectBlock(const CBlock *pblock);
     void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, CNode *pfrom = NULL);
 
+    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
+
 protected:
     void SendThread();
     void AckThread();
@@ -162,7 +164,6 @@ protected:
 
 
     void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
-    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
 
     const uint256 NewRandomUUID() const;
     const std::string NewRequestId() const;

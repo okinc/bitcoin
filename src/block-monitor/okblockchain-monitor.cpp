@@ -9,6 +9,7 @@
 #include "mysql_wrapper/okcoin_log.h"
 
 #define MONITOR_RETRY_DELAY	60
+#define SQL_WRITE_THREAD_COUNT    5
 
 using namespace std;
 using namespace boost;
@@ -17,6 +18,13 @@ using namespace boost::asio;
 using boost::lexical_cast;
 using boost::unordered_map;
 
+static boost::asio::io_service ioService;
+static boost::asio::io_service::work work(ioService);
+
+static void io_service_run(void)
+{
+    ioService.run();
+}
 
 
 COKBlockChainMonitor::COKBlockChainMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
@@ -163,8 +171,9 @@ bool COKBlockChainMonitor::LoadCacheEvents()
         }
         catch(std::exception &e)
         {
-            throw runtime_error(strprintf("%s : Deserialize or I/O error - %s", __func__, e.what()));
+            LogPrintf("ok--LoadCacheEvents : Deserialize or I/O error - %s", e.what());
         }
+
     }
     delete pcursor;
 
@@ -175,23 +184,24 @@ bool COKBlockChainMonitor::LoadCacheEvents()
 
 bool COKBlockChainMonitor::WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid, const COKLogEvent& logEvent)
 {
-    bool ret = Write(std::make_pair('T', std::make_pair(timestamp, uuid)), logEvent, false);
-//    LogPrintf("ok-- COKBlockChainMonitor:write %lld, ret=%d\n", timestamp,ret);
-    return ret;
+    return Write(std::make_pair('T', std::make_pair(timestamp, uuid)), logEvent, false);
 }
 
 bool COKBlockChainMonitor::DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid)
 {
-    bool ret =  Erase(std::make_pair('T', std::make_pair(timestamp, uuid)), false);
-//    LogPrintf("ok-- COKBlockChainMonitor:delete requestId: %lld, ret=%d\n",timestamp, ret);
-    return ret;
+    return  Erase(std::make_pair('T', std::make_pair(timestamp, uuid)), false);
 }
 
 void COKBlockChainMonitor::Start()
 {
     if(!LoadCacheEvents())
     {
-        throw runtime_error("COKBlockChainMonitor LoadEvent fail!");
+        // do nothing
+    }
+
+    for(int i = 0; i < SQL_WRITE_THREAD_COUNT; i++)
+    {
+        threadGroup.create_thread(boost::bind(&io_service_run));
     }
 
     threadGroup.create_thread(boost::bind(&COKBlockChainMonitor::SendThread, this));
@@ -206,7 +216,10 @@ void COKBlockChainMonitor::Stop()
     sem_acked.post();
     sem_resend.post();
 
-//    ioService.stop();
+    for(int i = 0; i < SQL_WRITE_THREAD_COUNT; i++){
+        ioService.stop();
+    }
+
     threadGroup.interrupt_all();
     threadGroup.join_all();
 }
@@ -404,6 +417,22 @@ bool COKBlockChainMonitor::pull_resend(std::string &requestId, const COKLogEvent
 }
 
 
+static void CallOKLogEventWrappedException(COKBlockChainMonitor* self, const std::string &requestId, const COKLogEvent& logEvent){
+    self->CallOKLogEvent(requestId, logEvent);
+//    try
+//    {
+//        self->CallOKLogEvent(requestId, logEvent);
+//    }
+//    catch(const std::exception& e)
+//    {
+//         LogPrintf("exception in CallOKLogEvent ->%s \n ", string(e.what()));
+//    }
+//    catch(...)
+//    {
+//         LogPrintf("unknow exception in CallOKLogEvent\n");
+//    }
+}
+
 
 void COKBlockChainMonitor::CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent){
     if(logEvent.IsNull())
@@ -412,9 +441,11 @@ void COKBlockChainMonitor::CallOKLogEvent(const std::string &requestId, const CO
 
     int ret = OKCoin_Log_Event(logEvent);
     if(ret > 0){
+        LogPrintf("ok true-- CallOKLogEvent requestid:%s\n",requestId);
         push_acked(requestId);
     }
     else{
+        LogPrintf("ok false-- CallOKLogEvent requestid:%s\n",requestId);
         push_resend(requestId);
     }
 }
@@ -449,7 +480,6 @@ void COKBlockChainMonitor::SendThread()
         }
         catch(std::exception &e)
         {
-            LogException(&e, string("CEventMonitor::SendThread() -> "+string(e.what())).c_str());
             LogBlock("CEventMonitor::SendThread() -> "+string(e.what())+"\n");
         }
         catch(...)
@@ -487,14 +517,11 @@ void COKBlockChainMonitor::AckThread()
 
         try
         {
-            if(do_acked(requestId))
-                LogPrintf("ok-- do_acked success -> requestId: %s\n",requestId);
-            else
-               LogPrintf("ok-- do_acked fail -> requestId: %s\n",requestId);
+            bool ret = do_acked(requestId);
+            LogPrintf("ok-- do_acked (%d)  ->    requestid: %s\n", ret,requestId);
         }
         catch(std::exception &e)
         {
-            LogException(&e, string("COKBlockChainMonitor::AckThread() -> "+string(e.what())).c_str());
             LogPrintf("COKBlockChainMonitor::AckThread() ->%s\n",string(e.what()));
         }
         catch(...)
@@ -581,7 +608,9 @@ void COKBlockChainMonitor::ResendThread()
 bool COKBlockChainMonitor::do_send(const std::string &requestId, const COKLogEvent& logEvent)
 {
 //    LogPrintf("do_send -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
-    CallOKLogEvent(requestId, logEvent);
+
+//    CallOKLogEvent(requestId, logEvent);
+    ioService.post(boost::bind(CallOKLogEventWrappedException,this,requestId,logEvent));
     return true;
 }
 
@@ -603,15 +632,14 @@ bool COKBlockChainMonitor::do_acked(const std::string &requestId)
         LOCK(cs_map);
         requestMap.erase(requestId);
     }
-//    LogPrintf("ok-- do_acked requestId:%s", requestId);
     return  DeleteCacheEvent(timestamp, uuid);
 }
 
 bool COKBlockChainMonitor::do_resend(const std::string &requestId, const COKLogEvent& logEvent)
 {
      LogPrintf("do_resend -> requestId: %s, event:%s\n",requestId,logEvent.ToString());
-    //ioService.post(boost::bind(CallOKLogEvent, this, requestId, logEvent));
-     CallOKLogEvent(requestId, logEvent);
+   ioService.post(boost::bind(CallOKLogEventWrappedException,this,requestId,logEvent));
+//     CallOKLogEvent(requestId, logEvent);
     return true;
 }
 
@@ -628,18 +656,17 @@ void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int
     }
     fOneThread = true;
 
-    MilliSleep(retryDelay * 1000);
+    MilliSleep(1 * 1000);
 
     while(!cachedEventQueue.empty())
     {
         pair<pair<int64_t, uint256>,  COKLogEvent> request = cachedEventQueue.front();
-        cachedEventQueue.pop();
         const COKLogEvent &logEvent = request.second;
         const int64_t &now = request.first.first;
         const uint256 &uuid = request.first.second;
         const string requestId = "event-" + NewRequestId(now, uuid);
-
         push_send(requestId, logEvent);
+        cachedEventQueue.pop();
     }
 }
 
