@@ -1085,6 +1085,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);
 
+    // ********************************************************* Step 6.5: ok_log_init mysql connects pools --(by oklink)
+    LogPrintf(" ok_log_init: mysql \n");
+    OKCoin_Log_init();  //event log 连接池初始化
+    LogPrintf(" ok_log_init: mysql ok! \n");
+
     // ********************************************************* Step 7: load block chain
 
     fReindex = GetBoolArg("-reindex", false);
@@ -1254,8 +1259,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     fFeeEstimatesInitialized = true;
 
     // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
-    LogPrintf(" ok_log_init\n");
-    OKCoin_Log_init();  //event log 连接池初始化
 
     LogPrintf("Start create COKBlockChainMonitor instance...\n");
     // cache size calculations

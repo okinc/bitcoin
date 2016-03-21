@@ -94,8 +94,8 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
     sql::Connection *pConn = pConnPool->GetConnectionTry(100);
     if(pConn == NULL)
         return ret;
-    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
-//    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
+//    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
+    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
 	try{
 		pstmtEvent->setInt(1, type);
 		pstmtEvent->setInt(2, action);
