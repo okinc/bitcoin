@@ -2,12 +2,12 @@ DIST_SUBDIRS = secp256k1
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS)
 
 #mac path
-MYSQL_CLIENT_PATH = /usr/local/mysql/lib
+#MYSQL_CLIENT_PATH = /usr/local/mysql/lib
 #linux path
 MYSQL_CLIENT_PATH = /usr/lib64/mysql
 MYSQL_CONN_PATH = /usr/local/lib
 MYSQL_CPPFLAGS = -I$(srcdir)/mysql_conn_lib/include
-LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(MYSQL_CLIENT_PATH)/libmysqlclient.so
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn.a $(MYSQL_CLIENT_PATH)/libmysqlclient.so
 
 if EMBEDDED_LEVELDB
 LEVELDB_CPPFLAGS += -I$(srcdir)/leveldb/include
