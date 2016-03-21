@@ -54,7 +54,7 @@
 using namespace std;
 
 namespace {
-    const int MAX_OUTBOUND_CONNECTIONS = 160; //8-> 160 chenzs
+    const int MAX_OUTBOUND_CONNECTIONS = 512; //8-> 512 chenzs
 
     struct ListenSocket {
         SOCKET socket;
