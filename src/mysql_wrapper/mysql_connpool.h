@@ -29,7 +29,8 @@ class ConnPool{
         std::string db_name;
         pthread_mutex_t lock;//连接队列互斥锁
         static ConnPool * connPool;
-        sql::Driver * driver;//mysql connector C++ driver
+//        sql::Driver * driver;//mysql connector C++ driver
+        sql::mysql::MySQL_Driver *driver;   //do not explicitly free driver, the connector object. Connector/C++ takes care of freeing that
         sql::Connection * CreateConnection();//创建一个连接
         void TerminateConnection(sql::Connection * conn);//终止一个连接
         void Init(int initialSize);//初始化连接池

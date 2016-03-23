@@ -5,10 +5,11 @@
 
 #include <stdexcept>
 #include "mysql_connpool.h"
+#include "util.h"
             
 using namespace std;
 
-ConnPool * ConnPool::connPool = NULL;
+static ConnPool * ConnPool::connPool = NULL;
 
 ConnPool::ConnPool(string host,string user,string password,string dbname, int maxSize){
     connectionProperties["hostName"] = host;
@@ -23,11 +24,14 @@ ConnPool::ConnPool(string host,string user,string password,string dbname, int ma
     this->curSize = 0;
     //初始化driver
     try{
-        this->driver = sql::mysql::get_driver_instance();  //这里不是线程安全的
+//        this->driver = sql::mysql::get_driver_instance();  //这里不是线程安全的
+        this->driver = sql::mysql::get_mysql_driver_instance();
     }
     catch(sql::SQLException &e){
+        LogPrintf(" ok_log exception:%s", e.what());
     }
     catch(std::runtime_error &e){
+        LogPrintf(" ok_log error:%s", e.what());
     }
     //初始化连接池
     this->Init(maxSize/2);
@@ -63,6 +67,22 @@ void ConnPool::Init(int size){
      pthread_mutex_unlock(&lock);    
 }
 
+void ConnPool::TerminateConnection(sql::Connection * conn){
+    if(conn){
+        try{
+            conn->close();
+        }
+        catch(sql::SQLException &e){
+            LogPrintf(" ok_log exception:%s", e.what());
+        }
+        catch(std::runtime_error &e){
+            LogPrintf(" ok_log error:%s", e.what());
+        }
+
+        delete conn;
+    }
+}
+
 void ConnPool::Destroy(){
     list<sql::Connection *>::iterator pos;
     
@@ -83,7 +103,7 @@ sql::Connection * ConnPool::CreateConnection(){//这里不负责curSize的增加
     try{
         conn = driver->connect(connectionProperties);
         conn->setSchema(db_name);
-         return conn;
+        return conn;
     }
     catch(sql::SQLException &e){
         return NULL;
@@ -93,19 +113,6 @@ sql::Connection * ConnPool::CreateConnection(){//这里不负责curSize的增加
     }
 }
 
-void ConnPool::TerminateConnection(sql::Connection * conn){
-    if(conn){
-        try{
-            conn->close();
-        }
-        catch(sql::SQLException &e){
-        }
-        catch(std::runtime_error &e){
-        }
-        
-        delete conn;
-    }
-}
 
 sql::Connection * ConnPool::GetConnection(){
     sql::Connection * conn = NULL;
