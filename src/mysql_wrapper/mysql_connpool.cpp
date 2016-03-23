@@ -9,7 +9,7 @@
             
 using namespace std;
 
-static ConnPool * ConnPool::connPool = NULL;
+ConnPool * ConnPool::connPool = NULL;
 
 ConnPool::ConnPool(string host,string user,string password,string dbname, int maxSize){
     connectionProperties["hostName"] = host;
