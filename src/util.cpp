@@ -251,7 +251,7 @@ int LogPrintStr(const std::string &str)
 
         // Debug print useful for profiling
         if (fLogTimestamps && fStartedNewLine)
-            ret += fprintf(fileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
+            ret += fprintf(fileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S%", GetTime()).c_str());
         if (!str.empty() && str[str.size()-1] == '\n')
             fStartedNewLine = true;
         else
