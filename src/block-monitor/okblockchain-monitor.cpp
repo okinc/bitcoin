@@ -87,7 +87,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
         return;
     }
 
-   LogPrintf("tx_monitor SyncTransaction:%s, fConflicted:%d\n",tx.GetHash().ToString(), fConflicted);
+   LogPrintf("tx_monitor (receive) SyncTransaction:%s, fConflicted:%d\n",tx.GetHash().ToString(), fConflicted);
    BuildEvent(fConflicted == true ? OC_ACTION_ORPHANE:OC_ACTION_NEW, tx, pfrom);
 }
 
@@ -100,7 +100,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
  */
 void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex,  CNode *pfrom)
 {
-     LogPrintf("tx_monitor SyncConnectBlock:%s\n",pblock->GetHash().ToString());
+     LogPrintf("tx_monitor (receive) SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
