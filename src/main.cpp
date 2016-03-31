@@ -2730,7 +2730,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot)
 {
-     LogPrintf("okcoin_log(block)  : checking block (blockbase data)...");
+     LogPrintf("okcoin_log(block)  : checking block (blockbase data)...\n");
     // These are checks that are independent of context.
 
     // Check that the header is valid (particularly PoW).  This is mostly
@@ -2772,7 +2772,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
             return state.DoS(100, error("CheckBlock(): more than one coinbase"),
                              REJECT_INVALID, "bad-cb-multiple");
 
-    LogPrintf("okcoin_log(block)  : checking block (verify transaction data)...");
+    LogPrintf("okcoin_log(block)  : checking block (verify transaction data)...\n");
     // Check transactions
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
         if (!CheckTransaction(tx, state))
@@ -2996,7 +2996,7 @@ static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned 
 
 bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool fForceProcessing, CDiskBlockPos *dbp)
 {
-    LogPrintf("okcoin_log(block) : received block broadcast");
+    LogPrintf("okcoin_log(block) : received block broadcast\n");
     // Preliminary checks
     bool checked = CheckBlock(*pblock, state);
 
@@ -3005,12 +3005,12 @@ bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool
         bool fRequested = MarkBlockAsReceived(pblock->GetHash());
         fRequested |= fForceProcessing;
 
-        LogPrintf("okcoin_log(block)  : check block ret = %d", checked);
+        LogPrintf("okcoin_log(block)  : check block ret = %d\n", checked);
         if (!checked) {
             return error("%s: CheckBlock FAILED", __func__);
         }
 
-         LogPrintf("okcoin_log(block)  : store to disk");
+         LogPrintf("okcoin_log(block)  : store to disk\n");
         // Store to disk
         CBlockIndex *pindex = NULL;
         bool ret = AcceptBlock(*pblock, state, &pindex, fRequested, dbp);
@@ -3018,12 +3018,12 @@ bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool
             mapBlockSource[pindex->GetBlockHash()] = pfrom->GetId();
         }
         CheckBlockIndex();
-        LogPrintf("okcoin_log(block)  : store to disk ret = %d", ret);
+        LogPrintf("okcoin_log(block)  : store to disk ret = %d\n", ret);
         if (!ret)
             return error("%s: AcceptBlock FAILED", __func__);
     }
 
-    LogPrintf("okcoin_log(block)  : Activate to BestChain");
+    LogPrintf("okcoin_log(block)  : Activate to BestChain\n");
     if (!ActivateBestChain(state, pblock, pfrom))
         return error("%s: ActivateBestChain failed", __func__);
 
