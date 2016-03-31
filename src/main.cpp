@@ -2996,7 +2996,7 @@ static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned 
 
 bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool fForceProcessing, CDiskBlockPos *dbp)
 {
-    LogPrintf("okcoin_log(block) : received block broadcast\n");
+    LogPrintf("okcoin_log(block) : received block broadcast block(%s)\n", pblock->GetHash().ToString());
     // Preliminary checks
     bool checked = CheckBlock(*pblock, state);
 

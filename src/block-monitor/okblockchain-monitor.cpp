@@ -72,7 +72,7 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CBlock *pblock, C
    if(!WriteCacheEvent(now, uuid, logEvent))
    {
        //TODO
-       LogPrintf("ok-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
+       LogPrintf("okcoin_log-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
    }
 
    push_send(requestId, logEvent);
@@ -87,7 +87,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
         return;
     }
 
-   LogPrintf("tx_monitor (receive) SyncTransaction:%s, fConflicted:%d\n",tx.GetHash().ToString(), fConflicted);
+   LogPrintf("okcoin_log  (receive) SyncTransaction:%s, fConflicted:%d\n",tx.GetHash().ToString(), fConflicted);
    BuildEvent(fConflicted == true ? OC_ACTION_ORPHANE:OC_ACTION_NEW, tx, pfrom);
 }
 
@@ -100,7 +100,7 @@ void COKBlockChainMonitor::SyncTransaction(const CTransaction &tx, const CBlock 
  */
 void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex,  CNode *pfrom)
 {
-     LogPrintf("tx_monitor (receive) SyncConnectBlock:%s\n",pblock->GetHash().ToString());
+     LogPrintf("okcoin_log (receive) SyncConnectBlock:%s\n",pblock->GetHash().ToString());
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
 //        {
 //            BuildEvent(OC_ACTION_CONFIRM, tx);  //确认
@@ -110,7 +110,7 @@ void COKBlockChainMonitor::SyncConnectBlock(const CBlock *pblock, const CBlockIn
 
 void COKBlockChainMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
-    LogPrintf("tx_monitor dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
+    LogPrintf("okcoin_log dis_ConnectBlock:%s\n",pblock->GetHash().ToString());
 
    // （不再写记录）在冲突tx中记录OC_ACTION_ORPHANE事件
 //        BOOST_FOREACH(const CTransaction &tx, pblock->vtx)
