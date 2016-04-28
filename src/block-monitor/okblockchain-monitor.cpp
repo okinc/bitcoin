@@ -120,67 +120,7 @@ void COKBlockChainMonitor::SyncDisconnectBlock(const CBlock *pblock)
         BuildEvent(OC_ACTION_ORPHANE,pblock);
 }
 
-//从leveldb加载缓存tx events
-bool COKBlockChainMonitor::LoadCacheEvents()
-{
 
-    leveldb::Iterator *pcursor = NewIterator();
-
-    CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);
-    ssKeySet << make_pair('T', make_pair(int64_t(0), uint256()));
-    pcursor->Seek(ssKeySet.str());
-
-    queue<pair<pair<int64_t, uint256>, COKLogEvent> > cacheEventQueue;
-
-    //Load Blocks
-    while(pcursor->Valid())
-    {
-        boost::this_thread::interruption_point();
-        try
-        {
-            leveldb::Slice slKey = pcursor->key(); //key中包含timestamp，uuid信息
-            CDataStream ssKey(slKey.data(), slKey.data()+slKey.size(), SER_DISK, CLIENT_VERSION);
-            char chType;
-            ssKey >> chType;
-            if(chType == 'T')
-            {
-                leveldb::Slice slValue = pcursor->value();  //value为logEvent信息
-                CDataStream ssValue(slValue.data(), slValue.data()+slValue.size(), SER_DISK, CLIENT_VERSION);
-
-                int64_t timestamp;
-                ssKey >> timestamp;
-
-                uint256 uuid;
-                ssKey >> uuid;
-
-                COKLogEvent logEvent;
-                ssValue >> logEvent;
-
-                if(!logEvent.IsNull()){
-                    LogPrintf("ok-- loadEvent:%s\n", logEvent.ToString());
-                    cacheEventQueue.push(make_pair(make_pair(timestamp, uuid), logEvent));
-                }
-
-            }
-            else
-            {
-                break;
-            }
-
-            pcursor->Next();
-        }
-        catch(std::exception &e)
-        {
-            LogPrintf("ok--LoadCacheEvents : Deserialize or I/O error - %s", e.what());
-        }
-
-    }
-    delete pcursor;
-
-    threadGroup.create_thread(boost::bind(&COKBlockChainMonitor::PushCacheLogEvents, this, cacheEventQueue));
-
-    return true;
-}
 
 bool COKBlockChainMonitor::WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid, const COKLogEvent& logEvent)
 {
@@ -603,7 +543,69 @@ bool COKBlockChainMonitor::do_resend(const std::string &requestId, const COKLogE
 
 
 
-void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent> > &cachedEventQueue)
+//从leveldb加载缓存tx events
+bool COKBlockChainMonitor::LoadCacheEvents()
+{
+
+    leveldb::Iterator *pcursor = NewIterator();
+
+    CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);
+    ssKeySet << make_pair('T', make_pair(int64_t(0), uint256()));
+    pcursor->Seek(ssKeySet.str());
+
+    static queue<pair<pair<int64_t, uint256>, COKLogEvent> > cacheEventQueue;
+
+    //Load Blocks
+    while(pcursor->Valid())
+    {
+        boost::this_thread::interruption_point();
+        try
+        {
+            leveldb::Slice slKey = pcursor->key(); //key中包含timestamp，uuid信息
+            CDataStream ssKey(slKey.data(), slKey.data()+slKey.size(), SER_DISK, CLIENT_VERSION);
+            char chType;
+            ssKey >> chType;
+            if(chType == 'T')
+            {
+                leveldb::Slice slValue = pcursor->value();  //value为logEvent信息
+                CDataStream ssValue(slValue.data(), slValue.data()+slValue.size(), SER_DISK, CLIENT_VERSION);
+
+                int64_t timestamp;
+                ssKey >> timestamp;
+
+                uint256 uuid;
+                ssKey >> uuid;
+
+                COKLogEvent logEvent;
+                ssValue >> logEvent;
+
+                if(!logEvent.IsNull()){
+                    LogPrintf("ok-- loadEvent:%s\n", logEvent.ToString());
+                    cacheEventQueue.push(make_pair(make_pair(timestamp, uuid), logEvent));
+                }
+
+            }
+            else
+            {
+                break;
+            }
+
+            pcursor->Next();
+        }
+        catch(std::exception &e)
+        {
+            LogPrintf("ok--LoadCacheEvents : Deserialize or I/O error - %s", e.what());
+        }
+
+    }
+    delete pcursor;
+
+    threadGroup.create_thread(boost::bind(&COKBlockChainMonitor::PushCacheLogEvents, this, cacheEventQueue));
+
+    return true;
+}
+
+void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent>> &cachedEventQueue)
 {
     RenameThread("bitcoin-event-monitor-LoadCached");
 
