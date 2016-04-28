@@ -605,7 +605,7 @@ bool COKBlockChainMonitor::LoadCacheEvents()
     return true;
 }
 
-void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent>> &cachedEventQueue)
+void COKBlockChainMonitor::PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent> > &cachedEventQueue)
 {
     RenameThread("bitcoin-event-monitor-LoadCached");
 
