@@ -50,10 +50,11 @@ static void io_service_run(void)
 
 BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 	CLevelDBWrapper(GetDataDir() / "blocks" / "blockmon", nCacheSize, fMemory, fWipe),
-	retryDelay(0), httpPool(BLOCKMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false)
+    retryDelay(0), httpPool(BLOCKMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false), is_active(true)
 {
 	retryDelay = GetArg("-blockmon_retry_delay", BLOCKMON_RETRY_DELAY);
 	httpPool = GetArg("-blockmon_http_pool", BLOCKMON_HTTP_POOL);
+    is_active = GetBoolArg("-blockmon_active", true);
 }
 
 //从leveldb加载缓存blocks
@@ -141,6 +142,11 @@ bool BlockMonitor::DeleteCacheBlock(const int64_t &timestamp, const uint256 &uui
 
 void BlockMonitor::Start()
 {
+    if(!is_active)
+    {
+        return;
+    }
+
     if(!LoadCacheBlocks())
 	{
         throw runtime_error("BlockMonitor LoadBlocks fail!");
@@ -179,6 +185,11 @@ void BlockMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, c
 	json_spirit::Object ret;
 	int64_t now = 0;
 
+    if(!is_active)
+    {
+        return;
+    }
+
 	{
 		now = GetAdjustedTime();
 		const string blockHash = pblock->GetHash().GetHex();
@@ -208,6 +219,11 @@ void BlockMonitor::SyncDisconnectBlock(const CBlock *pblock)
 {
 	json_spirit::Object ret;
 	int64_t now = 0;
+
+    if(!is_active)
+    {
+        return;
+    }
 
 	{
 		now = GetAdjustedTime();
@@ -791,6 +807,11 @@ void BlockMonitor::PushCacheSyncDisconnect(queue<pair<pair<int64_t, uint256>, pa
 
 void BlockMonitor::Stop()
 {
+    if(!is_active)
+    {
+        return;
+    }
+
 	is_stop = true;
 	sem_post.post();
 	sem_acked.post();

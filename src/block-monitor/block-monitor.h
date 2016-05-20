@@ -145,6 +145,7 @@ private:
 private:
     boost::thread_group threadGroup;
     bool is_stop;
+    bool is_active;
 
     mutable CCriticalSection cs_post;
     mutable CCriticalSection cs_postMap;

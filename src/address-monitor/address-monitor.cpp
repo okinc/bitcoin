@@ -43,10 +43,11 @@ static void io_service_run(void)
 
 AddressMonitor::AddressMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 	CLevelDBWrapper(GetDataDir() / "blocks" / "addrmon", nCacheSize, fMemory, fWipe),
-	retryDelay(0), httpPool(ADDRMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false)
+    retryDelay(0), httpPool(ADDRMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false), is_active(true)
 {
 	retryDelay = GetArg("-addrmon_retry_delay", ADDRMON_RETRY_DELAY);
 	httpPool = GetArg("-addrmon_http_pool", ADDRMON_HTTP_POOL);
+    is_active = GetBoolArg("-addrmon_active", true);
 }
 
 bool AddressMonitor::LoadAddresses()
@@ -221,6 +222,11 @@ bool AddressMonitor::HasAddress(const uint160 &keyId)
 
 void AddressMonitor::Start()
 {
+    if(!is_active)
+    {
+        return;
+    }
+
 	if(!LoadAddresses())
 	{
 		throw runtime_error("AddressMonitor LoadAddresses fail!");
@@ -319,6 +325,11 @@ unordered_map<int, uint160> AddressMonitor::GetMonitoredAddresses(const CTransac
 
 void AddressMonitor::SyncTransaction(const CTransaction &tx, const CBlock *pblock, const boost::unordered_map<uint160, std::string> &addresses)
 {
+    if(!is_active)
+    {
+        return;
+    }
+
 	if(pblock)
 	{
         //被block确认
@@ -379,6 +390,11 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 	json_spirit::Array ret;
 	int64_t now = 0;
 
+    if(!is_active)
+    {
+        return;
+    }
+
 	{
 		LOCK(cs_address);
 
@@ -429,6 +445,12 @@ void AddressMonitor::SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex,
 {
 	json_spirit::Array ret;
 	int64_t now = 0;
+
+    if(!is_active)
+    {
+        return;
+    }
+
 
 	{
 		LOCK(cs_address);
@@ -1106,13 +1128,16 @@ void AddressMonitor::PushSyncTxDisconnect(queue<pair<pair<int64_t, uint256>, pai
 
 void AddressMonitor::Stop()
 {
-	is_stop = true;
-	sem_post.post();
-	sem_acked.post();
-	sem_resend.post();
+    if(is_active)
+    {
+        is_stop = true;
+        sem_post.post();
+        sem_acked.post();
+        sem_resend.post();
 
-	ioService.stop();
-	threadGroup.interrupt_all();
-	threadGroup.join_all();
+        ioService.stop();
+        threadGroup.interrupt_all();
+        threadGroup.join_all();
+    }
 }
 

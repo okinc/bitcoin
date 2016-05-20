@@ -213,6 +213,7 @@ private:
 
     boost::thread_group threadGroup;
     bool is_stop;
+    bool is_active;
 };
 
 
