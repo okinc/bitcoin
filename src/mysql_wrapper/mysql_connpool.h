@@ -36,13 +36,13 @@ class ConnPool{
         void Init(int initialSize);//初始化连接池
         void Destroy();//销毁连接池
     protected:
-        ConnPool(string host,string user,string password,string dbname,int maxSize);
+        ConnPool(string host,string user,string password,string dbname,int maxSize,int socketTimeout, int connectTimeout);
     public:
         ~ConnPool();
         sql::Connection * GetConnection();//获取一个连接
         void ReleaseConnection(sql::Connection * conn);//释放一个连接
         sql::Connection * GetConnectionTry(int maxNum);//GetConnection的加强版，maxNum代表重试次数
-        static ConnPool * GetInstance(string host,string user,string password,string dbname,int maxSize);//获取一个ConnPool对象实例
+        static ConnPool * GetInstance(string host,string user,string password,string dbname,int maxSize,int socketTimeout, int connectTimeout);//获取一个ConnPool对象实例
 };
 
 #endif
