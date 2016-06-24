@@ -16,6 +16,8 @@
 #define DB_PASSWORD		"123456"
 #define DB_NAME			"coinokdata"
 #define MAX_CONNCOUNT	50
+#define DB_SOCKET_TIMEOUT  30000
+#define DB_CONNECT_TIMEOUT 5000
 
 
 using namespace sql;
@@ -25,6 +27,8 @@ static std::string db_server;
 static std::string db_user;
 static std::string db_password;
 static std::string db_name;
+static int db_socketTimeout;
+static int db_connectTimeout;
 static ConnPool *pConnPool;
 
 
@@ -50,10 +54,11 @@ bool OKCoin_Log_init(){
 	db_user = GetArg("-okdbuser", DB_USER);
 	db_password = GetArg("-okdbpassword", DB_PASSWORD);
 	db_name= GetArg("-okdbname", DB_NAME);
-	
+    db_socketTimeout = GetArg("-okdbsockettimeout", DB_SOCKET_TIMEOUT);
+    db_connectTimeout = GetArg("-okdbconnecttimeout", DB_CONNECT_TIMEOUT);
     LogPrintf( "OKCoin_Log_init loadconfig ok_db_host = %s\n", db_server);
 
-    pConnPool = ConnPool::GetInstance(db_server,db_user,db_password,db_name,MAX_CONNCOUNT);
+    pConnPool = ConnPool::GetInstance(db_server,db_user,db_password,db_name,MAX_CONNCOUNT, db_socketTimeout, db_connectTimeout);
   	fInited = pConnPool ? true: false;
 	
 

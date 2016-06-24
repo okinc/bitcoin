@@ -11,12 +11,17 @@ using namespace std;
 
 ConnPool * ConnPool::connPool = NULL;
 
-ConnPool::ConnPool(string host,string user,string password,string dbname, int maxSize){
+ConnPool::ConnPool(string host,string user,string password,string dbname, int maxSize, int socketTimeout, int connectTimeout){
+    if (connectTimeout > socketTimeout)
+        socketTimeout = connectTimeout * 2;
+
     connectionProperties["hostName"] = host;
     connectionProperties["userName"] = user;
     connectionProperties["password"] = password;
     connectionProperties["OPT_CONNECT_TIMEOUT"] = 600;
     connectionProperties["OPT_RECONNECT"] = true;
+    connectionProperties["socketTimeout"] = socketTimeout;
+    connectionProperties["connectTimeout"] = connectTimeout;
 
     db_name = dbname;
     
@@ -41,9 +46,9 @@ ConnPool::~ConnPool(){
     this->Destroy();
 }
 
-ConnPool *ConnPool::GetInstance(string host,string user,string password,string dbname, int maxSize){
+ConnPool *ConnPool::GetInstance(string host,string user,string password,string dbname, int maxSize, int socketTimeout, int connectTimeout){
     if(connPool == NULL) {
-        connPool = new ConnPool(host,user,password,dbname, maxSize);
+        connPool = new ConnPool(host,user,password,dbname, maxSize, socketTimeout, connectTimeout);
     }
     
     return connPool;
