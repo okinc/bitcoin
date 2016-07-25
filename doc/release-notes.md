@@ -1,8 +1,9 @@
-Bitcoin Core version 0.12.1 is now available from:
+Bitcoin Core version 0.12.2 is now available from:
 
-  <https://bitcoin.org/bin/bitcoin-core-0.12.1/>
+  <https://bitcoin.org/bin/bitcoin-core-0.12.2/>
 
-This is a new major version release, bringing new features and other improvements.
+This is a new minor version release, including ........,
+various bugfixes and updated translations.
 
 Please report bugs using the issue tracker at github:
 
@@ -50,6 +51,23 @@ git merge commit are mentioned.
 
 ### RPC and REST
 
+Asm script outputs replacements for OP_NOP2 and OP_NOP3
+-------------------------------------------------------
+
+OP_NOP2 has been renamed to OP_CHECKLOCKTIMEVERIFY by [BIP 
+65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki)
+
+OP_NOP3 has been renamed to OP_CHECKSEQUENCEVERIFY by [BIP 
+112](https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki)
+
+The following outputs are affected by this change:
+- RPC `getrawtransaction` (in verbose mode)
+- RPC `decoderawtransaction`
+- RPC `decodescript`
+- REST `/rest/tx/` (JSON format)
+- REST `/rest/block/` (JSON format when including extended tx details)
+- `bitcoin-tx -json`
+
 ### Configuration and command-line options
 
 ### Block and transaction handling
@@ -75,4 +93,5 @@ Thanks to everyone who directly contributed to this release:
 
 
 As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
+
 
