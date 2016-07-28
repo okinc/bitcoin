@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2014 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,9 +25,9 @@
 #include <QSet>
 #include <QTimer>
 
-using namespace std;
+#include <boost/foreach.hpp>
 
-WalletModel::WalletModel(CWallet *wallet, OptionsModel *optionsModel, QObject *parent) :
+WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *wallet, OptionsModel *optionsModel, QObject *parent) :
     QObject(parent), wallet(wallet), optionsModel(optionsModel), addressTableModel(0),
     transactionTableModel(0),
     recentRequestsTableModel(0),
@@ -39,7 +39,7 @@ WalletModel::WalletModel(CWallet *wallet, OptionsModel *optionsModel, QObject *p
     fForceCheckBalanceChanged = false;
 
     addressTableModel = new AddressTableModel(wallet, this);
-    transactionTableModel = new TransactionTableModel(wallet, this);
+    transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
 
     // This timer will be fired repeatedly to update the balance
@@ -290,8 +290,10 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             return TransactionCreationFailed;
         }
 
-        // reject absurdly high fee > 0.1 bitcoin
-        if (nFeeRequired > 10000000)
+        // reject absurdly high fee. (This can never happen because the
+        // wallet caps the fee at maxTxFee. This merely serves as a
+        // belt-and-suspenders check)
+        if (nFeeRequired > maxTxFee)
             return AbsurdFee;
     }
 
@@ -445,7 +447,7 @@ bool WalletModel::changePassphrase(const SecureString &oldPass, const SecureStri
 
 bool WalletModel::backupWallet(const QString &filename)
 {
-    return BackupWallet(*wallet, filename.toLocal8Bit().data());
+    return wallet->BackupWallet(filename.toLocal8Bit().data());
 }
 
 // Handlers for core signals
@@ -556,6 +558,11 @@ bool WalletModel::getPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const
     return wallet->GetPubKey(address, vchPubKeyOut);
 }
 
+bool WalletModel::havePrivKey(const CKeyID &address) const
+{
+    return wallet->HaveKey(address);
+}
+
 // returns a list of COutputs from COutPoints
 void WalletModel::getOutputs(const std::vector<COutPoint>& vOutpoints, std::vector<COutput>& vOutputs)
 {
@@ -565,7 +572,7 @@ void WalletModel::getOutputs(const std::vector<COutPoint>& vOutpoints, std::vect
         if (!wallet->mapWallet.count(outpoint.hash)) continue;
         int nDepth = wallet->mapWallet[outpoint.hash].GetDepthInMainChain();
         if (nDepth < 0) continue;
-        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true);
+        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true, true);
         vOutputs.push_back(out);
     }
 }
@@ -592,7 +599,7 @@ void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins) 
         if (!wallet->mapWallet.count(outpoint.hash)) continue;
         int nDepth = wallet->mapWallet[outpoint.hash].GetDepthInMainChain();
         if (nDepth < 0) continue;
-        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true);
+        COutput out(&wallet->mapWallet[outpoint.hash], outpoint.n, nDepth, true, true);
         if (outpoint.n < out.tx->vout.size() && wallet->IsMine(out.tx->vout[outpoint.n]) == ISMINE_SPENDABLE)
             vCoins.push_back(out);
     }
@@ -604,7 +611,7 @@ void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins) 
         while (wallet->IsChange(cout.tx->vout[cout.i]) && cout.tx->vin.size() > 0 && wallet->IsMine(cout.tx->vin[0]))
         {
             if (!wallet->mapWallet.count(cout.tx->vin[0].prevout.hash)) break;
-            cout = COutput(&wallet->mapWallet[cout.tx->vin[0].prevout.hash], cout.tx->vin[0].prevout.n, 0, true);
+            cout = COutput(&wallet->mapWallet[cout.tx->vin[0].prevout.hash], cout.tx->vin[0].prevout.n, 0, true, true);
         }
 
         CTxDestination address;
@@ -660,4 +667,19 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
         return wallet->EraseDestData(dest, key);
     else
         return wallet->AddDestData(dest, key, sRequest);
+}
+
+bool WalletModel::transactionCanBeAbandoned(uint256 hash) const
+{
+    LOCK2(cs_main, wallet->cs_wallet);
+    const CWalletTx *wtx = wallet->GetWalletTx(hash);
+    if (!wtx || wtx->isAbandoned() || wtx->GetDepthInMainChain() > 0 || wtx->InMempool())
+        return false;
+    return true;
+}
+
+bool WalletModel::abandonTransaction(uint256 hash) const
+{
+    LOCK2(cs_main, wallet->cs_wallet);
+    return wallet->AbandonTransaction(hash);
 }

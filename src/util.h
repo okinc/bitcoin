@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2014 The Bitcoin Core developers
+// Copyright (c) 2009-2015 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,6 +18,7 @@
 #include "tinyformat.h"
 #include "utiltime.h"
 
+#include <atomic>
 #include <exception>
 #include <map>
 #include <stdint.h>
@@ -27,6 +28,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/signals2/signal.hpp>
 #include <boost/thread/exceptions.hpp>
+
+static const bool DEFAULT_LOGTIMEMICROS = false;
+static const bool DEFAULT_LOGIPS        = false;
+static const bool DEFAULT_LOGTIMESTAMPS = true;
 
 /** Signals for translation. */
 class CTranslationInterface
@@ -44,9 +49,13 @@ extern bool fPrintToDebugLog;
 extern bool fServer;
 extern std::string strMiscWarning;
 extern bool fLogTimestamps;
+extern bool fLogTimeMicros;
 extern bool fLogIPs;
-extern volatile bool fReopenDebugLog;
+extern std::atomic<bool> fReopenDebugLog;
 extern CTranslationInterface translationInterface;
+
+extern const char * const BITCOIN_CONF_FILENAME;
+extern const char * const BITCOIN_PID_FILENAME;
 
 /**
  * Translation function: Call Translate signal on UI interface, which returns a boost::optional result.
@@ -59,6 +68,7 @@ inline std::string _(const char* psz)
 }
 
 void SetupEnvironment();
+bool SetupNetworking();
 
 /** Return true if log accepts specified category */
 bool LogAcceptCategory(const char* category);
@@ -67,40 +77,33 @@ int LogPrintStr(const std::string &str);
 
 #define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
 
-/**
- * When we switch to C++11, this can be switched to variadic templates instead
- * of this macro-based construction (see tinyformat.h).
- */
-#define MAKE_ERROR_AND_LOG_FUNC(n)                                        \
-    /**   Print to debug.log if -debug=category switch is given OR category is NULL. */ \
-    template<TINYFORMAT_ARGTYPES(n)>                                          \
-    static inline int LogPrint(const char* category, const char* format, TINYFORMAT_VARARGS(n))  \
-    {                                                                         \
-        if(!LogAcceptCategory(category)) return 0;                            \
-        return LogPrintStr(tfm::format(format, TINYFORMAT_PASSARGS(n))); \
-    }                                                                         \
-    /**   Log error and return false */                                        \
-    template<TINYFORMAT_ARGTYPES(n)>                                          \
-    static inline bool error(const char* format, TINYFORMAT_VARARGS(n))                     \
-    {                                                                         \
-        LogPrintStr("ERROR: " + tfm::format(format, TINYFORMAT_PASSARGS(n)) + "\n"); \
-        return false;                                                         \
-    }
+template<typename T1, typename... Args>
+static inline int LogPrint(const char* category, const char* fmt, const T1& v1, const Args&... args)
+{
+    if(!LogAcceptCategory(category)) return 0;                            \
+    return LogPrintStr(tfm::format(fmt, v1, args...));
+}
 
-TINYFORMAT_FOREACH_ARGNUM(MAKE_ERROR_AND_LOG_FUNC)
+template<typename T1, typename... Args>
+bool error(const char* fmt, const T1& v1, const Args&... args)
+{
+    LogPrintStr("ERROR: " + tfm::format(fmt, v1, args...) + "\n");
+    return false;
+}
 
 /**
  * Zero-arg versions of logging and error, these are not covered by
- * TINYFORMAT_FOREACH_ARGNUM
+ * the variadic templates above (and don't take format arguments but
+ * bare strings).
  */
-static inline int LogPrint(const char* category, const char* format)
+static inline int LogPrint(const char* category, const char* s)
 {
     if(!LogAcceptCategory(category)) return 0;
-    return LogPrintStr(format);
+    return LogPrintStr(s);
 }
-static inline bool error(const char* format)
+static inline bool error(const char* s)
 {
-    LogPrintStr(std::string("ERROR: ") + format + "\n");
+    LogPrintStr(std::string("ERROR: ") + s + "\n");
     return false;
 }
 void LogException(std::exception* pex, const char* pszThread);
@@ -133,9 +136,9 @@ void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map
 #ifdef WIN32
 boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 #endif
-boost::filesystem::path GetTempPath();
+void OpenDebugLog();
 void ShrinkDebugFile();
-void runCommand(std::string strCommand);
+void runCommand(const std::string& strCommand);
 
 inline bool IsSwitchChar(char c)
 {
@@ -208,7 +211,13 @@ std::string HelpMessageGroup(const std::string& message);
  */
 std::string HelpMessageOpt(const std::string& option, const std::string& message);
 
-void SetThreadPriority(int nPriority);
+/**
+ * Return the number of physical cores available on the current system.
+ * @note This does not count virtual cores, such as those provided by HyperThreading
+ * when boost is newer than 1.56.
+ */
+int GetNumCores();
+
 void RenameThread(const char* name);
 
 /**
@@ -238,5 +247,7 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
         throw;
     }
 }
+
+std::string CopyrightHolders(const std::string& strPrefix);
 
 #endif // BITCOIN_UTIL_H
