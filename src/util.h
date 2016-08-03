@@ -131,6 +131,12 @@ void OpenDebugLog();
 void ShrinkDebugFile();
 void runCommand(const std::string& strCommand);
 
+// OKCoin monitor
+void LogException(std::exception* pex, const char* pszThread);
+bool LogAddrmon(const std::string &str);
+bool LogBlock(const std::string &str);
+
+
 inline bool IsSwitchChar(char c)
 {
 #ifdef WIN32

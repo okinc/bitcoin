@@ -1403,7 +1403,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nStart = GetTimeMillis();
     printf("Start loading monitor block...\n");
     pblockMonitor->Load();
-    printf("End loading monitor block: %dms\n", GetTimeMillis() - nStart);
+    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET

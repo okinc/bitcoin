@@ -20,6 +20,9 @@ void RegisterMiningRPCCommands(CRPCTable &tableRPC);
 /** Register raw transaction RPC commands */
 void RegisterRawTransactionRPCCommands(CRPCTable &tableRPC);
 
+//OKCoin monitor
+void RegisterOKCoinExtraRPCCommands(CRPCTable &tableRPC);
+
 static inline void RegisterAllCoreRPCCommands(CRPCTable &tableRPC)
 {
     RegisterBlockchainRPCCommands(tableRPC);
@@ -27,6 +30,9 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable &tableRPC)
     RegisterMiscRPCCommands(tableRPC);
     RegisterMiningRPCCommands(tableRPC);
     RegisterRawTransactionRPCCommands(tableRPC);
+
+    //OKCoin monitor
+    RegisterOKCoinExtraRPCCommands(tableRPC);
 }
 
 #endif

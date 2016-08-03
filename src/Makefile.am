@@ -149,7 +149,9 @@ BITCOIN_CORE_H = \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
-  zmq/zmqpublishnotifier.h
+  zmq/zmqpublishnotifier.h \
+  address-monitor/address-monitor.h \
+  block-monitor/block-monitor.h
 
 
 obj/build.h: FORCE
@@ -186,6 +188,7 @@ libbitcoin_server_a_SOURCES = \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
   rpc/server.cpp \
+  rpc/okcoinextra.cpp \
   script/sigcache.cpp \
   script/ismine.cpp \
   timedata.cpp \
@@ -195,6 +198,8 @@ libbitcoin_server_a_SOURCES = \
   ui_interface.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  address-monitor/address-monitor.cpp \
+  block-monitor/block-monitor.cpp \
   $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ
