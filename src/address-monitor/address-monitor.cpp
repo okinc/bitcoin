@@ -6,7 +6,6 @@
 #include "script/script.h"
 #include "main.h"
 
-#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -19,12 +18,15 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/asio/io_service.hpp>
 
+#include "rpc/protocol.h"
+
+#include <event2/event.h>
+#include <event2/http.h>
+#include <event2/buffer.h>
+#include <event2/keyvalq_struct.h>
+
 #include "univalue.h"
 
-//#include "json/json_spirit_value.h"
-//#include "json/json_spirit_reader_template.h"
-//#include "json/json_spirit_writer_template.h"
-//#include "json/json_spirit_utils.h"
 
 using namespace std;
 using namespace boost;
@@ -37,13 +39,13 @@ static boost::asio::io_service::work threadPool(ioService);
 
 static void io_service_run(void)
 {
-	ioService.run();
+    ioService.run();
 }
 
 
 AddressMonitor::AddressMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
     CDBWrapper(GetDataDir() / "blocks" / "addrmon", nCacheSize, fMemory, fWipe),
-	retryDelay(0), httpPool(ADDRMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false)
+    retryDelay(500), httpPool(ADDRMON_HTTP_POOL), sem_post(0), sem_acked(0), sem_resend(0), is_stop(false)
 {
 	retryDelay = GetArg("-addrmon_retry_delay", ADDRMON_RETRY_DELAY);
 	httpPool = GetArg("-addrmon_http_pool", ADDRMON_HTTP_POOL);
@@ -51,7 +53,6 @@ AddressMonitor::AddressMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 
 bool AddressMonitor::LoadAddresses()
 {
-//    leveldb::Iterator *pcursor = NewIterator();
     CDBIterator *pcursor = NewIterator();
 
 	CDataStream ssKeySet(SER_DISK, CLIENT_VERSION);
@@ -64,24 +65,14 @@ bool AddressMonitor::LoadAddresses()
 		boost::this_thread::interruption_point();
 		try
 		{
-            leveldb::Slice slKey;
-            if (pcursor->GetKey(slKey)) {
-                CDataStream ssKey(slKey.data(), slKey.data()+slKey.size(), SER_DISK, CLIENT_VERSION);
-                char chType;
-                ssKey >> chType;
-                if(chType == 'A')
+            std::pair<char, uint160> ssKey;
+            if (pcursor->GetKey(ssKey)) {
+                if(ssKey.first == 'A')
                 {
-                    leveldb::Slice slValue;
-                    if (pcursor->GetValue(slValue)) {
-                        CDataStream ssValue(slValue.data(), slValue.data()+slValue.size(), SER_DISK, CLIENT_VERSION);
-
-                        uint160 keyId;
-                        ssKey >> keyId;
-
-                        string address;
-                        ssValue >> address;
-
-                        addressMap.insert(make_pair(keyId, address));
+                    uint160 keyId = ssKey.second;
+                    string addressValue;
+                    if (pcursor->GetValue(addressValue)) {
+                        addressMap.insert(make_pair(keyId, addressValue));
                     }
                 }
                 else
@@ -90,9 +81,7 @@ bool AddressMonitor::LoadAddresses()
                 }
             }
 			pcursor->Next();
-		}
-		catch(std::exception &e)
-		{
+        } catch (std::exception &e) {
 			throw runtime_error(strprintf("%s : Deserialize or I/O error - %s", __func__, e.what()));
 		}
 	}
@@ -119,28 +108,17 @@ bool AddressMonitor::LoadTransactions()
 		boost::this_thread::interruption_point();
 		try
 		{
-            leveldb::Slice slKey;
-            if (pcursor->GetKey(slKey)) {
-                CDataStream ssKey(slKey.data(), slKey.data()+slKey.size(), SER_DISK, CLIENT_VERSION);
-                char chType;
-                ssKey >> chType;
-                if(chType == 'T')
+            std::pair<char, pair<int64_t, uint256> > ssKey;
+            if (pcursor->GetKey(ssKey)) {
+                if(ssKey.first == 'T')
                 {
-                    leveldb::Slice slValue;
-                    if (pcursor->GetValue(slValue)) {
-                        CDataStream ssValue(slValue.data(), slValue.data()+slValue.size(), SER_DISK, CLIENT_VERSION);
+                    int64_t timestamp = ssKey.second.first;
+                    uint256 uuid = ssKey.second.second;
 
-                        int64_t timestamp;
-                        ssKey >> timestamp;
-
-                        uint256 uuid;
-                        ssKey >> uuid;
-
-                        int type;
-                        ssValue >> type;
-
-                        string json;
-                        ssValue >> json;
+                    std::pair<int, string> ssValue;
+                    if (pcursor->GetValue(ssValue)) {
+                        int type = ssValue.first;
+                        std::string json = ssValue.second;
 
                         if(type == SYNC_TX)
                         {
@@ -226,7 +204,7 @@ bool AddressMonitor::HasAddress(const uint160 &keyId)
 	return addressMap.find(keyId) != addressMap.end();
 }
 
-void AddressMonitor::Load()
+void AddressMonitor::Start()
 {
 	if(!LoadAddresses())
 	{
@@ -248,6 +226,20 @@ void AddressMonitor::Load()
     threadGroup.create_thread(boost::bind(&AddressMonitor::ResendThread, this));
     threadGroup.create_thread(boost::bind(&AddressMonitor::NoResponseCheckThread, this));
 }
+
+
+void AddressMonitor::Stop()
+{
+    is_stop = true;
+    sem_post.post();
+    sem_acked.post();
+    sem_resend.post();
+
+    ioService.stop();
+    threadGroup.interrupt_all();
+    threadGroup.join_all();
+}
+
 
 UniValue buildValue(const uint256 &txId, const CTransaction &tx, const int n,
 		const CBlock *pblock, const string &addressTo,
@@ -720,7 +712,111 @@ bool AddressMonitor::pull_resend(std::string &requestId, const std::string ** co
 	return false;
 }
 
+/** Reply structure for request_done to fill in */
+struct HTTPReply
+{
+    int status;
+    std::string body;
+};
 
+static void http_request_done(struct evhttp_request *req, void *ctx)
+{
+    HTTPReply *reply = static_cast<HTTPReply*>(ctx);
+
+    if (req == NULL) {
+        /* If req is NULL, it means an error occurred while connecting, but
+         * I'm not sure how to find out which one. We also don't really care.
+         */
+        reply->status = 0;
+        return;
+    }
+
+    reply->status = evhttp_request_get_response_code(req);
+
+    struct evbuffer *buf = evhttp_request_get_input_buffer(req);
+    if (buf)
+    {
+        size_t size = evbuffer_get_length(buf);
+        const char *data = (const char*)evbuffer_pullup(buf, size);
+        if (data)
+            reply->body = std::string(data, size);
+        evbuffer_drain(buf, size);
+    }
+}
+
+static void CallHttpPost(AddressMonitor* self, const std::string& requestId, const string& body) {
+    const string host = GetArg("-addrmon_host", "127.0.0.1");
+    int port = GetArg("-addrmon_port", 80);
+    const string url = GetArg("-addrmon_url", "");
+
+    // Create event base
+    struct event_base *base = event_base_new(); // TODO RAII
+    if (!base) {
+        LogAddrmon("cannot create event_base");
+        return;
+    }
+
+    // Synchronously look up hostname
+    struct evhttp_connection *evcon = evhttp_connection_base_new(base, NULL, host.c_str(), port); // TODO RAII
+    if (evcon == NULL) {
+        LogAddrmon("create connection failed");
+        return;
+    }
+    evhttp_connection_set_timeout(evcon, 600);
+
+    HTTPReply response;
+    struct evhttp_request *req = evhttp_request_new(http_request_done, (void*)&response); // TODO RAII
+    if (req == NULL) {
+        LogAddrmon("create http request failed");
+        return;
+    }
+
+
+    struct evkeyvalq *output_headers = evhttp_request_get_output_headers(req);
+    assert(output_headers);
+    evhttp_add_header(output_headers, "Host", host.c_str());
+    evhttp_add_header(output_headers, "Connection", "close");
+
+    // Attach request data
+    struct evbuffer * output_buffer = evhttp_request_get_output_buffer(req);
+    assert(output_buffer);
+    evbuffer_add(output_buffer, body.data(), body.size());
+
+    int r = evhttp_make_request(evcon, req, EVHTTP_REQ_POST, "/");
+    if (r != 0) {
+        evhttp_connection_free(evcon);
+        event_base_free(base);
+        LogAddrmon("send http request failed");
+        return;
+    }
+
+    event_base_dispatch(base);
+    evhttp_connection_free(evcon);
+    event_base_free(base);
+
+    if (response.status == 0) {
+        LogAddrmon("couldn't connect to server");
+    } else if (response.status == HTTP_UNAUTHORIZED) {
+        LogAddrmon("incorrect rpcuser or rpcpassword (authorization failed)");
+    } else if (response.status >= 400 && response.status != HTTP_BAD_REQUEST && response.status != HTTP_NOT_FOUND
+               && response.status != HTTP_INTERNAL_SERVER_ERROR) {
+        LogAddrmon(strprintf("server returned HTTP error %d", response.status));
+    } else if (response.body.empty()) {
+        LogAddrmon("no response from server");
+    }
+
+    // Parse reply
+    UniValue valReply(UniValue::VSTR);
+    valReply.read(response.body);
+    if (valReply.get_str() == "true") {
+        self->ack(requestId);
+        LogAddrmon("success reply -> requestId: "+requestId+"\n");
+    } else {
+        LogAddrmon("wrong reply -> requestId: "+requestId+", reply: "+valReply.get_str()+"\n");
+    }
+}
+
+/*
 static void CallRPC(AddressMonitor* self, const std::string &requestId, const string& body)
 {
     // Connect to localhost
@@ -775,12 +871,13 @@ static void CallRPC(AddressMonitor* self, const std::string &requestId, const st
         LogAddrmon("wrong reply -> requestId: "+requestId+", reply: "+strReply+"\n");
     }
 }
+*/
 
 static void CallRPCWrappedException(AddressMonitor* self, const std::string &requestId, const string& body)
 {
 	try
 	{
-		CallRPC(self, requestId, body);
+        CallHttpPost(self, requestId, body);
 	}
 	catch(const std::exception& e)
 	{
@@ -1098,15 +1195,4 @@ void AddressMonitor::LoadSyncDisconnect(queue<pair<pair<int64_t, uint256>, pair<
     }
 }
 
-void AddressMonitor::Stop()
-{
-	is_stop = true;
-	sem_post.post();
-	sem_acked.post();
-	sem_resend.post();
-
-	ioService.stop();
-	threadGroup.interrupt_all();
-	threadGroup.join_all();
-}
 

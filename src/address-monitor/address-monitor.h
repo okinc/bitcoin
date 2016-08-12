@@ -121,7 +121,8 @@ private:
 public:
     mutable CCriticalSection cs_address;
 
-    void Load();
+    void Start();
+    void Stop();
 
     bool AddAddress(const uint160 &keyId, const std::string &address);
     bool DelAddress(const uint160 &keyId, const std::string &address);
@@ -150,7 +151,7 @@ public:
                           const CTransaction &tx,
                           const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
 
-    void Stop();
+
 
 protected:
     boost::unordered_map<int, uint160> GetMonitoredAddresses(const CTransaction &tx, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
