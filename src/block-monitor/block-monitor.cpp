@@ -137,7 +137,7 @@ bool BlockMonitor::DeleteBlock(const int64_t &timestamp, const uint256 &uuid)
 	return Erase(std::make_pair('B', std::make_pair(timestamp, uuid)), true);
 }
 
-void BlockMonitor::Load()
+void BlockMonitor::Start()
 {
 	if(!LoadBlocks())
 	{

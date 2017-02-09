@@ -81,29 +81,7 @@ namespace boost
 #endif /* HASH_PAIR_UINT256_UINT160 */
 
 
-#ifndef LESS_THAN_BY_TIME
-#define LESS_THAN_BY_TIME
 
-struct LessThanByTime
-{
-	bool operator()(const std::pair<std::string, int64_t>& r1, const std::pair<std::string, int64_t>& r2) const
-	{
-	  if(r1.second < r2.second)
-	  {
-		  return  true;
-	  }
-	  else if(r1.second > r2.second)
-	  {
-		  return false;
-	  }
-	  else
-	  {
-		  return r1.first < r2.first;
-	  }
-	}
-};
-
-#endif /* LESS_THAN_BY_TIME */
 
 
 class AddressMonitor : public CDBWrapper

@@ -36,35 +36,7 @@ class CBlockIndex;
 class CTransaction;
 
 
-#ifndef HASH_PAIR_UINT256_UINT160
-#define HASH_PAIR_UINT256_UINT160
 
-namespace boost
-{
-	template <> struct hash<std::pair<uint256, uint160> >
-	{
-		size_t operator()(const std::pair<uint256, uint160> &txIdAndKeyId) const
-		{
-			size_t h = 0;
-			const uint256 &hash1 = txIdAndKeyId.first;
-			const uint160 &hash2 = txIdAndKeyId.second;
-
-			const unsigned char* end1 = hash1.end();
-			for (const unsigned char *it = hash1.begin(); it != end1; ++it) {
-				h = 31 * h + (*it);
-			}
-
-			const unsigned char* end2 = hash2.end();
-			for (const unsigned char *it = hash2.begin(); it != end2; ++it) {
-				h = 31 * h + (*it);
-			}
-
-			return h;
-		}
-	};
-}
-
-#endif /* HASH_PAIR_UINT256_UINT160 */
 
 #ifndef LESS_THAN_BY_TIME
 #define LESS_THAN_BY_TIME
@@ -104,7 +76,7 @@ private:
 
 public:
 
-    void Load();
+    void Start();
     bool ack(const std::string &requestId);
     void SyncConnectBlock(const CBlock *pblock,
                           CBlockIndex* pindex,
