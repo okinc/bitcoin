@@ -108,6 +108,7 @@ BITCOIN_CORE_H = \
   httpserver.h \
   indirectmap.h \
   init.h \
+  leveldbwrapper.h \
   key.h \
   keystore.h \
   dbwrapper.h \
@@ -182,6 +183,7 @@ libbitcoin_server_a_SOURCES = \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
+  leveldbwrapper.cpp \
   dbwrapper.cpp \
   main.cpp \
   merkleblock.cpp \
@@ -205,14 +207,14 @@ libbitcoin_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   ui_interface.cpp \
-  validationinterface.cpp \
-  versionbits.cpp \
   mysql_wrapper/mysql_connpool.h \
   mysql_wrapper/okcoin_log.h \
   block-monitor/okblockchain-monitor.h \
   mysql_wrapper/mysql_connpool.cpp \
   mysql_wrapper/okcoin_log.cpp \
   block-monitor/okblockchain-monitor.cpp \
+  validationinterface.cpp \
+  versionbits.cpp \ 
   $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ

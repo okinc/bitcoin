@@ -5,21 +5,22 @@
 #include "base58.h"
 #include "script/script.h"
 #include "main.h"
-
+#include "random.h"
 #include "mysql_wrapper/okcoin_log.h"
 
 #define MONITOR_RETRY_DELAY	60
-#define SQL_WRITE_THREAD_COUNT   2
+#define SQL_WRITE_THREAD_COUNT   3
 
 using namespace std;
 using namespace boost;
-using namespace json_spirit;
+//using namespace json_spirit;
 using namespace boost::asio;
 using boost::lexical_cast;
 using boost::unordered_map;
 
 static boost::asio::io_service ioService;
 static boost::asio::io_service::work work(ioService);
+
 
 static void io_service_run(void)
 {
@@ -168,7 +169,7 @@ void COKBlockChainMonitor::Stop()
 const uint256 COKBlockChainMonitor::NewRandomUUID() const
 {
     uint256 uuid;
-    RandAddSeedPerfmon();
+    RandAddSeed();
 
     RAND_bytes(uuid.begin(), uuid.end() - uuid.begin());
     return uuid;

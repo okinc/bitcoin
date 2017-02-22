@@ -8,7 +8,6 @@
 
 #include <boost/signals2/signal.hpp>
 #include <boost/shared_ptr.hpp>
-
 #include "block-monitor/okblockchain-monitor.h"
 
 class CBlock;
@@ -29,8 +28,13 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn);
 void UnregisterValidationInterface(CValidationInterface* pwalletIn);
 /** Unregister all wallets from core */
 void UnregisterAllValidationInterfaces();
+
 /** Push an updated transaction to all registered wallets */
-void SyncWithWallets(const CTransaction& tx, const CBlockIndex *pindex, const CBlock* pblock = NULL);
+// add pfrom and fConflicted by oklink
+void SyncWithWallets(const CTransaction& tx, const CBlockIndex *pindex, const CBlock* pblock = NULL, CNode *pfrom = NULL,  bool fConflicted = false);
+/** add by oklink*/
+void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex,  CNode *pfrom = NULL);
+
 
 class CValidationInterface {
 protected:
@@ -52,7 +56,7 @@ struct CMainSignals {
     /** Notifies listeners of updated block chain tip */
     boost::signals2::signal<void (const CBlockIndex *)> UpdatedBlockTip;
     /** Notifies listeners of updated transaction data (transaction, and optionally the block it is found in. */
-    boost::signals2::signal<void (const CTransaction &, const CBlockIndex *pindex, const CBlock *)> SyncTransaction;
+    boost::signals2::signal<void (const CTransaction &, const CBlockIndex *, const CBlock *, CNode *, bool)> SyncTransaction;
     /** Notifies listeners of an updated transaction without new data (for now: a coinbase potentially becoming visible). */
     boost::signals2::signal<void (const uint256 &)> UpdatedTransaction;
     /** Notifies listeners of a new active block chain. */

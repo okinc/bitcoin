@@ -39,6 +39,7 @@
 #include "net.h"
 #include "mysql_wrapper/okcoin_log.h"
 
+
 // -moncache default (MiB)
 static const int64_t nDefaultEventCache = 20;
 // max. -moncache in (MiB)
@@ -159,9 +160,6 @@ protected:
     void SendThread();
     void AckThread();
     void ResendThread();
-//    void NoResponseCheckThread();
-
-
 
     void PushCacheLogEvents(std::queue<std::pair<std::pair<int64_t, uint256>, COKLogEvent > > &cachedEventQueue);
 
