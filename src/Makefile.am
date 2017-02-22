@@ -2,6 +2,14 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#mac path
+MYSQL_CLIENT_PATH = /usr/local/mysql/lib
+#linux path
+#MYSQL_CLIENT_PATH = /usr/lib64/mysql
+MYSQL_CONN_PATH = /usr/local/lib
+MYSQL_CPPFLAGS = -I$(srcdir)/mysql_conn_lib/include
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn.so $(MYSQL_CLIENT_PATH)/libmysqlclient.so
+
 DIST_SUBDIRS = secp256k1 univalue
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
@@ -199,6 +207,12 @@ libbitcoin_server_a_SOURCES = \
   ui_interface.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  mysql_wrapper/mysql_connpool.h \
+  mysql_wrapper/okcoin_log.h \
+  block-monitor/okblockchain-monitor.h \
+  mysql_wrapper/mysql_connpool.cpp \
+  mysql_wrapper/okcoin_log.cpp \
+  block-monitor/okblockchain-monitor.cpp \
   $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ
@@ -357,7 +371,8 @@ bitcoind_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBMYSQL)
 
 bitcoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 

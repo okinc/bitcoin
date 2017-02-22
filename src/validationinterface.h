@@ -9,6 +9,8 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "block-monitor/okblockchain-monitor.h"
+
 class CBlock;
 class CBlockIndex;
 struct CBlockLocator;
@@ -65,8 +67,16 @@ struct CMainSignals {
     boost::signals2::signal<void (boost::shared_ptr<CReserveScript>&)> ScriptForMining;
     /** Notifies listeners that a block has been successfully mined */
     boost::signals2::signal<void (const uint256 &)> BlockFound;
+
+    //add by oklink
+     // Notifies listeners of updated transaction data (passing hash, transaction, and optionally the block it is found in.
+     boost::signals2::signal<void (const CBlock *, CBlockIndex*, CNode *)> SyncConnectBlock;
+     boost::signals2::signal<void (const CBlock *)> SyncDisconnectBlock;
 };
 
 CMainSignals& GetMainSignals();
+/** add by oklink */
+extern COKBlockChainMonitor *pOkBlkMonitor;
+
 
 #endif // BITCOIN_VALIDATIONINTERFACE_H

@@ -46,6 +46,8 @@
 #include <signal.h>
 #endif
 
+#include "mysql_wrapper/okcoin_log.h"
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -238,6 +240,19 @@ void Shutdown()
     }
 #endif
 
+   //add by oklink
+    if(pOkBlkMonitor)
+     {
+     pOkBlkMonitor->Stop();
+     pOkBlkMonitor->Sync();
+     pOkBlkMonitor->Flush();
+     }
+     delete pOkBlkMonitor;
+     pOkBlkMonitor = NULL;
+
+     OKCoin_Log_deInit();
+
+
 #ifndef WIN32
     try {
         boost::filesystem::remove(GetPidFile());
@@ -253,6 +268,8 @@ void Shutdown()
     globalVerifyHandle.reset();
     ECC_Stop();
     LogPrintf("%s: done\n", __func__);
+
+
 }
 
 /**
@@ -1241,6 +1258,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET)*1024*1024);
     }
 
+    // ********************************************************* Step 6.5: ok_log_init mysql connects pools --(by oklink)
+     LogPrintf(" ok_log_init: mysql \n");
+     OKCoin_Log_init(); //event log 连接池初始化
+     LogPrintf(" ok_log_init: mysql ok! \n");
+
+
     // ********************************************************* Step 7: load block chain
 
     fReindex = GetBoolArg("-reindex", false);
@@ -1421,6 +1444,21 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!est_filein.IsNull())
         mempool.ReadFeeEstimates(est_filein);
     fFeeEstimatesInitialized = true;
+
+    // ********************************************************* Step 7.5: load monitored addresses --(by oklink)
+
+     LogPrintf("Start create COKBlockChainMonitor instance...\n");
+     // cache size calculations
+     size_t nmonitorCache = (GetArg("-moncache", nDefaultEventCache) << 20);
+     if (nmonitorCache < (nMinEventCache << 20))
+     nmonitorCache = (nMinEventCache << 20); // total cache cannot be less than nMinDbCache
+     else if (nmonitorCache > (nMaxEventCache << 20))
+     nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
+
+     pOkBlkMonitor = new COKBlockChainMonitor(nmonitorCache);
+     nStart = GetTimeMillis();
+     pOkBlkMonitor->Start();
+     LogPrintf("Finish create COKBlockChainMonitor instance: %lldms\n", GetTimeMillis() - nStart);
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
