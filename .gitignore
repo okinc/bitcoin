@@ -120,3 +120,13 @@ oklink_bitcoin.files
 oklink_bitcoin.includes
 oklink_onchain.creator.user
 src/mysql_conn_lib
+contrib/devtools/split-debug.sh
+qa/pull-tester/tests_config.py
+src/init.cpp.autosave
+src/address-monitor/address-monitor.h.autosave
+src/secp256k1/gen_context
+src/secp256k1/src/ecmult_static_context.h
+src/univalue/stamp-h1
+src/univalue/univalue-config.h
+src/univalue/pc/libunivalue-uninstalled.pc
+src/univalue/pc/libunivalue.pc

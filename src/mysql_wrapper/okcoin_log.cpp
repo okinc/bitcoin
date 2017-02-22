@@ -91,14 +91,10 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 	assert(fInited == true);
     int ret = -1;
 #if LOG2DB
-	/*
-	if(pstmtEvent == NULL){
-		pstmtEvent = mysqlConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)");
-	}
-	*/
     sql::Connection *pConn = pConnPool->GetConnectionTry(100);
     if(pConn == NULL)
         return ret;
+
 //    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
     std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
 	try{
@@ -109,12 +105,12 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 		pstmtEvent->setInt(5, 0);
         pstmtEvent->setDateTime(6,DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetAdjustedTime()));
 		ret = pstmtEvent->executeUpdate();
-		pstmtEvent->close();
+        pstmtEvent->close();
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert Event type=%d err %s \n", type, e.what());
         ret = -2;
 	}
-	pConnPool->ReleaseConnection(pConn);
+     pConnPool->ReleaseConnection(pConn);
 
 #else
     ret = 0;

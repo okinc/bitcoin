@@ -29,7 +29,6 @@ ConnPool::ConnPool(string host,string user,string password,string dbname, int ma
     this->curSize = 0;
     //初始化driver
     try{
-//        this->driver = sql::mysql::get_driver_instance();  //这里不是线程安全的
         this->driver = sql::mysql::get_mysql_driver_instance();
     }
     catch(sql::SQLException &e){
@@ -65,11 +64,9 @@ void ConnPool::Init(int size){
             conns.push_back(conn);
             ++curSize;
         }
-        else{
-        }
     }
     
-     pthread_mutex_unlock(&lock);    
+    pthread_mutex_unlock(&lock);
 }
 
 void ConnPool::TerminateConnection(sql::Connection * conn){
@@ -128,11 +125,11 @@ sql::Connection * ConnPool::GetConnection(){
         conns.pop_front();
         
         if(conn->isClosed()){ //如果连接关闭,则重新打开一个连接
-            delete conn;
-            conn = this->CreateConnection();
+           delete conn;
+           conn = this->CreateConnection();
         }
         
-        if(conn == NULL){ //创建连接不成功
+        if(conn == NULL){
             --curSize;
         }
 
