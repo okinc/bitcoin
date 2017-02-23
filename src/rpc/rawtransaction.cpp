@@ -59,7 +59,18 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fInclud
     out.push_back(Pair("addresses", a));
 }
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
+//add by chenzs oklink
+void TxoutToJSON(const CTxOut& txout, UniValue& out, unsigned int i, bool fInfo){
+    //out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
+    out.push_back(Pair("value", txout.nValue));
+    out.push_back(Pair("n", (boost::int64_t)i));
+    UniValue o(UniValue::VOBJ);
+    ScriptPubKeyToJSON(txout.scriptPubKey, o, fInfo);
+    out.push_back(Pair("scriptPubKey", o));
+}
+
+//add fInfo by oklink
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, bool fInfo)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("hash", tx.GetWitnessHash().GetHex()));
@@ -77,10 +88,24 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
         else {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
             in.push_back(Pair("vout", (int64_t)txin.prevout.n));
-            UniValue o(UniValue::VOBJ);
-            o.push_back(Pair("asm", ScriptToAsmStr(txin.scriptSig, true)));
-            o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-            in.push_back(Pair("scriptSig", o));
+
+            //chenzs oklink get prevout info
+            CTransaction txPrevOut;
+            uint256 hashBlock = uint256();
+            if(GetTransaction(txin.prevout.hash, txPrevOut, Params().GetConsensus(), hashBlock, true))
+            {
+                UniValue preOut(UniValue::VOBJ);
+                const CTxOut& txout = txPrevOut.vout[txin.prevout.n];
+                TxoutToJSON(txout, preOut, txin.prevout.n, fInfo);
+                in.push_back(Pair("prev_out", preOut));
+            }
+
+            if(fInfo) {
+                UniValue o(UniValue::VOBJ);
+                o.push_back(Pair("asm", ScriptToAsmStr(txin.scriptSig, true)));
+                o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
+                in.push_back(Pair("scriptSig", o));
+            }
         }
         if (!tx.wit.IsNull()) {
             if (!tx.wit.vtxinwit[i].IsNull()) {
@@ -101,12 +126,36 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
     for (unsigned int i = 0; i < tx.vout.size(); i++) {
         const CTxOut& txout = tx.vout[i];
         UniValue out(UniValue::VOBJ);
+
+        /* //chenzs oklinke
         out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
         out.push_back(Pair("n", (int64_t)i));
         UniValue o(UniValue::VOBJ);
         ScriptPubKeyToJSON(txout.scriptPubKey, o, true);
         out.push_back(Pair("scriptPubKey", o));
         vout.push_back(out);
+                */
+        //chenzs oklink
+        TxoutToJSON(txout, out, i, fInfo);
+        //增加是否支付spent
+        bool isSpent = false;
+
+        CCoins coins;
+        LOCK(mempool.cs);
+        CCoinsViewMemPool view(pcoinsTip, mempool);
+        if (view.GetCoins(tx.GetHash(), coins)){
+            mempool.pruneSpent(tx.GetHash(), coins); // TODO: this should be done by the CCoinsViewMemPool
+        }
+        else{
+            pcoinsTip->GetCoins(tx.GetHash(), coins);//缓存没有记录，从数据库取
+        }
+
+        if(i >= coins.vout.size() || coins.vout[i].IsNull()){
+            isSpent = true;
+        }
+        out.push_back(Pair("spent", isSpent));
+        vout.push_back(out);
+
     }
     entry.push_back(Pair("vout", vout));
 
@@ -209,14 +258,17 @@ UniValue getrawtransaction(const UniValue& params, bool fHelp)
     if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
 
-    string strHex = EncodeHexTx(tx, RPCSerializationFlags());
+//    string strHex = EncodeHexTx(tx, RPCSerializationFlags());
 
-    if (!fVerbose)
+    if (!fVerbose) {
+        string strHex = EncodeHexTx(tx, RPCSerializationFlags());
         return strHex;
+    }
 
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("hex", strHex));
-    TxToJSON(tx, hashBlock, result);
+    //不返回hex
+    //result.push_back(Pair("hex", strHex));
+    TxToJSON(tx, hashBlock, result, true);
     return result;
 }
 
@@ -512,7 +564,7 @@ UniValue decoderawtransaction(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
 
     UniValue result(UniValue::VOBJ);
-    TxToJSON(tx, uint256(), result);
+    TxToJSON(tx, uint256(), result, true);
 
     return result;
 }

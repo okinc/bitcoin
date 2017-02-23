@@ -28,7 +28,7 @@
 
 using namespace std;
 
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, bool fInfo = false);//chenzs oklink ,add fInfo param);
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex);
 
 double GetDifficulty(const CBlockIndex* blockindex)
@@ -112,7 +112,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
         if(txDetails)
         {
             UniValue objTx(UniValue::VOBJ);
-            TxToJSON(tx, uint256(), objTx);
+            TxToJSON(tx, uint256(), objTx, false);
             txs.push_back(objTx);
         }
         else
@@ -543,16 +543,50 @@ UniValue getblockheader(const UniValue& params, bool fHelp)
     return blockheaderToJSON(pblockindex);
 }
 
+//add bye oklink
+UniValue getblockbyheight(const UniValue& params, bool fHelp){
+    if(fHelp || params.size() < 1 || params.size() > 3){
+        throw runtime_error(
+            "getblockbyheight height ( verbose ) ( decode )\n"
+            "\nref to getblock()\n"
+            + HelpExampleCli("getblockbyheight", "1000")
+            + HelpExampleRpc("getblockbyheight", "1000")
+        );
+    }
+
+    LOCK(cs_main);
+
+    int nHeight = params[0].get_int();
+    if (nHeight < 0 || nHeight > chainActive.Height())
+        throw runtime_error("Block number out of range.");
+
+    CBlockIndex* pblockindex = chainActive[nHeight];
+    CBlock block;
+    if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
+
+    bool fVerbose = true; //解码Block
+    if (params.size() > 1)
+        fVerbose = params[1].get_bool();
+    bool fDecode = false; //解码Transaction
+    if(params.size() > 2)
+        fDecode = params[2].get_bool();
+
+    return blockToJSON(block, pblockindex, fDecode);
+
+}
+
 UniValue getblock(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() < 1 || params.size() > 3)
         throw runtime_error(
-            "getblock \"hash\" ( verbose )\n"
+            "getblock \"hash\" ( verbose ) (decode)\n"
             "\nIf verbose is false, returns a string that is serialized, hex-encoded data for block 'hash'.\n"
             "If verbose is true, returns an Object with information about block <hash>.\n"
             "\nArguments:\n"
             "1. \"hash\"          (string, required) The block hash\n"
             "2. verbose           (boolean, optional, default=true) true for a json object, false for the hex encoded data\n"
+            "3. decode   (boolean,optional,default=false) decode transaction\n"
             "\nResult (for verbose = true):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
@@ -1205,6 +1239,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "gettxout",               &gettxout,               true  },
     { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        true  },
     { "blockchain",         "verifychain",            &verifychain,            true  },
+    { "blockchain",         "getblockbyheight",       &getblockbyheight,       true  },
 
     /* Not shown in help */
     { "hidden",             "invalidateblock",        &invalidateblock,        true  },
