@@ -17,7 +17,7 @@ MYSQL_CONN_PATH = /usr/lib64
 #MYSQL_CONN_PATH = /usr/local/lib
 
 
-LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(MYSQL_CLIENT_PATH)/libmysqlclient.a
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn.so $(MYSQL_CLIENT_PATH)/libmysqlclient.so
 
 
 if EMBEDDED_UNIVALUE

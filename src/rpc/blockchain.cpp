@@ -647,7 +647,12 @@ UniValue getblock(const UniValue& params, bool fHelp)
         return strHex;
     }
 
-    return blockToJSON(block, pblockindex);
+    bool fDecode = false; //解码Transaction by chenzs
+    if(params.size() > 2)
+        fDecode = params[2].get_bool();
+
+
+    return blockToJSON(block, pblockindex, fDecode);
 }
 
 struct CCoinsStats
