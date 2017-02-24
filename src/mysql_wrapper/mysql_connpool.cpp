@@ -29,7 +29,7 @@ ConnPool::ConnPool(string host,string user,string password,string dbname, int ma
     this->curSize = 0;
     //初始化driver
     try{
-        this->driver = sql::mysql::get_mysql_driver_instance();
+        this->driver = sql::mysql::get_driver_instance();
     }
     catch(sql::SQLException &e){
         LogPrintf(" ok_log exception:%s", e.what());
