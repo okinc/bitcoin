@@ -556,7 +556,7 @@ UniValue getblockbyheight(const UniValue& params, bool fHelp){
 
     LOCK(cs_main);
 
-    int nHeight = params[0].get_int();
+    int64_t nHeight = params[0].get_int64();
     if (nHeight < 0 || nHeight > chainActive.Height())
         throw runtime_error("Block number out of range.");
 
