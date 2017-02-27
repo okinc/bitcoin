@@ -568,6 +568,15 @@ UniValue getblockbyheight(const UniValue& params, bool fHelp){
     bool fVerbose = true; //解码Block
     if (params.size() > 1)
         fVerbose = params[1].get_bool();
+
+    if (!fVerbose)
+    {
+        CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
+        ssBlock << block;
+        std::string strHex = HexStr(ssBlock.begin(), ssBlock.end());
+        return strHex;
+    }
+
     bool fDecode = false; //解码Transaction
     if(params.size() > 2)
         fDecode = params[2].get_bool();
