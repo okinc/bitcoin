@@ -562,6 +562,8 @@ UniValue getblockbyheight(const UniValue& params, bool fHelp){
 
     CBlockIndex* pblockindex = chainActive[nHeight];
     CBlock block;
+    if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Block not available (pruned data)");
     if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
 
