@@ -556,7 +556,7 @@ UniValue getblockbyheight(const UniValue& params, bool fHelp){
 
     LOCK(cs_main);
 
-    int64_t nHeight = params[0].get_int64();
+    int nHeight = params[0].get_int();
     if (nHeight < 0 || nHeight > chainActive.Height())
         throw runtime_error("Block number out of range.");
 
@@ -1241,7 +1241,8 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       true  },
     { "blockchain",         "getblockcount",          &getblockcount,          true  },
     { "blockchain",         "getblock",               &getblock,               true  },
-    { "blockchain",         "getblockhash",           &getblockhash,           true  },
+  { "blockchain",         "getblockbyheight",       &getblockbyheight,       true  },
+  { "blockchain",         "getblockhash",           &getblockhash,           true  },
     { "blockchain",         "getblockheader",         &getblockheader,         true  },
     { "blockchain",         "getchaintips",           &getchaintips,           true  },
     { "blockchain",         "getdifficulty",          &getdifficulty,          true  },
@@ -1253,7 +1254,6 @@ static const CRPCCommand commands[] =
     { "blockchain",         "gettxout",               &gettxout,               true  },
     { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        true  },
     { "blockchain",         "verifychain",            &verifychain,            true  },
-    { "blockchain",         "getblockbyheight",       &getblockbyheight,       true  },
 
     /* Not shown in help */
     { "hidden",             "invalidateblock",        &invalidateblock,        true  },
