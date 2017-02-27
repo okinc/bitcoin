@@ -69,6 +69,7 @@ void ConnPool::Init(int size){
     pthread_mutex_unlock(&lock);
 }
 
+
 void ConnPool::TerminateConnection(sql::Connection * conn){
     if(conn){
         try{
