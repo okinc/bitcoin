@@ -9,7 +9,7 @@
 #include "mysql_wrapper/okcoin_log.h"
 
 #define MONITOR_RETRY_DELAY	60
-#define SQL_WRITE_THREAD_COUNT   2
+#define SQL_WRITE_THREAD_COUNT   8
 
 using namespace std;
 using namespace boost;

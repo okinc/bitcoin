@@ -96,8 +96,9 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
         return ret;
 
 //    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
-    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
 	try{
+        std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
+
 		pstmtEvent->setInt(1, type);
 		pstmtEvent->setInt(2, action);
 		pstmtEvent->setString(3, hash);
@@ -107,7 +108,7 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 		ret = pstmtEvent->executeUpdate();
         pstmtEvent->close();
 	}catch(sql::SQLException &e){
-		LogPrint("okcoin_log", "okcoin_log Insert Event type=%d err %s \n", type, e.what());
+        LogPrint("okcoin_log Insert Event type=%d err %s \n", type, e.what());
         ret = -2;
 	}
      pConnPool->ReleaseConnection(pConn);
