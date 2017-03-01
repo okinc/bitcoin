@@ -91,27 +91,24 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 	assert(fInited == true);
     int ret = -1;
 #if LOG2DB
-     LogPrintf("okcoin_log", "log 1\n");
     sql::Connection *pConn = pConnPool->GetConnectionTry(100);
     if(pConn == NULL)
         return ret;
-LogPrintf("okcoin_log", "log 2\n");
-//    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
-    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
-	try{
-        LogPrintf("okcoin_log", "log 3\n");
+
+    try{
+    //    std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
+        std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("Insert into tb_btc_event(`type`,`action`,`hashcode`,`relayed_by`,`status`,`received_time`) Values(?,?,?,?,?,?)"));
+
 		pstmtEvent->setInt(1, type);
 		pstmtEvent->setInt(2, action);
 		pstmtEvent->setString(3, hash);
 		pstmtEvent->setString(4, fromip);
 		pstmtEvent->setInt(5, 0);
         pstmtEvent->setDateTime(6,DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetAdjustedTime()));
-        LogPrintf("okcoin_log", "log 4\n");
-		ret = pstmtEvent->executeUpdate();
-        LogPrintf("okcoin_log", "log 5\n");
+        ret = pstmtEvent->executeUpdate();
         pstmtEvent->close();
 	}catch(sql::SQLException &e){
-        LogPrintf("okcoin_log", "okcoin_log Insert Event type=%d err %s \n", type, e.what());
+        LogPrintf("okcoin_log Insert Event type=%d err %s \n", type, e.what());
         ret = -2;
 	}
      pConnPool->ReleaseConnection(pConn);
