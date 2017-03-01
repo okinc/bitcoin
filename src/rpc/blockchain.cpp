@@ -99,12 +99,12 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
     result.push_back(Pair("confirmations", (int)confirmations));
-    result.push_back(Pair("strippedsize", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS)));
+    //result.push_back(Pair("strippedsize", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS)));
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
-    result.push_back(Pair("weight", (int)::GetBlockWeight(block)));
+  //  result.push_back(Pair("weight", (int)::GetBlockWeight(block)));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", block.nVersion));
-    result.push_back(Pair("versionHex", strprintf("%08x", block.nVersion)));
+    //result.push_back(Pair("versionHex", strprintf("%08x", block.nVersion)));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
     UniValue txs(UniValue::VARR);
     BOOST_FOREACH(const CTransaction&tx, block.vtx)
@@ -118,7 +118,11 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
         else
             txs.push_back(tx.GetHash().GetHex());
     }
-    result.push_back(Pair("tx", txs));
+    if(txDetails)
+            result.push_back(Pair("tx", txs));
+     else
+            result.push_back(Pair("txid", txs));
+
     result.push_back(Pair("time", (uint64_t)block.GetBlockTime()));
     result.push_back(Pair("mediantime", (int64_t)blockindex->GetMedianTimePast()));
     result.push_back(Pair("nonce", (uint64_t)block.nNonce));
