@@ -108,7 +108,7 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 		ret = pstmtEvent->executeUpdate();
         pstmtEvent->close();
 	}catch(sql::SQLException &e){
-        LogPrint("okcoin_log Insert Event type=%d err %s \n", type, e.what());
+        LogPrintf("okcoin_log Insert Event type=%d err %s \n", type, e.what());
         ret = -2;
 	}
      pConnPool->ReleaseConnection(pConn);
