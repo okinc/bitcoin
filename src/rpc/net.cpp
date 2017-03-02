@@ -192,7 +192,9 @@ UniValue getpeerinfo(const UniValue& params, bool fHelp)
         ret.push_back(obj);
     }
 
-    return ret;
+    UniValue infos(UniValue::VOBJ);//使用infos节点 封装Array结果
+    infos.push_back(Pair("infos", ret)); //okcoin
+    return infos;
 }
 
 UniValue addnode(const UniValue& params, bool fHelp)
