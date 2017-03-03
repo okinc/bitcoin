@@ -49,11 +49,11 @@ void COKBlockChainMonitor::BuildEvent(const int &action, const CTransaction& tx,
     uint256 uuid = NewRandomUUID();
     string requestId = "event-" + NewRequestId(now, uuid);
 
-    if(!WriteCacheEvent(now, uuid, logEvent))
-    {
-        //TODO
-        LogPrintf("ok-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
-    }
+//    if(!WriteCacheEvent(now, uuid, logEvent))
+//    {
+//        //TODO
+//        LogPrintf("ok-- COKBlockChainMonitor:WriteCacheEvent fail event: %s\n",logEvent.ToString());
+//    }
 
     push_send(requestId, logEvent);
 
