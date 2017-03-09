@@ -121,7 +121,7 @@ int OKCoin_Log_Event(const int& type, const int& action, const std::string& hash
 }
 
 
-int OKCoin_Log_Event(const COKLogEvent &event){
+int OKCoin_Log_Event(const COKLogEvent event){
     if(!event.IsNull()){
        return OKCoin_Log_Event(event.mType, event.mAction, event.mHashCode, event.mFromIP);
     }

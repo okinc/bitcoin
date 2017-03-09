@@ -58,7 +58,7 @@ extern bool OKCoin_Log_deInit();
 * 2014/07/11 chenzs
 * type -- block:0 tx:1  
 */
-int OKCoin_Log_Event(const COKLogEvent &event);
+int OKCoin_Log_Event(const COKLogEvent event);
 int OKCoin_Log_Event(const int& type, int& action , const std::string& hash, const std::string& fromip="127.0.0.1");
 //剔除孤立数据
 int OKCoin_Log_EarseOrphaneBlk(std::string blkHash);

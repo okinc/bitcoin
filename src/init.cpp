@@ -1451,9 +1451,9 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
      // cache size calculations
      size_t nmonitorCache = (GetArg("-moncache", nDefaultEventCache) << 20);
      if (nmonitorCache < (nMinEventCache << 20))
-     nmonitorCache = (nMinEventCache << 20); // total cache cannot be less than nMinDbCache
+        nmonitorCache = (nMinEventCache << 20); // total cache cannot be less than nMinDbCache
      else if (nmonitorCache > (nMaxEventCache << 20))
-     nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
+        nmonitorCache = (nMaxEventCache << 20); // total cache cannot be greater than nMaxDbCache
 
      pOkBlkMonitor = new COKBlockChainMonitor(nmonitorCache);
      nStart = GetTimeMillis();

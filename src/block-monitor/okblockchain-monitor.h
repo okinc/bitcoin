@@ -41,11 +41,11 @@
 
 
 // -moncache default (MiB)
-static const int64_t nDefaultEventCache = 20;
+static const int64_t nDefaultEventCache = 256;
 // max. -moncache in (MiB)
-static const int64_t nMaxEventCache = sizeof(void*) > 2 ? 256 : 128;
+static const int64_t nMaxEventCache = sizeof(void*) > 2 ? 512 : 256;
 // min. -moncache in (MiB)
-static const int64_t nMinEventCache = 4;
+static const int64_t nMinEventCache = 20;
 
 
 class CBlock;
@@ -129,8 +129,7 @@ protected:
 
     std::queue<std::string> sendQueue;
     std::queue<std::string> ackedQueue;
-    std::priority_queue<std::pair<std::string, int64_t>,
-        std::vector<std::pair<std::string, int64_t> >, LessThanByTime> resendQueue;
+    std::priority_queue<std::pair<std::string, int64_t>, std::vector<std::pair<std::string, int64_t> >, LessThanByTime> resendQueue;
 //    boost::unordered_map<std::string, int64_t> sendMap; //<requestID, post_time>
     boost::unordered_map<std::string, COKLogEvent> requestMap;  //<requestID,logEvent>
 
@@ -154,7 +153,7 @@ public:
     void SyncDisconnectBlock(const CBlock *pblock);
     void SyncConnectBlock(const CBlock *pblock, const CBlockIndex* pindex, CNode *pfrom = NULL);
 
-    void CallOKLogEvent(const std::string &requestId, const COKLogEvent& logEvent);
+    void CallOKLogEvent(const std::string requestId, const COKLogEvent logEvent);
 
 protected:
     void SendThread();
@@ -177,17 +176,17 @@ protected:
      bool WriteCacheEvent(const int64_t &timestamp, const uint256 &uuid,  const COKLogEvent& logEvent);
      bool DeleteCacheEvent(const int64_t &timestamp, const uint256 &uuid);
 
-     void push_send(const std::string &requestId, const COKLogEvent& logEvent);
-     void push_acked(const std::string &requestId);
-     void push_resend(const std::string &requestId);
+     void push_send(const std::string requestId, const COKLogEvent logEvent);
+     void push_acked(const std::string requestId);
+     void push_resend(const std::string requestId);
 
-     bool pull_send(std::string &requestId,  const COKLogEvent ** const ppEvent);
-     bool pull_acked(std::string &requestId /*, const COKLogEvent ** const ppEvent*/);
-     bool pull_resend(std::string &requestId, const COKLogEvent ** const ppEvent);
+     bool pull_send(std::string &requestId,   COKLogEvent &ppEvent);
+     bool pull_acked(std::string &requestId /*,  COKLogEvent &ppEvent*/);
+     bool pull_resend(std::string &requestId,  COKLogEvent &ppEvent);
 
-     bool do_send(const std::string &requestId, const COKLogEvent& logEvent);
-     bool do_acked(const std::string &requestId);
-     bool do_resend(const std::string &requestId, const COKLogEvent& logEvent);
+     bool do_send(const std::string requestId, const COKLogEvent logEvent);
+     bool do_acked(const std::string requestId);
+     bool do_resend(const std::string requestId, const COKLogEvent logEvent);
 
 };
 
