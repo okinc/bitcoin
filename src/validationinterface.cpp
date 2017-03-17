@@ -75,3 +75,7 @@ void UnregisterAllValidationInterfaces() {
 void SyncWithWallets(const CTransaction &tx, const CBlockIndex *pindex, const CBlock *pblock) {
     g_signals.SyncTransaction(tx, pindex, pblock);
 }
+
+void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex){
+    g_signals.SyncConnectBlock(&block, pindex, boost::unordered_map<uint160, std::string>());
+}

@@ -563,6 +563,7 @@ void AddressMonitor::PostActionWrappedException(const std::string &requestId, co
 {
 	try
 	{
+        LogAddrmon("PostAction requestId:" + requestId + "\n body:" +body +"\n");
         const string host = GetArg("-addrmon_host", "127.0.0.1");
         const int port = GetArg("-addrmon_port", 80);
         const string url = GetArg("-addrmon_url", "");
