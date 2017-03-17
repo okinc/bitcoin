@@ -63,7 +63,7 @@
 
 // OKCoin monitor
 #include "address-monitor/address-monitor.h"
-#include "block-monitor/block-monitor.h"
+#include "address-monitor/block-monitor.h"
 
 using namespace std;
 
@@ -1457,12 +1457,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     paddressMonitor = new AddressMonitor(nmonitorCache);
     nStart = GetTimeMillis();
     printf("Start loading monitor address...\n");
-    paddressMonitor->Load();
+    paddressMonitor->Start();
     printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
     pblockMonitor = new BlockMonitor(nmonitorCache);
     nStart = GetTimeMillis();
     printf("Start loading monitor block...\n");
-    pblockMonitor->Load();
+    pblockMonitor->Start();
     printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
 
     // ********************************************************* Step 8: load wallet

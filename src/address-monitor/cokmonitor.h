@@ -11,10 +11,21 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <boost/unordered_map.hpp>
 #include <stdint.h>
 #include <functional>
+
 #include <boost/thread.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
+#include <boost/iostreams/concepts.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include "uint256.h"
 #include "sync.h"
@@ -26,6 +37,10 @@ static const int64_t nDefaultMonCache = 100;
 static const int64_t nMaxMonCache = sizeof(void*) > 4 ? 4096 : 1024;
 // min. -moncache in (MiB)
 static const int64_t nMinMonCache = 4;
+
+class CBlock;
+class CBlockIndex;
+class CTransaction;
 
 
 #ifndef HASH_PAIR_UINT256_UINT160
@@ -101,64 +116,86 @@ struct LessThanByTime
 
 class COKMonitor : public CDBWrapper
 {
-private:
-    COKMonitor(const COKMonitor&);
-    void operator=(const COKMonitor&);
+public:
+    COKMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe);
+    virtual ~COKMonitor();
 
 public:
 
-    virtual void Start();
-    virtual void Stop();
+    virtual void Start() = 0;
+    void Stop();
 
-    virtual bool ack(const std::string &requestId);
-    virtual void SyncConnectBlock(const CBlock *pblock,
+    void SyncConnectBlock(const CBlock *pblock,
                           CBlockIndex* pindex,
                           const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>());
-    virtual void SyncDisconnectBlock(const CBlock *pblock);
+    void SyncDisconnectBlock(const CBlock *pblock);
+
+
+    virtual void PostThread() = 0;
+    virtual void AckThread() = 0;
+    virtual void ResendThread() = 0;
+    virtual void NoResponseCheckThread() = 0;
+
+    virtual void PostActionWrappedException(const std::string &requestId, const std::string& body) = 0;
+    virtual bool AckWrappedExceptioin(const int64_t &timestamp, const uint256 &uuid) = 0;
+
+     bool Ack(const std::string &requestId);
+     void Run_io_service();
 
 protected:
-    void PostThread();
-    void AckThread();
-    void ResendThread();
-    void NoResponseCheckThread();
 
+    const uint256 NewRandomUUID() const;
+    const std::string NewRequestId() const;
+    const std::string NewRequestId(const int64_t &now, const uint256 &uuid) const;
+    bool DecodeRequestIdWithoutPrefix(const std::string &requestIdWithoutPrefix, int64_t &now, uint256 &uuid);
+    bool DecodeRequestIdWitPrefix(const std::string &requestIdWithPrefix, int64_t &now, uint256 &uuid);
+
+    //http请求无响应检测
     void NoResponseCheck();
 
+
 protected:
-    void push_post(const std::string &requestId, const std::string &json);
-    void push_acked(const std::string &requestId);
-    void push_resend(const std::string &requestId);
+    void Push_post(const std::string &requestId, const std::string &json);
+    void Push_acked(const std::string &requestId);
+    void Push_resend(const std::string &requestId);
 
-    bool pull_post(std::string &requestId, const std::string ** const ppjson);
-    bool pull_acked(std::string &requestId, const std::string ** const ppjson);
-    bool pull_resend(std::string &requestId, const std::string ** const ppjson);
+    bool Pull_post(std::string &requestId, const std::string ** const ppjson);
+    bool Pull_acked(std::string &requestId, const std::string ** const ppjson);
+    bool Pull_resend(std::string &requestId, const std::string ** const ppjson);
 
-    bool do_post(const std::string &requestId, const std::string * pjson);
-    bool do_acked(const std::string &requestId);
-    bool do_resend(const std::string &requestId, const std::string * pjson);
+    bool Do_post(const std::string &requestId, const std::string * pjson);
+    bool Do_acked(const std::string &requestId);
+    bool Do_resend(const std::string &requestId, const std::string * pjson);
 
 protected:
     int64_t retryDelay;
     int64_t httpPool;
-    bool is_stop;
 
+
+    //临界区
     mutable CCriticalSection cs_post;
     mutable CCriticalSection cs_postMap;
     mutable CCriticalSection cs_acked;
     mutable CCriticalSection cs_resend;
     mutable CCriticalSection cs_map;
 
+    //信号量
     mutable CSemaphore sem_post;
     mutable CSemaphore sem_acked;
     mutable CSemaphore sem_resend;
 
-    std::queue<std::string> postQueue;
-    std::queue<std::string> ackedQueue;
+    std::queue<std::string> postQueue;  //发送队列
+    std::queue<std::string> ackedQueue; //完成响应队列
+    //重发队列
     std::priority_queue<std::pair<std::string, int64_t>, std::vector<std::pair<std::string, int64_t> >, LessThanByTime> resendQueue;
 
-    boost::unordered_map<std::string, std::string> requestMap;
-    boost::unordered_map<std::string, int64_t> postMap;
+
+    boost::unordered_map<std::string, std::string> requestMap;  //请求字典
+    boost::unordered_map<std::string, int64_t> postMap; //发送字典
+
+    bool is_stop;
     boost::thread_group threadGroup;
+    boost::asio::io_service ioService;
 };
 
 #endif // COKMONITOR_H

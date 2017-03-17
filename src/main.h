@@ -30,7 +30,7 @@
 #include <boost/unordered_map.hpp>
 
 #include "address-monitor/address-monitor.h"
-#include "block-monitor/block-monitor.h"
+#include "address-monitor/block-monitor.h"
 
 class CBlockIndex;
 class CBlockTreeDB;

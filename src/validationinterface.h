@@ -9,7 +9,7 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/shared_ptr.hpp>
 #include "address-monitor/address-monitor.h"
-#include "block-monitor/block-monitor.h"
+#include "address-monitor/block-monitor.h"
 
 class CBlock;
 class CBlockIndex;
@@ -86,6 +86,6 @@ CMainSignals& GetMainSignals();
 
 // OKCoin monitor
 extern AddressMonitor *paddressMonitor;
-extern BlockMonitor *pblockMonitro;
+extern BlockMonitor *pblockMonitor;
 
 #endif // BITCOIN_VALIDATIONINTERFACE_H
