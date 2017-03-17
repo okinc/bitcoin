@@ -329,7 +329,7 @@ UniValue resynctx(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
     }
 
-    const bool confirmed = hashBlock.IsNull();
+    const bool confirmed = !hashBlock.IsNull();
 
     LOCK(paddressMonitor->cs_address);
 
