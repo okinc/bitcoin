@@ -96,13 +96,6 @@ UniValue CallHttpPost(const std::string host, const int port, const std::string 
     else if (response.body.empty())
         throw runtime_error("no response from server");
 
-    // Parse reply
-    UniValue valReply(UniValue::VSTR);
-    if (!valReply.read(response.body))
-        throw runtime_error("couldn't parse reply from server");
-    const UniValue& reply = valReply.get_obj();
-    if (reply.empty())
-        throw runtime_error("expected reply to have result, error and id properties");
 
-    return reply;
+    return UniValue::replay(response.body);
 }
