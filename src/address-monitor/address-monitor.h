@@ -11,7 +11,7 @@
 #include "cokmonitor.h"
 
 #define ADDRMON_RETRY_DELAY	600
-#define ADDRMON_HTTP_POOL	10
+#define ADDRMON_HTTP_POOL	20
 
 
 

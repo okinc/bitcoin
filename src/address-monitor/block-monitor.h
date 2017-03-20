@@ -11,7 +11,7 @@
 #include "cokmonitor.h"
 
 #define BLOCKMON_RETRY_DELAY	600
-#define BLOCKMON_HTTP_POOL	10
+#define BLOCKMON_HTTP_POOL	5
 
 
 
