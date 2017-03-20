@@ -37,6 +37,7 @@ using boost::unordered_map;
 
 static void CallPostActionWrappedException(COKMonitor* self, const std::string &requestId, const string& body)
 {
+
     self->PostActionWrappedException(requestId, body);
 }
 
@@ -44,7 +45,7 @@ static void CallPostActionWrappedException(COKMonitor* self, const std::string &
 COKMonitor::COKMonitor(const boost::filesystem::path& path, size_t nCacheSize, bool fMemory, bool fWipe):
     CDBWrapper(path, nCacheSize, fMemory, fWipe),retryDelay(500),httpPool(10),sem_post(0),sem_acked(0),sem_resend(0),is_stop(false)
 {
-    boost::asio::io_service::work threadPool(ioService);
+
 }
 
 COKMonitor::~COKMonitor() {

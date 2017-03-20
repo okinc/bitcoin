@@ -26,13 +26,7 @@ using namespace boost::asio;
 using boost::lexical_cast;
 using boost::unordered_map;
 
-//static boost::asio::io_service ioService;
-//static boost::asio::io_service::work threadPool(ioService);
 
-//static void io_service_run(void)
-//{
-//	ioService.run();
-//}
 
 static void io_service_run(BlockMonitor *self)
 {
@@ -63,6 +57,7 @@ BlockMonitor::BlockMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 {
 	retryDelay = GetArg("-blockmon_retry_delay", BLOCKMON_RETRY_DELAY);
 	httpPool = GetArg("-blockmon_http_pool", BLOCKMON_HTTP_POOL);
+    static boost::asio::io_service::work threadPool(ioService);
 }
 
 BlockMonitor::~BlockMonitor()

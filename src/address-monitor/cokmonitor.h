@@ -163,9 +163,9 @@ protected:
     bool Pull_acked(std::string &requestId, const std::string ** const ppjson);
     bool Pull_resend(std::string &requestId, const std::string ** const ppjson);
 
-    bool Do_post(const std::string &requestId, const std::string * pjson);
-    bool Do_acked(const std::string &requestId);
-    bool Do_resend(const std::string &requestId, const std::string * pjson);
+    virtual bool Do_post(const std::string &requestId, const std::string * pjson);
+    virtual bool Do_acked(const std::string &requestId);
+    virtual bool Do_resend(const std::string &requestId, const std::string * pjson);
 
 protected:
     int64_t retryDelay;

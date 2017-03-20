@@ -28,6 +28,7 @@ AddressMonitor::AddressMonitor(size_t nCacheSize, bool fMemory, bool fWipe) :
 {
 	retryDelay = GetArg("-addrmon_retry_delay", ADDRMON_RETRY_DELAY);
 	httpPool = GetArg("-addrmon_http_pool", ADDRMON_HTTP_POOL);
+    static boost::asio::io_service::work threadPool(ioService);
 }
 
 AddressMonitor::~AddressMonitor()
