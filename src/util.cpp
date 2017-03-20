@@ -858,9 +858,12 @@ bool LogAddrmon(const std::string &str)
             setbuf(addrmonout, NULL); // unbuffered
     }
 
-    int ret = fwrite(str.data(), 1, str.size(), addrmonout);
+    static bool fStartedNewLine = true;
+    string strTimestamped = LogTimestampStr(str, &fStartedNewLine);
 
-    return ret == str.size();
+    int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), blockmonout);
+
+    return ret == strTimestamped.size();
 }
 
 
@@ -898,9 +901,11 @@ bool LogBlock(const std::string &str)
             if (freopen(pathBlockmon.string().c_str(), "a", blockmonout) != NULL)
                 setbuf(blockmonout, NULL); // unbuffered
         }
+        static bool fStartedNewLine = true;
+        string strTimestamped = LogTimestampStr(str, &fStartedNewLine);
 
-        int ret = fwrite(str.data(), 1, str.size(), blockmonout);
+        int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), blockmonout);
 
-        return ret == str.size();
+        return ret == strTimestamped.size();
 }
 
