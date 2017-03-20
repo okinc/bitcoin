@@ -76,7 +76,7 @@ UniValue CallHttpPost(const std::string host, const int port, const std::string 
     assert(output_buffer);
     evbuffer_add(output_buffer, body.data(), body.size());
 
-    int r = evhttp_make_request(evcon, req, EVHTTP_REQ_POST, "/");
+    int r = evhttp_make_request(evcon, req, EVHTTP_REQ_POST, url.c_str());
     if (r != 0) {
         evhttp_connection_free(evcon);
         event_base_free(base);
