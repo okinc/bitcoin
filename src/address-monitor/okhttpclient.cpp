@@ -96,6 +96,5 @@ UniValue CallHttpPost(const std::string host, const int port, const std::string 
     else if (response.body.empty())
         throw runtime_error("no response from server");
 
-
-    return UniValue::replay(response.body);
+    return response.body;
 }
