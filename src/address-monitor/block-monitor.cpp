@@ -227,7 +227,8 @@ void BlockMonitor::PostActionWrappedException(const std::string &requestId, cons
         const string url = GetArg("-blockmon_url", "/");
 
         UniValue reply = CallHttpPost(host, port, url, body);
-        if (reply.getValStr() == "true") {
+        if (reply.getValStr() == "true" || reply.getValStr() == "false") {
+            //false 为接收端不处理，可以完成acked 2017、03、21)
             Push_acked(requestId);
             LogBlock("success reply -> requestId: "+requestId+"\n");
         } else {

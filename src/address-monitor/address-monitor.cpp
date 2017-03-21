@@ -569,7 +569,7 @@ void AddressMonitor::PostActionWrappedException(const std::string &requestId, co
         const int port = GetArg("-addrmon_port", 80);
         const string url = GetArg("-addrmon_url", "");
         UniValue reply = CallHttpPost(host, port, url, body);
-        if (reply.getValStr() == "true") {
+        if (reply.getValStr() == "true" || reply.getValStr() == "false") {
             Push_acked(requestId);
             LogAddrmon("success reply -> requestId: "+requestId+"\n");
         } else {
