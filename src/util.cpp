@@ -861,7 +861,7 @@ bool LogAddrmon(const std::string &str)
     static bool fStartedNewLine = true;
     string strTimestamped = LogTimestampStr(str, &fStartedNewLine);
 
-    int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), blockmonout);
+    int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), addrmonout);
 
     return ret == strTimestamped.size();
 }
