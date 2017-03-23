@@ -863,7 +863,7 @@ bool LogAddrmon(const std::string &str)
 
     int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), addrmonout);
 
-    return ret == strTimestamped.size();
+    return ret == (int)strTimestamped.size();
 }
 
 
@@ -906,6 +906,6 @@ bool LogBlock(const std::string &str)
 
         int ret = fwrite(strTimestamped.data(), 1, strTimestamped.size(), blockmonout);
 
-        return ret == strTimestamped.size();
+        return ret == (int)strTimestamped.size();
 }
 

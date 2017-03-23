@@ -248,7 +248,7 @@ void BlockMonitor::PostActionWrappedException(const std::string &requestId, cons
 
 bool BlockMonitor::AckWrappedExceptioin(const int64_t &timestamp, const uint256 &uuid)
 {
-    DeleteBlock(timestamp, uuid);
+    return DeleteBlock(timestamp, uuid);
 }
 
 
