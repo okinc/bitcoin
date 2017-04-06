@@ -94,7 +94,7 @@ UniValue CallHttpPost(const std::string host, const int port, const std::string 
     else if (response.status >= 400 && response.status != HTTP_BAD_REQUEST && response.status != HTTP_NOT_FOUND && response.status != HTTP_INTERNAL_SERVER_ERROR)
         throw runtime_error(strprintf("server returned HTTP error %d", response.status));
     else if (response.body.empty())
-        throw runtime_error("no response from server");
+        throw runtime_error("no response from server,%d", response.status);
 
     return response.body;
 }
