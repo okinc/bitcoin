@@ -873,7 +873,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
     UniValue result(UniValue::VOBJ);
 
     if (!DecodeHexTx(tx, params[0].get_str()))
-        result = JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+        result = JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX_decode_failed");
     uint256 hashTx = tx.GetHash();
 
     CAmount nMaxRawTxFee = maxTxFee;
@@ -899,13 +899,13 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
             }
         }
     } else if (fHaveChain) {
-        result = JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction already in block chain");
+        result = JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction_already_in_block_chain");
     }
 
 
     if (result.isNull()) {
          RelayTransaction(tx);
-         result = JSONRPCError(0, "send success");
+         result = JSONRPCError(0, "send_success");
          result.push_back(Pair("txid", hashTx.GetHex()));
     }
 

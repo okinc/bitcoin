@@ -53,7 +53,7 @@ string JSONRPCReply(const UniValue& result, const UniValue& error, const UniValu
     return reply.write() + "\n";
 }
 
-UniValue JSONRPCError(int code, const string& message)
+UniValue JSONRPCError(int code, std::string& message)
 {
     UniValue error(UniValue::VOBJ);
     error.push_back(Pair("code", code));
