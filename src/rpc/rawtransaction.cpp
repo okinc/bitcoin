@@ -870,8 +870,10 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     // parse hex string from parameter
     CTransaction tx;
+    UniValue result(UniValue::VOBJ);
+
     if (!DecodeHexTx(tx, params[0].get_str()))
-        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+        result = JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
     uint256 hashTx = tx.GetHash();
 
     CAmount nMaxRawTxFee = maxTxFee;
@@ -888,20 +890,28 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
         bool fMissingInputs;
         if (!AcceptToMemoryPool(mempool, state, tx, false, &fMissingInputs, false, nMaxRawTxFee)) {
             if (state.IsInvalid()) {
-                throw JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
+                result = JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
             } else {
                 if (fMissingInputs) {
-                    throw JSONRPCError(RPC_TRANSACTION_ERROR, "Missing inputs");
+                    result = JSONRPCError(RPC_TRANSACTION_ERROR, "Missing inputs");
                 }
-                throw JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
+                result = JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
             }
         }
     } else if (fHaveChain) {
-        throw JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction already in block chain");
+        result = JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction already in block chain");
     }
-    RelayTransaction(tx);
 
-    return hashTx.GetHex();
+
+    if (result.isNull()) {
+         RelayTransaction(tx);
+         result = JSONRPCError(0, "send success");
+         result.push_back(Pair("txid", hashTx.GetHex()));
+    }
+
+    return result;
+
+    //return hashTx.GetHex();
 }
 
 static const CRPCCommand commands[] =
