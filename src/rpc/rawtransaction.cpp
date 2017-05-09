@@ -907,8 +907,8 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     if (result.isNull()) {
          RelayTransaction(tx);
-         result.push_back("code", 0));
-         result.push_back("message", "success"));
+         result.push_back(Pair("code", 0));
+         result.push_back(Pair("message", "success"));
          result.push_back(Pair("txid", hashTx.GetHex()));
     }
 
