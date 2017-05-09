@@ -894,7 +894,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
             } else {
                 if (fMissingInputs) {
 //                    result = JSONRPCError(RPC_TRANSACTION_ERROR, "missing_inputs");
-                    result.pushKV("code", RPC_TRANSACTION_ERROR)
+                    result.pushKV("code", RPC_TRANSACTION_ERROR);
                     result.pushKV("message", "missing_inputs");
                 }
                 result = JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
@@ -907,9 +907,9 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     if (result.isNull()) {
          RelayTransaction(tx);
-         result.push_back(Pair("code", 0));
-         result.push_back(Pair("message", "success"));
-         result.push_back(Pair("txid", hashTx.GetHex()));
+         result.pushKV("code", 0);
+         result.puskKV("message", "success");
+         result.puskKV("txid", hashTx.GetHex());
     }
 
     return result;
