@@ -893,7 +893,9 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
                 result = JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
             } else {
                 if (fMissingInputs) {
-                    result = JSONRPCError(RPC_TRANSACTION_ERROR, "missing_inputs");
+//                    result = JSONRPCError(RPC_TRANSACTION_ERROR, "missing_inputs");
+                    result.push_back(Pair("code", RPC_TRANSACTION_ERROR));
+                    result.push_back(Pair("message", "missing_inputs"));
                 }
                 result = JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
             }
@@ -905,7 +907,8 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     if (result.isNull()) {
          RelayTransaction(tx);
-         result = JSONRPCError(0, "send_success");
+         result.push_back("code", 0));
+         result.push_back("message", "success"));
          result.push_back(Pair("txid", hashTx.GetHex()));
     }
 
