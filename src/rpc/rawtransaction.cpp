@@ -893,7 +893,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
                 result = JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
             } else {
                 if (fMissingInputs) {
-                    result = JSONRPCError(RPC_TRANSACTION_ERROR, "missing inputs");
+                 //   result = JSONRPCError(RPC_TRANSACTION_ERROR, "missing inputs");
                 } else {
                     result = JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
                 }
