@@ -195,14 +195,23 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
         addressRet = pubKey.GetID();
         return true;
     }
-    else if (whichType == TX_PUBKEYHASH)
+    else if (whichType == TX_PUBKEYHASH || whichType == TX_WITNESS_V0_KEYHASH)
     {
+        // 隔离验证地址 chenzs 2017/05/15
         addressRet = CKeyID(uint160(vSolutions[0]));
         return true;
     }
     else if (whichType == TX_SCRIPTHASH)
     {
         addressRet = CScriptID(uint160(vSolutions[0]));
+        return true;
+    }
+    else if (whichType == TX_WITNESS_V0_SCRIPTHASH)
+    {
+        // 隔离验证地址 chenzs 2017/05/15
+        uint160 hash;
+        CRIPEMD160().Write(&vSolutions[0][0], vSolutions[0].size()).Finalize(hash.begin());
+        addressRet = CScriptID(hash);
         return true;
     }
     // Multisig txns have more than one address...
