@@ -908,7 +908,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
     }
 
 
-    if (result.isNull()) {
+    if (result.empty()) {
          RelayTransaction(tx);
          result.pushKV("code", 0);
          result.pushKV("message", "success");
