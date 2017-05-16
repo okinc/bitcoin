@@ -873,7 +873,10 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
     UniValue result(UniValue::VOBJ);
 
     if (!DecodeHexTx(tx, params[0].get_str()))
+    {
         result = JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+        return result;
+    }
     uint256 hashTx = tx.GetHash();
 
     CAmount nMaxRawTxFee = maxTxFee;
