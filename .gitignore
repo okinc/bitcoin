@@ -110,3 +110,11 @@ qa/cache/*
 
 libbitcoinconsensus.pc
 contrib/devtools/split-debug.sh
+oklink_bitcoin.config
+oklink_bitcoin.creator
+oklink_bitcoin.creator.user
+oklink_bitcoin.files
+oklink_bitcoin.includes
+oklink_onchain.creator.user
+qa/pull-tester/run-bitcoind-for-test.sh
+qa/pull-tester/tests-config.sh
