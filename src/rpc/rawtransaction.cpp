@@ -884,6 +884,7 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
     LOCK(cs_main);
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL));
     //OKCoin monitor
+    UniValue result(UniValue::VOBJ); // add by okmonitor use json return
 
     // parse hex string from parameter
     CMutableTransaction mtx;
