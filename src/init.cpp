@@ -61,6 +61,11 @@
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
 
+// OKCoin monitor
+#include "address-monitor/address-monitor.h"
+#include "address-monitor/block-monitor.h"
+
+
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
 #endif
@@ -226,6 +231,27 @@ void Shutdown()
 
     {
         LOCK(cs_main);
+        //OKCoin monitor
+        if(paddressMonitor)
+        {
+            paddressMonitor->Stop();
+            paddressMonitor->Sync();
+            paddressMonitor->Flush();
+        }
+
+        if(pblockMonitor)
+        {
+            pblockMonitor->Stop();
+            pblockMonitor->Sync();
+            pblockMonitor->Flush();
+        }
+
+        delete paddressMonitor;
+        paddressMonitor = NULL;
+        delete pblockMonitor;
+        pblockMonitor = NULL;
+
+
         if (pcoinsTip != NULL) {
             FlushStateToDisk();
         }
@@ -1546,6 +1572,27 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!est_filein.IsNull())
         mempool.ReadFeeEstimates(est_filein);
     fFeeEstimatesInitialized = true;
+
+    // OKCoin monitor
+    // ********************************************************* Step 7.5: load monitored addresses
+    // cache size calculations
+    size_t nmonitorCache = (GetArg("-moncache", nDefaultMonCache) << 20);
+    if (nmonitorCache < (nMinMonCache << 20))
+        nmonitorCache = (nMinMonCache << 20); // total cache cannot be less than nMinDbCache
+    else if (nmonitorCache > (nMaxMonCache << 20))
+        nmonitorCache = (nMaxMonCache << 20); // total cache cannot be greater than nMaxDbCache
+
+    paddressMonitor = new AddressMonitor(nmonitorCache);
+    nStart = GetTimeMillis();
+    printf("Start loading monitor address...\n");
+    paddressMonitor->Start();
+    printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
+    pblockMonitor = new BlockMonitor(nmonitorCache);
+    nStart = GetTimeMillis();
+    printf("Start loading monitor block...\n");
+    pblockMonitor->Start();
+    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET

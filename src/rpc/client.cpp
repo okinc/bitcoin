@@ -129,6 +129,14 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "echojson", 7, "arg7" },
     { "echojson", 8, "arg8" },
     { "echojson", 9, "arg9" },
+    //OKCoin monitor
+    {"addmonitor", 1, "address"},
+    {"delmonitor", 1, "address"},
+    {"ismonitor", 1, "address"},
+    {"ackmonitor", 1, "requetId"},
+    {"ackblock", 1, "requetId"},
+    {"resynctx", 1, "txid"},
+    {"rescan", 2, "block"},
 };
 
 class CRPCConvertTable

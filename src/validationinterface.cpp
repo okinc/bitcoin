@@ -12,6 +12,10 @@ CMainSignals& GetMainSignals()
     return g_signals;
 }
 
+// OKCoin monitor
+AddressMonitor *paddressMonitor = NULL;
+BlockMonitor *pblockMonitor = NULL;
+
 void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.UpdatedBlockTip.connect(boost::bind(&CValidationInterface::UpdatedBlockTip, pwalletIn, _1, _2, _3));
     g_signals.SyncTransaction.connect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2, _3));
@@ -23,6 +27,14 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.ScriptForMining.connect(boost::bind(&CValidationInterface::GetScriptForMining, pwalletIn, _1));
     g_signals.BlockFound.connect(boost::bind(&CValidationInterface::ResetRequestCount, pwalletIn, _1));
     g_signals.NewPoWValidBlock.connect(boost::bind(&CValidationInterface::NewPoWValidBlock, pwalletIn, _1, _2));
+
+    //OKCoin monitor
+    g_signals.SyncTransaction.connect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.connect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.connect(boost::bind(&AddressMonitor::SyncDisconnectBlock, paddressMonitor, _1));
+
+    g_signals.SyncConnectBlock.connect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.connect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
 void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
@@ -36,6 +48,14 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.SyncTransaction.disconnect(boost::bind(&CValidationInterface::SyncTransaction, pwalletIn, _1, _2, _3));
     g_signals.UpdatedBlockTip.disconnect(boost::bind(&CValidationInterface::UpdatedBlockTip, pwalletIn, _1, _2, _3));
     g_signals.NewPoWValidBlock.disconnect(boost::bind(&CValidationInterface::NewPoWValidBlock, pwalletIn, _1, _2));
+
+    //OKCoin monitor
+    g_signals.SyncTransaction.disconnect(boost::bind(&AddressMonitor::SyncTransaction, paddressMonitor, _1, _2, _3));
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&AddressMonitor::SyncConnectBlock, paddressMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&AddressMonitor::SyncDisconnectBlock, paddressMonitor, _1));
+
+    g_signals.SyncConnectBlock.disconnect(boost::bind(&BlockMonitor::SyncConnectBlock, pblockMonitor, _1, _2, _3));
+    g_signals.SyncDisconnectBlock.disconnect(boost::bind(&BlockMonitor::SyncDisconnectBlock, pblockMonitor, _1));
 }
 
 void UnregisterAllValidationInterfaces() {
@@ -49,4 +69,13 @@ void UnregisterAllValidationInterfaces() {
     g_signals.SyncTransaction.disconnect_all_slots();
     g_signals.UpdatedBlockTip.disconnect_all_slots();
     g_signals.NewPoWValidBlock.disconnect_all_slots();
+
+    //OKCoin monitor
+    g_signals.SyncConnectBlock.disconnect_all_slots();
+    g_signals.SyncDisconnectBlock.disconnect_all_slots();
+}
+
+//OKCoin monitor
+void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex){
+    g_signals.SyncConnectBlock(&block, pindex, boost::unordered_map<uint160, std::string>());
 }

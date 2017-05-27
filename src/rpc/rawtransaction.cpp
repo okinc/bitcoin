@@ -883,11 +883,15 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
 
     LOCK(cs_main);
     RPCTypeCheck(request.params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL));
+    //OKCoin monitor
 
     // parse hex string from parameter
     CMutableTransaction mtx;
-    if (!DecodeHexTx(mtx, request.params[0].get_str()))
-        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+    if (!DecodeHexTx(mtx, request.params[0].get_str())) {
+     result = JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+     return result;
+    }
+
     CTransactionRef tx(MakeTransactionRef(std::move(mtx)));
     const uint256& hashTx = tx->GetHash();
 
@@ -906,26 +910,39 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
         bool fMissingInputs;
         if (!AcceptToMemoryPool(mempool, state, std::move(tx), fLimitFree, &fMissingInputs, NULL, false, nMaxRawTxFee)) {
             if (state.IsInvalid()) {
-                throw JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
+               result = JSONRPCError(RPC_TRANSACTION_REJECTED, strprintf("%i: %s", state.GetRejectCode(), state.GetRejectReason()));
             } else {
                 if (fMissingInputs) {
-                    throw JSONRPCError(RPC_TRANSACTION_ERROR, "Missing inputs");
+                     result = JSONRPCError(RPC_TRANSACTION_ERROR, "Missing inputs");
                 }
-                throw JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
+                else {
+                  result = JSONRPCError(RPC_TRANSACTION_ERROR, state.GetRejectReason());
+                }
+
             }
         }
     } else if (fHaveChain) {
-        throw JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction already in block chain");
+        result = JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN, "transaction already in_block chain");
     }
-    if(!g_connman)
-        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    CInv inv(MSG_TX, hashTx);
-    g_connman->ForEachNode([&inv](CNode* pnode)
-    {
-        pnode->PushInventory(inv);
-    });
-    return hashTx.GetHex();
+    //OKCoin monitor
+
+    if (result.empty()) {
+        if(!g_connman)
+            throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+
+        CInv inv(MSG_TX, hashTx);
+        g_connman->ForEachNode([&inv](CNode* pnode)
+        {
+            pnode->PushInventory(inv);
+        });
+
+        result.pushKV("code", 0);
+        result.pushKV("message", "success");
+        result.pushKV("txid", hashTx.GetHex());
+    }
+
+    return result;
 }
 
 static const CRPCCommand commands[] =

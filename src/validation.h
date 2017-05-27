@@ -32,6 +32,10 @@
 #include <boost/unordered_map.hpp>
 #include <boost/filesystem/path.hpp>
 
+//OKCoin monitor
+#include "address-monitor/address-monitor.h"
+#include "address-monitor/block-monitor.h"
+
 class CBlockIndex;
 class CBlockTreeDB;
 class CBloomFilter;
@@ -575,5 +579,9 @@ void DumpMempool();
 
 /** Load the mempool from disk. */
 bool LoadMempool();
+
+// OKCoin Monitor
+extern AddressMonitor *paddressMonitor;
+extern BlockMonitor *pblockMonitor;
 
 #endif // BITCOIN_VALIDATION_H

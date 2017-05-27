@@ -10,6 +10,10 @@
 #include <boost/shared_ptr.hpp>
 #include <memory>
 
+#include "address-monitor/address-monitor.h"
+#include "address-monitor/block-monitor.h"
+
+
 class CBlock;
 class CBlockIndex;
 struct CBlockLocator;
@@ -30,6 +34,9 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn);
 /** Unregister all wallets from core */
 void UnregisterAllValidationInterfaces();
 
+/** add by oklink*/
+void SyncWithBlock(const CBlock& block,  CBlockIndex* pindex);
+
 class CValidationInterface {
 protected:
     virtual void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {}
@@ -42,9 +49,17 @@ protected:
     virtual void GetScriptForMining(boost::shared_ptr<CReserveScript>&) {};
     virtual void ResetRequestCount(const uint256 &hash) {};
     virtual void NewPoWValidBlock(const CBlockIndex *pindex, const std::shared_ptr<const CBlock>& block) {};
+
+    // OKCoin Monitor
+    virtual void SyncConnectBlock(const CBlock *pblock, CBlockIndex* pindex, const boost::unordered_map<uint160, std::string> &addresses=boost::unordered_map<uint160, std::string>()) {};
+    virtual void SyncDisconnectBlock(const CBlock *pblock) {};
+
+
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterAllValidationInterfaces();
+
+
 };
 
 struct CMainSignals {
@@ -79,8 +94,18 @@ struct CMainSignals {
      * Notifies listeners that a block which builds directly on our current tip
      * has been received and connected to the headers tree, though not validated yet */
     boost::signals2::signal<void (const CBlockIndex *, const std::shared_ptr<const CBlock>&)> NewPoWValidBlock;
+
+    // OKCoin monitor
+    // Notifies listeners of updated transaction data (passing hash, transaction, and optionally the block it is found in.
+    boost::signals2::signal<void (const CBlock *, CBlockIndex*, const boost::unordered_map<uint160, std::string> &)> SyncConnectBlock;
+    boost::signals2::signal<void (const CBlock *)> SyncDisconnectBlock;
+
 };
 
 CMainSignals& GetMainSignals();
+
+// OKCoin monitor
+extern AddressMonitor *paddressMonitor;
+extern BlockMonitor *pblockMonitor;
 
 #endif // BITCOIN_VALIDATIONINTERFACE_H
