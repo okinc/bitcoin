@@ -895,6 +895,27 @@ bool AppInitBasicSetup()
 
     std::set_new_handler(new_handler_terminate);
 
+    // OKCoin monitor
+    // ********************************************************* Step 1.5: load monitored addresses
+    // cache size calculations
+    size_t nmonitorCache = (GetArg("-moncache", nDefaultMonCache) << 20);
+    if (nmonitorCache < (nMinMonCache << 20))
+        nmonitorCache = (nMinMonCache << 20); // total cache cannot be less than nMinDbCache
+    else if (nmonitorCache > (nMaxMonCache << 20))
+        nmonitorCache = (nMaxMonCache << 20); // total cache cannot be greater than nMaxDbCache
+
+    paddressMonitor = new AddressMonitor(nmonitorCache);
+    int64_t nStart = GetTimeMillis();
+    printf("Start loading monitor address...\n");
+    paddressMonitor->Start();
+    printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
+    pblockMonitor = new BlockMonitor(nmonitorCache);
+    nStart = GetTimeMillis();
+    printf("Start loading monitor block...\n");
+    pblockMonitor->Start();
+    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
+
+
     return true;
 }
 
@@ -1572,27 +1593,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!est_filein.IsNull())
         mempool.ReadFeeEstimates(est_filein);
     fFeeEstimatesInitialized = true;
-
-    // OKCoin monitor
-    // ********************************************************* Step 7.5: load monitored addresses
-    // cache size calculations
-    size_t nmonitorCache = (GetArg("-moncache", nDefaultMonCache) << 20);
-    if (nmonitorCache < (nMinMonCache << 20))
-        nmonitorCache = (nMinMonCache << 20); // total cache cannot be less than nMinDbCache
-    else if (nmonitorCache > (nMaxMonCache << 20))
-        nmonitorCache = (nMaxMonCache << 20); // total cache cannot be greater than nMaxDbCache
-
-    paddressMonitor = new AddressMonitor(nmonitorCache);
-    nStart = GetTimeMillis();
-    printf("Start loading monitor address...\n");
-    paddressMonitor->Start();
-    printf("End loading monitor address: %lldms\n", GetTimeMillis() - nStart);
-    pblockMonitor = new BlockMonitor(nmonitorCache);
-    nStart = GetTimeMillis();
-    printf("Start loading monitor block...\n");
-    pblockMonitor->Start();
-    printf("End loading monitor block: %lldms\n", GetTimeMillis() - nStart);
-
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
